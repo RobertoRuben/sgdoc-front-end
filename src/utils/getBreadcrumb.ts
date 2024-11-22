@@ -1,5 +1,3 @@
-// src/utils/getBreadcrumb.ts
-
 import { NavItem } from '../components/layout/SidebarConfig';
 
 export const getBreadcrumb = (
