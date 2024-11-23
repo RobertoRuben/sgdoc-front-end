@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Layout } from '@/components/layout/Layout';
 import { LoadingProvider } from '@/context/LoadingContext';
 import RemitentesPage from '@/pages/remitentes-page/RemitentesPage';
+import TrabajadoresPage from "@/pages/trabajadores-page/TrabajadoresPage";
 
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
                     {/* Ruta que utiliza Layout */}
                     <Route path="/" element={<Layout />}>
                         <Route path="remitentes" element={<RemitentesPage />} /> {/* Agrega esta línea */}
+                        <Route path="trabajadores" element={<TrabajadoresPage />} /> {/* Agrega esta línea */}
 
                         {/* Manejo de rutas no encontradas */}
                         <Route path="*" element={<div className="p-4">Página no encontrada</div>} />
