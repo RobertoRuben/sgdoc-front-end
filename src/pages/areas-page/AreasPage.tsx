@@ -11,17 +11,17 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Pagination } from '@/components/ui/pagination';
-import { Remitente } from "@/model/remitente";
-import { RemitentesModal } from "@/components/modal/remitente-modal/RemitenteRegistration";
+import { Area } from "@/model/area";
+import { AreaModal } from "@/components/modal/area-modal/AreaModal.tsx";
 import { DeleteConfirmationModal } from "@/components/modal/alerts/DeleteConfirmationModal";
 import { motion, AnimatePresence } from 'framer-motion';
 
-const remitentes: Remitente[] = [
-    { id: 1, dni: 12345678, nombres: "Juan", apellidoPaterno: "Pérez", apellidoMaterno: "García", genero: "Masculino" },
-    { id: 2, dni: 87654321, nombres: "María", apellidoPaterno: "López", apellidoMaterno: "Martínez", genero: "Femenino" },
-    { id: 3, dni: 23456789, nombres: "Carlos", apellidoPaterno: "Rodríguez", apellidoMaterno: "Sánchez", genero: "Masculino" },
-    { id: 4, dni: 98765432, nombres: "Ana", apellidoPaterno: "Fernández", apellidoMaterno: "Gómez", genero: "Femenino" },
-    { id: 5, dni: 34567890, nombres: "Pedro", apellidoPaterno: "Díaz", apellidoMaterno: "Ruiz", genero: "Masculino" },
+const areas: Area[] = [
+    { id: 1, nombreArea: "Recursos Humanos" },
+    { id: 2, nombreArea: "Finanzas" },
+    { id: 3, nombreArea: "Desarrollo de Software" },
+    { id: 4, nombreArea: "Marketing" },
+    { id: 5, nombreArea: "Atención al Cliente" },
 ];
 
 const tableVariants = {
@@ -36,25 +36,26 @@ const rowVariants = {
     exit: { opacity: 0 },
 };
 
-const RemitentesPage: React.FC = () => {
+const AreasPage: React.FC = () => {
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
-    const [selectedRemitente, setSelectedRemitente] = useState<Remitente | undefined>(undefined);
+    const [selectedArea, setSelectedArea] = useState<Area | undefined>(undefined);
+    const [dataVersion, setDataVersion] = useState<number>(0); // Nuevo estado para la versión de datos
     const pageSize = 4;
 
-    const totalPages = Math.ceil(remitentes.length / pageSize);
+    const totalPages = Math.ceil(areas.length / pageSize);
 
-    const currentRemitentes = useMemo(() => {
+    const currentAreas = useMemo(() => {
         const startIndex = (currentPage - 1) * pageSize;
-        return remitentes.slice(startIndex, startIndex + pageSize);
-    }, [currentPage]);
+        return areas.slice(startIndex, startIndex + pageSize);
+    }, [currentPage, dataVersion]); // Agregamos dataVersion como dependencia
 
     const handleEdit = (id?: number) => {
         if (id !== undefined) {
-            const remitente = remitentes.find(r => r.id === id);
-            if (remitente) {
-                setSelectedRemitente(remitente);
+            const area = areas.find(a => a.id === id);
+            if (area) {
+                setSelectedArea(area);
                 setIsModalOpen(true);
             }
         }
@@ -62,19 +63,22 @@ const RemitentesPage: React.FC = () => {
 
     const handleDeleteClick = (id?: number) => {
         if (id !== undefined) {
-            const remitente = remitentes.find(r => r.id === id);
-            if (remitente) {
-                setSelectedRemitente(remitente);
+            const area = areas.find(a => a.id === id);
+            if (area) {
+                setSelectedArea(area);
                 setIsDeleteModalOpen(true);
             }
         }
     };
 
     const handleDeleteConfirm = () => {
-        if (selectedRemitente) {
-            console.log(`Eliminar remitente con ID: ${selectedRemitente.id}`);
+        if (selectedArea) {
+            console.log(`Eliminar área con ID: ${selectedArea.id}`);
             setIsDeleteModalOpen(false);
-            setSelectedRemitente(undefined);
+            setSelectedArea(undefined);
+            // Aquí podrías actualizar la lista de áreas eliminando la seleccionada
+            // Después de actualizar los datos, incrementa dataVersion para activar la animación
+            setDataVersion(prev => prev + 1);
         }
     };
 
@@ -83,34 +87,43 @@ const RemitentesPage: React.FC = () => {
         setCurrentPage(page);
     };
 
-    const handleModalSubmit = (data: Remitente) => {
+    const handleModalSubmit = (data: Area) => {
         if (data.id) {
-            console.log("Actualizar remitente:", data);
+            console.log("Actualizar área:", data);
+            // Aquí podrías actualizar la lista de áreas con los nuevos datos
         } else {
-            console.log("Nuevo remitente registrado:", data);
+            console.log("Nueva área registrada:", data);
+            // Aquí podrías agregar la nueva área a la lista
         }
         setIsModalOpen(false);
-        setSelectedRemitente(undefined);
+        setSelectedArea(undefined);
+        // Después de actualizar los datos, incrementa dataVersion para activar la animación
+        setDataVersion(prev => prev + 1);
     };
 
     const handleCloseModal = () => {
-        setSelectedRemitente(undefined); // Limpia el estado antes de cerrar el modal
+        setSelectedArea(undefined);
         setIsModalOpen(false);
+    };
+
+    const refreshData = () => {
+        console.log(refreshData())
+        setDataVersion(prev => prev + 1);
     };
 
     return (
         <div className="pt-0.5 pr-0.5 pb-1 pl-0.5 sm:pt-2 sm:pr-2 sm:pb-4 sm:pl-2 bg-transparent">
             <div className="flex flex-col sm:flex-row justify-between items-center mb-4 sm:mb-8 mt-4 bg-transparent">
-                <h2 className="text-2xl font-semibold text-gray-800 mb-2 sm:mb-0">Remitentes</h2>
+                <h2 className="text-2xl font-semibold text-gray-800 mb-2 sm:mb-0">Áreas</h2>
                 <Button
                     onClick={() => {
-                        setSelectedRemitente(undefined);
+                        setSelectedArea(undefined);
                         setIsModalOpen(true);
                     }}
                     className="w-full sm:w-auto px-4 py-2 bg-[#03A64A] text-white rounded hover:bg-[#028a3b] transition-colors duration-200 flex items-center justify-center"
                 >
                     <Plus className="w-5 h-5 mr-2" />
-                    Agregar Remitente
+                    Agregar Área
                 </Button>
             </div>
 
@@ -119,15 +132,16 @@ const RemitentesPage: React.FC = () => {
                     <Search className="absolute left-7 top-1/2 transform -translate-y-1/2 text-gray-400" />
                     <Input
                         type="text"
-                        placeholder="Buscar remitentes..."
+                        placeholder="Buscar áreas..."
                         className="pl-10 w-full border-gray-300 focus:border-[#03A64A] focus:ring focus:ring-[#03A64A] focus:ring-opacity-50 rounded-md shadow-sm"
-                        aria-label="Buscar remitentes"
+                        aria-label="Buscar áreas"
+                        // Podrías agregar lógica de búsqueda aquí
                     />
                 </div>
                 <div className="overflow-x-auto">
                     <AnimatePresence mode="wait">
                         <motion.div
-                            key={currentPage}
+                            key={`${currentPage}-${dataVersion}`} // Clave combinada para detectar cambios de página y datos
                             variants={tableVariants}
                             initial="initial"
                             animate="animate"
@@ -135,22 +149,18 @@ const RemitentesPage: React.FC = () => {
                             transition={{ duration: 0.5 }}
                             className="w-full"
                         >
-                            <Table>
+                            <Table className="min-w-full divide-y divide-gray-200">
                                 <TableHeader>
                                     <TableRow className="bg-gray-50 border-b border-gray-200">
                                         <TableHead className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Id</TableHead>
-                                        <TableHead className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">DNI</TableHead>
-                                        <TableHead className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nombres</TableHead>
-                                        <TableHead className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider hidden sm:table-cell">Apellido Paterno</TableHead>
-                                        <TableHead className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider hidden sm:table-cell">Apellido Materno</TableHead>
-                                        <TableHead className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider hidden sm:table-cell">Género</TableHead>
+                                        <TableHead className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nombre del Área</TableHead>
                                         <TableHead className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Acciones</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {currentRemitentes.map((remitente, index) => (
+                                    {currentAreas.map((area, index) => (
                                         <motion.tr
-                                            key={remitente.id}
+                                            key={area.id}
                                             variants={rowVariants}
                                             initial="hidden"
                                             animate="visible"
@@ -158,21 +168,17 @@ const RemitentesPage: React.FC = () => {
                                             transition={{ duration: 0.3, delay: index * 0.05 }}
                                             className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-gray-100 transition-colors duration-150 ease-in-out`}
                                         >
-                                            <TableCell className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{remitente.id}</TableCell>
-                                            <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">{remitente.dni}</TableCell>
-                                            <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">{remitente.nombres}</TableCell>
-                                            <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 hidden sm:table-cell">{remitente.apellidoPaterno}</TableCell>
-                                            <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 hidden sm:table-cell">{remitente.apellidoMaterno}</TableCell>
-                                            <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 hidden sm:table-cell">{remitente.genero}</TableCell>
+                                            <TableCell className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{area.id}</TableCell>
+                                            <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">{area.nombreArea}</TableCell>
                                             <TableCell className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
                                                 <Button
-                                                    onClick={() => handleEdit(remitente.id)}
+                                                    onClick={() => handleEdit(area.id)}
                                                     className="bg-amber-500 text-white hover:bg-amber-600 mr-2"
                                                 >
                                                     <Pencil className="w-5 h-5" />
                                                 </Button>
                                                 <Button
-                                                    onClick={() => handleDeleteClick(remitente.id)}
+                                                    onClick={() => handleDeleteClick(area.id)}
                                                     className="bg-red-500 text-white hover:bg-red-600"
                                                 >
                                                     <Trash2 className="w-5 h-5" />
@@ -195,9 +201,9 @@ const RemitentesPage: React.FC = () => {
             </div>
 
             {isModalOpen && (
-                <RemitentesModal
+                <AreaModal
                     isOpen={isModalOpen}
-                    remitente={selectedRemitente}
+                    area={selectedArea}
                     onClose={handleCloseModal}
                     onSubmit={handleModalSubmit}
                 />
@@ -208,11 +214,12 @@ const RemitentesPage: React.FC = () => {
                     isOpen={isDeleteModalOpen}
                     onClose={() => setIsDeleteModalOpen(false)}
                     onConfirm={handleDeleteConfirm}
-                    itemName={`${selectedRemitente?.nombres || ""} ${selectedRemitente?.apellidoPaterno || ""} ${selectedRemitente?.apellidoMaterno || ""}`}
+                    itemName={selectedArea?.nombreArea || ""}
                 />
             )}
         </div>
     );
+
 };
 
-export default RemitentesPage;
+export default AreasPage;

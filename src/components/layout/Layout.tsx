@@ -43,6 +43,8 @@ export function Layout() {
         handleComplete();
     }, [location, setLoading]);
 
+    const headerTitle = location.pathname === '/inicio' ? 'Bienvenido' : 'SGDOC';
+
     return (
         <div className="flex h-screen overflow-hidden bg-gray-100">
             <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
@@ -53,7 +55,7 @@ export function Layout() {
                         console.log("Depuración: Abriendo Sidebar.");
                         setSidebarOpen(true);
                     }}
-                    title="SGDOC"
+                    title={headerTitle}
                     notificationCount={notificationCount}
                     onViewNotifications={handleViewNotifications}
                 />

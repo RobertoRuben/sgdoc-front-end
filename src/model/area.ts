@@ -1,4 +1,4 @@
 export interface Area{
-    id: number
+    id?: number
     nombreArea: string
 }
