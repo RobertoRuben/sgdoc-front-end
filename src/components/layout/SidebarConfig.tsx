@@ -43,19 +43,20 @@ export const navItems: NavItem[] = [
     {
         name: "Remitentes",
         icon: UserPlus,
-        path: "/remitentes",
+        path: "/remitentes/lista",
         allowedRoles: ['Administrador', 'Director', 'Auxiliar'],
     },
     {
         name: "Documentos",
+        path: "/documentos",
         icon: FileText,
         allowedRoles: ['Administrador', 'Director', 'Auxiliar'],
         subItems: [
             { name: "Lista de Documentos", path: "/documentos/lista" },
-            { name: "Derivaciones", path: "/documentos/derivaciones" },
-            { name: "Estado de Documentos", path: "/documentos/estado" },
-            { name: "Categorias", path: "/documentos/categorias" },
-            { name: "Ambitos", path: "/documentos/ambitos" },
+            { name: "Derivaciones", path: "/documentos/derivaciones/lista" },
+            { name: "Estado de Documentos", path: "/documentos/estado/lista" },
+            { name: "Categorias", path: "/documentos/categorias/lista" },
+            { name: "Ambitos", path: "/documentos/ambitos/lista" },
         ],
     },
     {
@@ -63,8 +64,8 @@ export const navItems: NavItem[] = [
         icon: MapPin,
         allowedRoles: ['Administrador', 'Director'],
         subItems: [
-            { name: "Centros Poblados", path: "/ubicaciones/centros-poblados" },
-            { name: "Caseríos", path: "/ubicaciones/caserios" },
+            { name: "Centros Poblados", path: "/distrito/centros-poblados/lista" },
+            { name: "Caseríos", path: "/distrito/caserios/lista" },
         ],
     },
     {
@@ -79,17 +80,16 @@ export const navItems: NavItem[] = [
     {
         name: "Áreas",
         icon: Briefcase,
-        path: "/areas",
         allowedRoles: ['Administrador', 'Director'],
         subItems: [
             { name: "Lista de Áreas", path: "/areas/lista" },
-            { name: "Comunicaciones", path: "/areas/comunicacion" },
+            { name: "Comunicaciones", path: "/areas/comunicaciones/lista" },
         ]
     },
     {
         name: "Trabajadores",
         icon: UserCheck,
-        path: "/trabajadores",
+        path: "/trabajadores/lista",
         allowedRoles: ['Administrador', 'Director'],
     },
     {

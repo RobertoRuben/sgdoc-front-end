@@ -55,7 +55,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                         className="lg:hidden"
                         aria-label="Cerrar menú"
                     >
-                        <X className="h-6 w-6" />
+                        <X className="h-6 w-6"  strokeWidth={3}/>
                     </button>
                 </div>
 
@@ -69,11 +69,11 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                                         <div>
                                             <button
                                                 onClick={() => toggleMenu(item.name)}
-                                                className="flex items-center justify-between w-full p-2 hover:bg-[#028a3b] rounded focus:outline-none"
+                                                className="flex items-center justify-between w-full p-2 hover:bg-[#028a3b] rounded focus:outline-none font-semibold"
                                                 aria-expanded={openMenus[item.name] || false}
                                             >
                                                 <span className="flex items-center">
-                                                    <item.icon className="w-5 h-5 mr-2" />
+                                                    <item.icon className="w-5 h-5 mr-2" strokeWidth={3}/>
                                                     {item.name}
                                                 </span>
                                                 {openMenus[item.name] ? (
@@ -109,13 +109,13 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                                     ) : (
                                         <Link
                                             to={item.path || '#'}
-                                            className="flex items-center p-2 hover:bg-[#028a3b] rounded"
+                                            className="flex items-center p-2 hover:bg-[#028a3b] rounded font-semibold"
                                             onClick={() => {
                                                 console.log(`Depuración: Seleccionando Item '${item.name}'.`);
                                                 onClose();
                                             }}
                                         >
-                                            <item.icon className="w-5 h-5 mr-2" />
+                                            <item.icon className="w-5 h-5 mr-2" strokeWidth={3} />
                                             {item.name}
                                         </Link>
                                     )}

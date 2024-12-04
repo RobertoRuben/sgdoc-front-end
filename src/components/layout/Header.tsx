@@ -31,7 +31,7 @@ export function Header({ onOpenSidebar, title, notificationCount, onViewNotifica
                     <Menu className="h-6 w-6" />
                 </button>
                 <div className="flex-1 flex items-center">
-                    {title}
+                    <span className="font-bold text-lg">{title}</span>
                 </div>
                 <div className="flex items-center space-x-4">
                     <DropdownMenu>
@@ -42,7 +42,7 @@ export function Header({ onOpenSidebar, title, notificationCount, onViewNotifica
                                 aria-label="Notificaciones"
                                 className="relative text-white hover:bg-[#4F4F4F] transition-colors duration-200"
                             >
-                                <Bell className="h-5 w-5" />
+                                <Bell className="h-5 w-5" strokeWidth={3}/>
                                 {notificationCount > 0 && (
                                     <Badge className="absolute -top-1 -right-1 px-1.5 py-0.5 text-xs bg-[#03A64A] text-white rounded-full">
                                         {notificationCount}
@@ -52,7 +52,7 @@ export function Header({ onOpenSidebar, title, notificationCount, onViewNotifica
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="mt-2 bg-white">
                             <DropdownMenuItem onClick={onViewNotifications} className="text-[#333333] hover:bg-[#F2F2F2] flex items-center">
-                                <Bell className="mr-2 h-4 w-4" />
+                                <Bell className="mr-2 h-4 w-4" strokeWidth={3} />
                                 Ver notificaciones
                             </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -65,16 +65,16 @@ export function Header({ onOpenSidebar, title, notificationCount, onViewNotifica
                                 aria-label="Perfil de usuario"
                                 className="text-white hover:bg-[#4F4F4F] transition-colors duration-200"
                             >
-                                <User className="h-5 w-5" />
+                                <User className="h-5 w-5" strokeWidth={3} />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="mt-2 bg-white">
                             <DropdownMenuItem className="text-[#333333] hover:bg-[#F2F2F2] flex items-center">
-                                <UserCircle className="mr-2 h-4 w-4" />
+                                <UserCircle className="mr-2 h-4 w-4" strokeWidth={3} />
                                 Mi Perfil
                             </DropdownMenuItem>
                             <DropdownMenuItem className="text-[#333333] hover:bg-[#F2F2F2] flex items-center">
-                                <LogOut className="mr-2 h-4 w-4" />
+                                <LogOut className="mr-2 h-4 w-4"  strokeWidth={3}/>
                                 Cerrar sesión
                             </DropdownMenuItem>
                         </DropdownMenuContent>

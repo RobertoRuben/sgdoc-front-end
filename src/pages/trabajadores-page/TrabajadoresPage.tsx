@@ -10,11 +10,12 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { Pagination } from "@/components/ui/pagination";
+import { Pagination } from '@/components/ui/pagination';
 import { Trabajador } from "@/model/trabajador";
 import { Area } from "@/model/area";
 import { TrabajadoresModal } from "@/components/modal/trabajador-modal/TrabajadorRegistration";
 import { DeleteConfirmationModal } from "@/components/modal/alerts/DeleteConfirmationModal.tsx";
+import { motion, AnimatePresence } from 'framer-motion';
 
 const areas: Area[] = [
     { id: 1, nombreArea: "Recursos Humanos" },
@@ -35,12 +36,25 @@ const initialTrabajadores: Trabajador[] = [
     { id: 3, dni: 23456789, nombre: "Carlos", apellidoPaterno: "Rodríguez", apellidoMaterno: "Sánchez", genero: "Masculino", areaId: 3 },
 ];
 
+const tableVariants = {
+    initial: { opacity: 0, scale: 0.95 },
+    animate: { opacity: 1, scale: 1 },
+    exit: { opacity: 0, scale: 0.95 },
+};
+
+const rowVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1 },
+    exit: { opacity: 0 },
+};
+
 const TrabajadoresPage: React.FC = () => {
     const [trabajadores, setTrabajadores] = useState<Trabajador[]>(initialTrabajadores);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
     const [selectedTrabajador, setSelectedTrabajador] = useState<Trabajador | undefined>(undefined);
+    const [dataVersion, setDataVersion] = useState<number>(0); // Nuevo estado para la versión de datos
     const pageSize = 4;
 
     const totalPages = Math.ceil(trabajadores.length / pageSize);
@@ -48,7 +62,7 @@ const TrabajadoresPage: React.FC = () => {
     const currentTrabajadores = useMemo(() => {
         const startIndex = (currentPage - 1) * pageSize;
         return trabajadores.slice(startIndex, startIndex + pageSize);
-    }, [currentPage, trabajadores]);
+    }, [currentPage, dataVersion, trabajadores]); // Agregamos dataVersion y trabajadores como dependencias
 
     const handleEdit = (id?: number) => {
         if (id !== undefined) {
@@ -75,6 +89,7 @@ const TrabajadoresPage: React.FC = () => {
             setTrabajadores(trabajadores.filter(t => t.id !== selectedTrabajador.id));
             setIsDeleteModalOpen(false);
             setSelectedTrabajador(undefined);
+            setDataVersion(prev => prev + 1); // Incrementamos dataVersion para activar animación
         }
     };
 
@@ -94,11 +109,20 @@ const TrabajadoresPage: React.FC = () => {
         }
         setIsModalOpen(false);
         setSelectedTrabajador(undefined);
+        setDataVersion(prev => prev + 1); // Incrementamos dataVersion para activar animación
     };
 
     const handleCloseModal = () => {
         setSelectedTrabajador(undefined); // Limpia el estado antes de cerrar
         setIsModalOpen(false);
+    };
+
+    const refreshData = () => {
+        // Lógica para refrescar los datos
+        // Por ejemplo, una llamada a una API para obtener datos actualizados
+        // Después de obtener los nuevos datos, incrementa dataVersion
+        console.log(refreshData())
+        setDataVersion(prev => prev + 1);
     };
 
     return (
@@ -125,53 +149,73 @@ const TrabajadoresPage: React.FC = () => {
                         placeholder="Buscar trabajadores..."
                         className="pl-10 w-full border-gray-300 focus:border-[#03A64A] focus:ring focus:ring-[#03A64A] focus:ring-opacity-50 rounded-md shadow-sm"
                         aria-label="Buscar trabajadores"
+                        // Podrías agregar lógica de búsqueda aquí
                     />
                 </div>
                 <div className="overflow-x-auto">
-                    <Table>
-                        <TableHeader>
-                            <TableRow className="bg-gray-50 border-b border-gray-200">
-                                <TableHead className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">ID</TableHead>
-                                <TableHead className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">DNI</TableHead>
-                                <TableHead className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nombre</TableHead>
-                                <TableHead className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider hidden sm:table-cell">Apellido Paterno</TableHead>
-                                <TableHead className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider hidden sm:table-cell">Apellido Materno</TableHead>
-                                <TableHead className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider hidden sm:table-cell">Género</TableHead>
-                                <TableHead className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider hidden sm:table-cell">Área</TableHead>
-                                <TableHead className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Acciones</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {currentTrabajadores.map((trabajador, index) => (
-                                <TableRow
-                                    key={trabajador.id}
-                                    className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-gray-100 transition-colors duration-150 ease-in-out`}
-                                >
-                                    <TableCell className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{trabajador.id}</TableCell>
-                                    <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">{trabajador.dni}</TableCell>
-                                    <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">{trabajador.nombre}</TableCell>
-                                    <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 hidden sm:table-cell">{trabajador.apellidoPaterno}</TableCell>
-                                    <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 hidden sm:table-cell">{trabajador.apellidoMaterno}</TableCell>
-                                    <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 hidden sm:table-cell">{trabajador.genero}</TableCell>
-                                    <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 hidden sm:table-cell">{areas.find(area => area.id === trabajador.areaId)?.nombreArea}</TableCell>
-                                    <TableCell className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <Button
-                                            onClick={() => handleEdit(trabajador.id)}
-                                            className="bg-amber-500 text-white hover:bg-amber-600 mr-2"
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={`${currentPage}-${dataVersion}`} // Clave combinada para detectar cambios de página y datos
+                            variants={tableVariants}
+                            initial="initial"
+                            animate="animate"
+                            exit="exit"
+                            transition={{ duration: 0.5 }}
+                            className="w-full"
+                        >
+                            <Table className="min-w-full divide-y divide-gray-200">
+                                <TableHeader>
+                                    <TableRow className="bg-gray-50 border-b border-gray-200">
+                                        <TableHead className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">ID</TableHead>
+                                        <TableHead className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">DNI</TableHead>
+                                        <TableHead className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nombre</TableHead>
+                                        <TableHead className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider hidden sm:table-cell">Apellido Paterno</TableHead>
+                                        <TableHead className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider hidden sm:table-cell">Apellido Materno</TableHead>
+                                        <TableHead className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider hidden sm:table-cell">Género</TableHead>
+                                        <TableHead className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider hidden sm:table-cell">Área</TableHead>
+                                        <TableHead className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Acciones</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {currentTrabajadores.map((trabajador, index) => (
+                                        <motion.tr
+                                            key={trabajador.id}
+                                            variants={rowVariants}
+                                            initial="hidden"
+                                            animate="visible"
+                                            exit="exit"
+                                            transition={{ duration: 0.3, delay: index * 0.05 }}
+                                            className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-gray-100 transition-colors duration-150 ease-in-out`}
                                         >
-                                            <Pencil className="w-5 h-5" />
-                                        </Button>
-                                        <Button
-                                            onClick={() => handleDeleteClick(trabajador.id)}
-                                            className="bg-red-500 text-white hover:bg-red-600"
-                                        >
-                                            <Trash2 className="w-5 h-5" />
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                                            <TableCell className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{trabajador.id}</TableCell>
+                                            <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">{trabajador.dni}</TableCell>
+                                            <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">{trabajador.nombre}</TableCell>
+                                            <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 hidden sm:table-cell">{trabajador.apellidoPaterno}</TableCell>
+                                            <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 hidden sm:table-cell">{trabajador.apellidoMaterno}</TableCell>
+                                            <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 hidden sm:table-cell">{trabajador.genero}</TableCell>
+                                            <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 hidden sm:table-cell">
+                                                {areas.find(area => area.id === trabajador.areaId)?.nombreArea || "Área No Asignada"}
+                                            </TableCell>
+                                            <TableCell className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                <Button
+                                                    onClick={() => handleEdit(trabajador.id)}
+                                                    className="bg-amber-500 text-white hover:bg-amber-600 mr-2"
+                                                >
+                                                    <Pencil className="w-5 h-5" />
+                                                </Button>
+                                                <Button
+                                                    onClick={() => handleDeleteClick(trabajador.id)}
+                                                    className="bg-red-500 text-white hover:bg-red-600"
+                                                >
+                                                    <Trash2 className="w-5 h-5" />
+                                                </Button>
+                                            </TableCell>
+                                        </motion.tr>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </motion.div>
+                    </AnimatePresence>
                 </div>
                 <div className="py-4 px-4 sm:px-6 border-t border-gray-200">
                     <Pagination
@@ -202,6 +246,7 @@ const TrabajadoresPage: React.FC = () => {
             )}
         </div>
     );
+
 };
 
 export default TrabajadoresPage;
