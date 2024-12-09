@@ -37,7 +37,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             )}
 
             <aside
-                className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#03A64A] text-white p-4 transform transition-transform duration-300 ease-in-out
+                className={`fixed inset-y-0 left-0 z-50 w-64 bg-gradient-to-b from-[#03A64A] to-black text-white p-4 transform transition-transform duration-300 ease-in-out
                 ${isOpen ? 'translate-x-0' : '-translate-x-full'}
                 lg:translate-x-0 lg:static lg:inset-auto flex-shrink-0 flex flex-col h-full`}
                 aria-label="Sidebar de navegación"
@@ -60,7 +60,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 </div>
 
                 {/* Contenido scrollable con barra de desplazamiento personalizada */}
-                <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-rounded scrollbar-track-rounded scrollbar-thumb-[#028a3b] scrollbar-track-[#03A64A]">
+                <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-rounded scrollbar-track-rounded scrollbar-thumb-gray-400 scrollbar-track-transparent">
                     <nav>
                         <ul className="space-y-2">
                             {navItems.map((item: NavItem, index: number) => (

@@ -1,7 +1,7 @@
 export interface Trabajador{
     id?: number;
     dni: number;
-    nombre: string;
+    nombres: string;
     apellidoPaterno: string;
     apellidoMaterno: string;
     genero: string;
