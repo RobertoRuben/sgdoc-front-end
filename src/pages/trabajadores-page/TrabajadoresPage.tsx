@@ -31,9 +31,9 @@ const areas: Area[] = [
 ];
 
 const initialTrabajadores: Trabajador[] = [
-    { id: 1, dni: 12345678, nombre: "Juan", apellidoPaterno: "Pérez", apellidoMaterno: "García", genero: "Masculino", areaId: 1 },
-    { id: 2, dni: 87654321, nombre: "María", apellidoPaterno: "López", apellidoMaterno: "Martínez", genero: "Femenino", areaId: 2 },
-    { id: 3, dni: 23456789, nombre: "Carlos", apellidoPaterno: "Rodríguez", apellidoMaterno: "Sánchez", genero: "Masculino", areaId: 3 },
+    { id: 1, dni: 12345678, nombres: "Juan", apellidoPaterno: "Pérez", apellidoMaterno: "García", genero: "Masculino", areaId: 1 },
+    { id: 2, dni: 87654321, nombres: "María", apellidoPaterno: "López", apellidoMaterno: "Martínez", genero: "Femenino", areaId: 2 },
+    { id: 3, dni: 23456789, nombres: "Carlos", apellidoPaterno: "Rodríguez", apellidoMaterno: "Sánchez", genero: "Masculino", areaId: 3 },
 ];
 
 const tableVariants = {
@@ -189,7 +189,7 @@ const TrabajadoresPage: React.FC = () => {
                                         >
                                             <TableCell className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{trabajador.id}</TableCell>
                                             <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">{trabajador.dni}</TableCell>
-                                            <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">{trabajador.nombre}</TableCell>
+                                            <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">{trabajador.nombres}</TableCell>
                                             <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 hidden sm:table-cell">{trabajador.apellidoPaterno}</TableCell>
                                             <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 hidden sm:table-cell">{trabajador.apellidoMaterno}</TableCell>
                                             <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 hidden sm:table-cell">{trabajador.genero}</TableCell>
@@ -241,7 +241,7 @@ const TrabajadoresPage: React.FC = () => {
                     isOpen={isDeleteModalOpen}
                     onClose={() => setIsDeleteModalOpen(false)}
                     onConfirm={handleDeleteConfirm}
-                    itemName={`${selectedTrabajador?.nombre || ""} ${selectedTrabajador?.apellidoPaterno || ""} ${selectedTrabajador?.apellidoMaterno || ""}`}
+                    itemName={`${selectedTrabajador?.nombres || ""} ${selectedTrabajador?.apellidoPaterno || ""} ${selectedTrabajador?.apellidoMaterno || ""}`}
                 />
             )}
         </div>

@@ -21,7 +21,7 @@ type HeaderProps = {
 
 export function Header({ onOpenSidebar, title, notificationCount, onViewNotifications }: HeaderProps) {
     return (
-        <header className="bg-[#2F2F2F] text-white py-4 px-6 shadow-md w-full">
+        <header className="bg-gradient-to-r from-black via-gray-900 to-black text-white py-4 px-6 shadow-md w-full">
             <div className="flex items-center justify-between">
                 <button
                     onClick={onOpenSidebar}

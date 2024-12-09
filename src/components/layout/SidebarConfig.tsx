@@ -74,7 +74,7 @@ export const navItems: NavItem[] = [
         allowedRoles: ['Administrador'],
         subItems: [
             { name: "Lista de Usuarios", path: "/usuarios/lista" },
-            { name: "Roles", path: "/usuarios/roles" },
+            { name: "Roles", path: "/usuarios/roles/lista" },
         ],
     },
     {

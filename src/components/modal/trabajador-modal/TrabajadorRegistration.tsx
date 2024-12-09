@@ -61,7 +61,7 @@ export function TrabajadoresModal({ isOpen, trabajador, onClose, onSubmit, areas
             if (trabajador) {
                 form.reset({
                     dni: trabajador.dni.toString(),
-                    nombre: trabajador.nombre,
+                    nombre: trabajador.nombres,
                     apellidoPaterno: trabajador.apellidoPaterno,
                     apellidoMaterno: trabajador.apellidoMaterno,
                     genero: trabajador.genero as "Masculino" | "Femenino" | "Otro",
@@ -89,7 +89,7 @@ export function TrabajadoresModal({ isOpen, trabajador, onClose, onSubmit, areas
         const data: Trabajador = {
             id: trabajador?.id || 0,
             dni: parseInt(values.dni, 10),
-            nombre: values.nombre,
+            nombres: values.nombre,
             apellidoPaterno: values.apellidoPaterno,
             apellidoMaterno: values.apellidoMaterno,
             genero: values.genero,
