@@ -14,7 +14,7 @@ import { Pagination } from '@/components/ui/pagination';
 import { Trabajador } from "@/model/trabajador";
 import { Area } from "@/model/area";
 import { TrabajadoresModal } from "@/components/modal/trabajador-modal/TrabajadorRegistration";
-import { DeleteConfirmationModal } from "@/components/modal/alerts/DeleteConfirmationModal.tsx";
+import { DeleteConfirmationModal } from "@/components/modal/alerts/delete-modal/DeleteConfirmationModal.tsx";
 import { motion, AnimatePresence } from 'framer-motion';
 
 const areas: Area[] = [
@@ -54,7 +54,7 @@ const TrabajadoresPage: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
     const [selectedTrabajador, setSelectedTrabajador] = useState<Trabajador | undefined>(undefined);
-    const [dataVersion, setDataVersion] = useState<number>(0); // Nuevo estado para la versión de datos
+    const [dataVersion, setDataVersion] = useState<number>(0);
     const pageSize = 4;
 
     const totalPages = Math.ceil(trabajadores.length / pageSize);
@@ -62,7 +62,7 @@ const TrabajadoresPage: React.FC = () => {
     const currentTrabajadores = useMemo(() => {
         const startIndex = (currentPage - 1) * pageSize;
         return trabajadores.slice(startIndex, startIndex + pageSize);
-    }, [currentPage, dataVersion, trabajadores]); // Agregamos dataVersion y trabajadores como dependencias
+    }, [currentPage, dataVersion, trabajadores]);
 
     const handleEdit = (id?: number) => {
         if (id !== undefined) {
@@ -89,7 +89,7 @@ const TrabajadoresPage: React.FC = () => {
             setTrabajadores(trabajadores.filter(t => t.id !== selectedTrabajador.id));
             setIsDeleteModalOpen(false);
             setSelectedTrabajador(undefined);
-            setDataVersion(prev => prev + 1); // Incrementamos dataVersion para activar animación
+            setDataVersion(prev => prev + 1);
         }
     };
 
@@ -109,20 +109,12 @@ const TrabajadoresPage: React.FC = () => {
         }
         setIsModalOpen(false);
         setSelectedTrabajador(undefined);
-        setDataVersion(prev => prev + 1); // Incrementamos dataVersion para activar animación
+        setDataVersion(prev => prev + 1);
     };
 
     const handleCloseModal = () => {
-        setSelectedTrabajador(undefined); // Limpia el estado antes de cerrar
+        setSelectedTrabajador(undefined);
         setIsModalOpen(false);
-    };
-
-    const refreshData = () => {
-        // Lógica para refrescar los datos
-        // Por ejemplo, una llamada a una API para obtener datos actualizados
-        // Después de obtener los nuevos datos, incrementa dataVersion
-        console.log(refreshData())
-        setDataVersion(prev => prev + 1);
     };
 
     return (
@@ -149,13 +141,12 @@ const TrabajadoresPage: React.FC = () => {
                         placeholder="Buscar trabajadores..."
                         className="pl-10 w-full border-gray-300 focus:border-[#03A64A] focus:ring focus:ring-[#03A64A] focus:ring-opacity-50 rounded-md shadow-sm"
                         aria-label="Buscar trabajadores"
-                        // Podrías agregar lógica de búsqueda aquí
                     />
                 </div>
                 <div className="overflow-x-auto">
                     <AnimatePresence mode="wait">
                         <motion.div
-                            key={`${currentPage}-${dataVersion}`} // Clave combinada para detectar cambios de página y datos
+                            key={`${currentPage}-${dataVersion}`}
                             variants={tableVariants}
                             initial="initial"
                             animate="animate"

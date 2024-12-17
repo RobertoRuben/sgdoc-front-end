@@ -13,7 +13,7 @@ import {
 import { Pagination } from '@/components/ui/pagination';
 import { Rol } from "@/model/rol";
 import { RolModal } from "@/components/modal/rol-modal/RolModal";
-import { DeleteConfirmationModal } from "@/components/modal/alerts/DeleteConfirmationModal";
+import { DeleteConfirmationModal } from "@/components/modal/alerts/delete-modal/DeleteConfirmationModal.tsx";
 import { motion, AnimatePresence } from 'framer-motion';
 
 const roles: Rol[] = [
