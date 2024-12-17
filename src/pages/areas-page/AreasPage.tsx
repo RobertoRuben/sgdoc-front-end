@@ -13,7 +13,7 @@ import {
 import { Pagination } from '@/components/ui/pagination';
 import { Area } from "@/model/area";
 import { AreaModal } from "@/components/modal/area-modal/AreaModal.tsx";
-import { DeleteConfirmationModal } from "@/components/modal/alerts/DeleteConfirmationModal";
+import { DeleteConfirmationModal } from "@/components/modal/alerts/delete-modal/DeleteConfirmationModal.tsx";
 import { motion, AnimatePresence } from 'framer-motion';
 
 const areas: Area[] = [

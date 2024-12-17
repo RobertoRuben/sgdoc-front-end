@@ -13,7 +13,7 @@ import {
 import { Pagination } from '@/components/ui/pagination';
 import { Remitente } from "@/model/remitente";
 import { RemitentesModal } from "@/components/modal/remitente-modal/RemitenteRegistration";
-import { DeleteConfirmationModal } from "@/components/modal/alerts/DeleteConfirmationModal";
+import { DeleteConfirmationModal } from "@/components/modal/alerts/delete-modal/DeleteConfirmationModal.tsx";
 import { motion, AnimatePresence } from 'framer-motion';
 
 const remitentes: Remitente[] = [

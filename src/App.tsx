@@ -4,8 +4,9 @@ import { LoadingProvider } from '@/context/LoadingContext';
 import RemitentesPage from '@/pages/remitentes-page/RemitentesPage';
 import TrabajadoresPage from "@/pages/trabajadores-page/TrabajadoresPage";
 import AreasPage from "@/pages/areas-page/AreasPage";
-import LoginPage from '@/components/auth/LoginPage';
+import LoginPage from '@/pages/login-page/LoginPage.tsx';
 import RolesPage from "@/pages/rol-page/RolesPage";
+import UsuariosPage from "@/pages/usuarios-page/UsuariosPage";
 import { Toaster } from './components/ui/toaster';  // Asegúrate de importar el componente Toaster
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
                     <Route path="/" element={<Layout />}>
                         <Route path="remitentes/lista" element={<RemitentesPage />} />
                         <Route path="trabajadores/lista" element={<TrabajadoresPage />} />
+                        <Route path="usuarios/lista" element={<UsuariosPage />} />
                         <Route path="usuarios/roles/lista" element={<RolesPage />} />
                         <Route path="areas/lista" element={<AreasPage />} />
 
