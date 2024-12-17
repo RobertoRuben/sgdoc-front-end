@@ -13,7 +13,7 @@ import {
 import { Pagination } from '@/components/ui/pagination';
 import { Remitente } from "@/model/remitente";
 import { RemitentesModal } from "@/components/modal/remitente-modal/RemitenteRegistration";
-import { DeleteConfirmationModal } from "@/components/modal/alerts/delete-modal/DeleteConfirmationModal.tsx";
+import DeleteModal from "@/components/modal/alerts/delete-modal/DeleteModal";
 import { motion, AnimatePresence } from 'framer-motion';
 
 const remitentes: Remitente[] = [
@@ -70,7 +70,7 @@ const RemitentesPage: React.FC = () => {
         }
     };
 
-    const handleDeleteConfirm = () => {
+    const handleDeleteConfirm = async () => {
         if (selectedRemitente) {
             console.log(`Eliminar remitente con ID: ${selectedRemitente.id}`);
             setIsDeleteModalOpen(false);
@@ -204,7 +204,7 @@ const RemitentesPage: React.FC = () => {
             )}
 
             {isDeleteModalOpen && (
-                <DeleteConfirmationModal
+                <DeleteModal
                     isOpen={isDeleteModalOpen}
                     onClose={() => setIsDeleteModalOpen(false)}
                     onConfirm={handleDeleteConfirm}

@@ -13,7 +13,7 @@ import {
 import { Pagination } from '@/components/ui/pagination';
 import { Area } from "@/model/area";
 import { AreaModal } from "@/components/modal/area-modal/AreaModal.tsx";
-import { DeleteConfirmationModal } from "@/components/modal/alerts/delete-modal/DeleteConfirmationModal.tsx";
+import DeleteModal from "@/components/modal/alerts/delete-modal/DeleteModal";
 import { motion, AnimatePresence } from 'framer-motion';
 
 const areas: Area[] = [
@@ -71,7 +71,7 @@ const AreasPage: React.FC = () => {
         }
     };
 
-    const handleDeleteConfirm = () => {
+    const handleDeleteConfirm = async () => {
         if (selectedArea) {
             console.log(`Eliminar área con ID: ${selectedArea.id}`);
             setIsDeleteModalOpen(false);
@@ -210,7 +210,7 @@ const AreasPage: React.FC = () => {
             )}
 
             {isDeleteModalOpen && (
-                <DeleteConfirmationModal
+                <DeleteModal
                     isOpen={isDeleteModalOpen}
                     onClose={() => setIsDeleteModalOpen(false)}
                     onConfirm={handleDeleteConfirm}

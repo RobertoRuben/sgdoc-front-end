@@ -13,7 +13,7 @@ import {
 import { Pagination } from '@/components/ui/pagination';
 import { Rol } from "@/model/rol";
 import { RolModal } from "@/components/modal/rol-modal/RolModal";
-import { DeleteConfirmationModal } from "@/components/modal/alerts/delete-modal/DeleteConfirmationModal.tsx";
+import DeleteModal from "@/components/modal/alerts/delete-modal/DeleteModal";
 import { motion, AnimatePresence } from 'framer-motion';
 
 const roles: Rol[] = [
@@ -70,7 +70,7 @@ const RolesPage: React.FC = () => {
         }
     };
 
-    const handleDeleteConfirm = () => {
+    const handleDeleteConfirm = async () => {
         if (selectedRol) {
             console.log(`Eliminar rol con ID: ${selectedRol.id}`);
             setIsDeleteModalOpen(false);
@@ -196,7 +196,7 @@ const RolesPage: React.FC = () => {
             )}
 
             {isDeleteModalOpen && (
-                <DeleteConfirmationModal
+                <DeleteModal
                     isOpen={isDeleteModalOpen}
                     onClose={() => setIsDeleteModalOpen(false)}
                     onConfirm={handleDeleteConfirm}

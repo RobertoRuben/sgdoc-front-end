@@ -14,7 +14,7 @@ import { Pagination } from '@/components/ui/pagination';
 import { Trabajador } from "@/model/trabajador";
 import { Area } from "@/model/area";
 import { TrabajadoresModal } from "@/components/modal/trabajador-modal/TrabajadorRegistration";
-import { DeleteConfirmationModal } from "@/components/modal/alerts/delete-modal/DeleteConfirmationModal.tsx";
+import DeleteModal from "@/components/modal/alerts/delete-modal/DeleteModal";
 import { motion, AnimatePresence } from 'framer-motion';
 
 const areas: Area[] = [
@@ -84,7 +84,7 @@ const TrabajadoresPage: React.FC = () => {
         }
     };
 
-    const handleDeleteConfirm = () => {
+    const handleDeleteConfirm = async () => {
         if (selectedTrabajador) {
             setTrabajadores(trabajadores.filter(t => t.id !== selectedTrabajador.id));
             setIsDeleteModalOpen(false);
@@ -228,7 +228,7 @@ const TrabajadoresPage: React.FC = () => {
             )}
 
             {isDeleteModalOpen && (
-                <DeleteConfirmationModal
+                <DeleteModal
                     isOpen={isDeleteModalOpen}
                     onClose={() => setIsDeleteModalOpen(false)}
                     onConfirm={handleDeleteConfirm}

@@ -21,7 +21,7 @@ import { Pagination } from '@/components/ui/pagination';
 import { PaginatedUsuarioResponse } from "@/model/paginatedUsuarioResponse";
 import { UsuarioDetails } from "@/model/usuarioDetails";
 import { RegistroUsuarioModal } from "@/components/modal/usuario-modal/UsuarioModal";
-import { DeleteConfirmationModal } from "@/components/modal/alerts/delete-modal/DeleteConfirmationModal.tsx";
+import DeleteModal from "@/components/modal/alerts/delete-modal/DeleteModal";
 import DeactivateModal from "@/components/modal/alerts/deactivate-modal/DeactivateModal.tsx";
 import { motion, AnimatePresence } from 'framer-motion';
 import { Usuario } from "@/model/usuario";
@@ -343,7 +343,7 @@ const UsuariosPage: React.FC = () => {
             )}
 
             {isDeleteModalOpen && (
-                <DeleteConfirmationModal
+                <DeleteModal
                     isOpen={isDeleteModalOpen}
                     onClose={() => setIsDeleteModalOpen(false)}
                     onConfirm={handleDeleteConfirm}
