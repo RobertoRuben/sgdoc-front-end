@@ -9,7 +9,8 @@ import {
     UserPlus,
     UserCheck,
     Search,
-    ChartColumnIcon
+    ChartColumnIcon,
+    InboxIcon
 } from 'lucide-react';
 import React from 'react';
 
@@ -41,6 +42,14 @@ export const navItems: NavItem[] = [
         allowedRoles: ['Administrador', 'Director', 'Auxiliar', 'Psicologo'],
     },
     {
+        name: "Mesa de Partes",
+        icon: InboxIcon,
+        allowedRoles: ['Administrador', 'Director', 'Auxiliar'],
+        subItems: [
+            { name: "Ingreso de Documentos", path: "/mesa-partes/ingreso" }
+        ],
+    },
+    {
         name: "Remitentes",
         icon: UserPlus,
         path: "/remitentes/lista",
@@ -53,8 +62,7 @@ export const navItems: NavItem[] = [
         allowedRoles: ['Administrador', 'Director', 'Auxiliar'],
         subItems: [
             { name: "Lista de Documentos", path: "/documentos/lista" },
-            { name: "Derivaciones", path: "/documentos/derivaciones/lista" },
-            { name: "Estado de Documentos", path: "/documentos/estado/lista" },
+            { name: "Seguimiento", path: "/documentos/seguimiento/lista" },
             { name: "Categorias", path: "/documentos/categorias/lista" },
             { name: "Ambitos", path: "/documentos/ambitos/lista" },
         ],

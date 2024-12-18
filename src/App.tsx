@@ -7,6 +7,8 @@ import AreasPage from "@/pages/areas-page/AreasPage";
 import LoginPage from '@/pages/login-page/LoginPage.tsx';
 import RolesPage from "@/pages/rol-page/RolesPage";
 import UsuariosPage from "@/pages/usuarios-page/UsuariosPage";
+import IngresoDocumentosPage from '@/pages/documentos-page/IngresoDocumentosPage';
+import ListaDocumentosPage from './pages/documentos-page/ListaDocumentosPage';
 import { Toaster } from './components/ui/toaster';  // Asegúrate de importar el componente Toaster
 
 function App() {
@@ -27,10 +29,16 @@ function App() {
                         <Route path="usuarios/lista" element={<UsuariosPage />} />
                         <Route path="usuarios/roles/lista" element={<RolesPage />} />
                         <Route path="areas/lista" element={<AreasPage />} />
+                        <Route path="mesa-partes/ingreso" element={<IngresoDocumentosPage />} />
+                        <Route path="documentos/lista" element={<ListaDocumentosPage />} />
+
+                        {/* Redirecciones */}
 
                         <Route path="areas" element={<Navigate to="/areas/lista" replace />} />
                         <Route path="remitentes" element={<Navigate to="/remitentes/lista" replace />} />
                         <Route path="trabajadores" element={<Navigate to="/trabajadores/lista" replace />} />
+                        <Route path="documentos" element={<Navigate to="/documentos/lista" replace />} />
+                        <Route path="mesa-partes" element={<Navigate to="/mesa-partes/ingreso" replace />} />
                         <Route path="usuarios/roles" element={<Navigate to="/usuarios/roles/lista" replace />} />
 
                         {/* Manejo de rutas no encontradas */}
