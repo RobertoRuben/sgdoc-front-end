@@ -216,7 +216,7 @@ const UsuariosPage: React.FC = () => {
     return (
         <div className="pt-0.5 pr-0.5 pb-1 pl-0.5 sm:pt-2 sm:pr-2 sm:pb-4 sm:pl-2 bg-transparent">
             <div className="flex flex-col sm:flex-row justify-between items-center mb-4 sm:mb-8 mt-4 bg-transparent">
-                <h2 className="text-2xl font-semibold text-gray-800 mb-2 sm:mb-0">Usuarios</h2>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2 sm:mb-0">Usuarios</h2>
                 <Button
                     onClick={() => {
                         setSelectedUsuario(undefined);
