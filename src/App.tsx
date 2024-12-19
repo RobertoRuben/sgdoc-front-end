@@ -9,6 +9,7 @@ import RolesPage from "@/pages/rol-page/RolesPage";
 import UsuariosPage from "@/pages/usuarios-page/UsuariosPage";
 import IngresoDocumentosPage from '@/pages/documentos-page/IngresoDocumentosPage';
 import ListaDocumentosPage from './pages/documentos-page/ListaDocumentosPage';
+import AmbitoPage from './pages/ambito-page/AmbitoPage';
 import { Toaster } from './components/ui/toaster';  // Asegúrate de importar el componente Toaster
 
 function App() {
@@ -31,6 +32,7 @@ function App() {
                         <Route path="areas/lista" element={<AreasPage />} />
                         <Route path="mesa-partes/ingreso" element={<IngresoDocumentosPage />} />
                         <Route path="documentos/lista" element={<ListaDocumentosPage />} />
+                        <Route path="documentos/ambitos/lista" element={<AmbitoPage />} />
 
                         {/* Redirecciones */}
 
@@ -40,6 +42,7 @@ function App() {
                         <Route path="documentos" element={<Navigate to="/documentos/lista" replace />} />
                         <Route path="mesa-partes" element={<Navigate to="/mesa-partes/ingreso" replace />} />
                         <Route path="usuarios/roles" element={<Navigate to="/usuarios/roles/lista" replace />} />
+                        <Route path="documentos/ambitos" element={<Navigate to="/documentos/ambitos/lista" replace />} />
 
                         {/* Manejo de rutas no encontradas */}
                         <Route path="*" element={<div className="p-4">Página no encontrada</div>} />
