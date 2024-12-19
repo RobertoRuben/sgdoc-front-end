@@ -13,6 +13,7 @@ import AmbitoPage from './pages/ambito-page/AmbitoPage';
 import CategoriaPage from './pages/categoria-page/CategoriaPage';
 import CentroPobladoPage from './pages/centro-poblado-page/CentroPobladoPage';
 import CaseriosPage from './pages/caserios-page/CaseriosPage';
+import InicioPage from './pages/inicio-page/InicioPage';
 import { Toaster } from './components/ui/toaster';  // Asegúrate de importar el componente Toaster
 
 function App() {
@@ -39,6 +40,7 @@ function App() {
                         <Route path="documentos/categorias/lista" element={<CategoriaPage />} />
                         <Route path="distrito/centros-poblados/lista" element={<CentroPobladoPage />} />
                         <Route path="distrito/caserios/lista" element={<CaseriosPage />} />
+                        <Route path="inicio" element={<InicioPage />} />
 
                         {/* Redirecciones */}
 
