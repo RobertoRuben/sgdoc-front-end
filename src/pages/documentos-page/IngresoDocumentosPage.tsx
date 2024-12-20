@@ -1,4 +1,12 @@
 import { useState, useMemo } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHeader,
+  TableHead,
+  TableRow,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Plus, Download, Send } from "lucide-react"; // Agregado Send
@@ -94,7 +102,6 @@ const IngresoDocumentosPage: React.FC = () => {
     }
   };
 
-
   const handlePageChange = (page: number) => {
     if (page < 1 || page > totalPages) return;
     setCurrentPage(page);
@@ -110,7 +117,7 @@ const IngresoDocumentosPage: React.FC = () => {
           onClick={() => {
             setIsModalOpen(true);
           }}
-          className="w-full sm:w-auto px-4 py-2 bg-[#03A64A] text-white rounded hover:bg-[#028a3b] transition-colors duration-200 flex items-center justify-center"
+          className="w-full sm:w-auto px-4 py-2 bg-[#145A32] text-white rounded hover:bg-[#0E3D22] transition-colors duration-200 flex items-center justify-center"
         >
           <Plus className="w-5 h-5 mr-2" />
           Ingresar Documento
@@ -141,39 +148,39 @@ const IngresoDocumentosPage: React.FC = () => {
               transition={{ duration: 0.5 }}
               className="w-full"
             >
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead>
-                  <tr className="bg-gray-50 border-b border-gray-200">
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <Table className="min-w-full divide-y divide-gray-200">
+                <TableHeader>
+                  <TableRow className="bg-[#145A32] hover:bg-[#0E3D22]">
+                    <TableHead className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       ID
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    </TableHead>
+                    <TableHead className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       Documento
-                    </th>
-                    <th className="hidden sm:table-cell px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    </TableHead>
+                    <TableHead className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider hidden sm:table-cell">
                       DNI Remitente
-                    </th>
-                    <th className="hidden md:table-cell px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    </TableHead>
+                    <TableHead className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider hidden md:table-cell">
                       Fecha de Ingreso
-                    </th>
-                    <th className="hidden lg:table-cell px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    </TableHead>
+                    <TableHead className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider hidden lg:table-cell">
                       Ámbito
-                    </th>
-                    <th className="hidden xl:table-cell px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    </TableHead>
+                    <TableHead className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider hidden xl:table-cell">
                       Categoría
-                    </th>
-                    <th className="hidden xl:table-cell px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    </TableHead>
+                    <TableHead className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider hidden xl:table-cell">
                       Centro Poblado
-                    </th>
-                    <th className="hidden 2xl:table-cell px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    </TableHead>
+                    <TableHead className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider hidden 2xl:table-cell">
                       Caserío
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    </TableHead>
+                    <TableHead className="px-4 py-3 text-right text-xs font-bold text-white uppercase tracking-wider">
                       Acciones
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {currentDocumentos.map((documento, index) => (
                     <motion.tr
                       key={documento.id}
@@ -184,54 +191,52 @@ const IngresoDocumentosPage: React.FC = () => {
                       transition={{ duration: 0.3, delay: index * 0.05 }}
                       className={`${
                         index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                      } hover:bg-gray-100`}
+                      } hover:bg-gray-100 transition-colors duration-150 ease-in-out`}
                     >
-                      <td className="px-4 py-3 text-sm text-gray-800">
+                      <TableCell className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {documento.id}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-800">
+                      </TableCell>
+                      <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
                         {documento.nombreDocumento}
-                      </td>
-                      <td className="hidden sm:table-cell px-4 py-3 text-sm text-gray-800">
+                      </TableCell>
+                      <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 hidden sm:table-cell">
                         {documento.dniRemitente}
-                      </td>
-                      <td className="hidden md:table-cell px-4 py-3 text-sm text-gray-800">
+                      </TableCell>
+                      <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 hidden md:table-cell">
                         {new Date(documento.fechaIngreso).toLocaleDateString()}
-                      </td>
-                      <td className="hidden lg:table-cell px-4 py-3 text-sm text-gray-800">
+                      </TableCell>
+                      <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 hidden lg:table-cell">
                         {documento.nombreAmbito}
-                      </td>
-                      <td className="hidden xl:table-cell px-4 py-3 text-sm text-gray-800">
+                      </TableCell>
+                      <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 hidden xl:table-cell">
                         {documento.nombreCategoria}
-                      </td>
-                      <td className="hidden xl:table-cell px-4 py-3 text-sm text-gray-800">
+                      </TableCell>
+                      <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 hidden xl:table-cell">
                         {documento.nombreCentroPoblado}
-                      </td>
-                      <td className="hidden 2xl:table-cell px-4 py-3 text-sm text-gray-800">
+                      </TableCell>
+                      <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 hidden 2xl:table-cell">
                         {documento.nombreCaserio}
-                      </td>
-                      <td className="px-4 py-3 text-right text-sm font-medium">
+                      </TableCell>
+                      <TableCell className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div className="flex justify-end gap-2">
-                          {/* Botón de Descargar */}
                           <Button
                             onClick={() => handleDownload(documento.id)}
-                            className="bg-blue-500 text-white hover:bg-blue-600"
+                            className="bg-[#1496cc] text-white hover:bg-[#0d7ba8]"
                           >
                             <Download className="w-5 h-5" />
                           </Button>
-                          {/* Botón de Enviar */}
                           <Button
                             onClick={() => handleSend(documento.id)}
-                            className="bg-green-500 text-white hover:bg-green-600"
+                            className="bg-[#7db0aa] text-white hover:bg-[#5e8b86]"
                           >
                             <Send className="w-5 h-5" />
                           </Button>
                         </div>
-                      </td>
+                      </TableCell>
                     </motion.tr>
                   ))}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </motion.div>
           </AnimatePresence>
         </div>

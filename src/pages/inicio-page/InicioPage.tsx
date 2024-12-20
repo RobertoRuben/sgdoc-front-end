@@ -45,25 +45,25 @@ const InicioPage: React.FC = () => {
         <InfoCard 
           title="Documentos ingresados hoy" 
           value={datos.documentos.documentosIngresadosHoy.toString()} 
-          color="#168f54" 
+          color=" #168f54" 
           icon={<FileText size={24} />} 
         />
         <InfoCard 
           title="Nuevos remitentes registrados" 
           value={datos.remitentes.nuevosRemitentesRegistrados.toString()} 
-          color="#e2d111" 
+          color= " #e2d111" 
           icon={<UserPlus size={24} />} 
         />
         <InfoCard 
           title="Derivados hoy" 
           value={datos.derivaciones.derivadosHoy.toString()} 
-          color="#d9504c" 
+          color=" #d9504c" 
           icon={<Send size={24} />} 
         />
         <InfoCard 
           title="Pendientes por derivar" 
           value={datos.derivaciones.pendientesPorDerivar.toString()} 
-          color="#243328" 
+          color=" #243328" 
           icon={<Clock size={24} />} 
         />
       </div>
@@ -93,13 +93,13 @@ const InicioPage: React.FC = () => {
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
                   <XAxis
                     dataKey="name"
-                    stroke="#888888"
+                    stroke=" #888888"
                     fontSize={12}
                     tickLine={false}
                     axisLine={false}
                   />
                   <YAxis
-                    stroke="#888888"
+                    stroke=" #888888"
                     fontSize={12}
                     tickLine={false}
                     axisLine={false}
@@ -113,11 +113,11 @@ const InicioPage: React.FC = () => {
                       padding: '10px',
                     }}
                     labelStyle={{ fontWeight: 'bold', marginBottom: '5px' }}
-                    cursor={{ fill: "#dbdad1" }}
+                    cursor={{ fill: " #dbdad1" }}
                   />
                   <Bar
                     dataKey="documentos"
-                    fill="#7ebaad"
+                    fill=" #7ebaad"
                     radius={[4, 4, 0, 0]}
                     name="Documentos"
                   />

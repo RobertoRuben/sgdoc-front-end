@@ -8,6 +8,7 @@ import {
     DialogHeader,
     DialogTitle,
     DialogDescription,
+    DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,8 +20,8 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { FiUser, FiEdit } from "react-icons/fi";
 import { Rol } from "@/model/rol";
+import { Edit, Plus, Save, XCircle } from "lucide-react";
 
 const formSchema = z.object({
     nombre: z.string()
@@ -73,57 +74,65 @@ export function RolModal({ isOpen, rol, onClose, onSubmit }: RolModalProps) {
 
     return (
         <Dialog open={isOpen} onOpenChange={handleClose}>
-            <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                    <div className="flex items-center justify-center space-x-2">
+            <DialogContent className="sm:max-w-[600px] p-0 bg-white max-h-[90vh] overflow-hidden flex flex-col">
+                <DialogHeader className="bg-gradient-to-l from-[#028a3b] via-[#014920] to-black text-white p-6 rounded-t-lg shadow-md">
+                    <DialogTitle className="text-2xl font-bold flex items-center">
                         {isEditing ? (
-                            <FiEdit className="text-primary text-2xl" />
+                            <Edit className="mr-2 h-6 w-6" />
                         ) : (
-                            <FiUser className="text-primary text-2xl" />
+                            <Plus className="mr-2 h-6 w-6" />
                         )}
-                        <DialogTitle className="text-2xl font-semibold text-center">
-                            {isEditing ? "Editar Rol" : "Registrar Rol"}
-                        </DialogTitle>
-                    </div>
-                    <DialogDescription className="text-center text-muted-foreground mt-2">
+                        {isEditing ? "Editar Rol" : "Registrar Rol"}
+                    </DialogTitle>
+                    <DialogDescription className="text-sm text-emerald-100">
                         {isEditing
                             ? "Modifica los datos del rol en el formulario a continuación."
                             : "Complete el formulario para registrar un nuevo rol."}
                     </DialogDescription>
                 </DialogHeader>
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-                        <FormField
-                            control={form.control}
-                            name="nombre"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Nombre del Rol</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="Ingrese el nombre del rol" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <div className="flex justify-end space-x-2 pt-4">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={handleClose}
-                                className="bg-[#d82f2f] text-white hover:bg-[#991f1f] hover:text-white"
-                            >
-                                Cancelar
-                            </Button>
-                            <Button
-                                type="submit"
-                                className={isEditing ? "bg-[#028a3b] hover:bg-[#027a33]" : "bg-[#028a3b] hover:bg-[#027a33]"}
-                            >
-                                {isEditing ? "Guardar Cambios" : "Registrar"}
-                            </Button>
-                        </div>
-                    </form>
-                </Form>
+
+                <div className="overflow-y-auto flex-grow scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(handleSubmit)} className="p-6 space-y-6">
+                            <FormField
+                                control={form.control}
+                                name="nombre"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Nombre del Rol</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                placeholder="Ingrese el nombre del rol"
+                                                {...field}
+                                                className="w-full"
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </form>
+                    </Form>
+                </div>
+
+                <DialogFooter className="p-6 flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
+                    <Button
+                        type="button"
+                        onClick={handleClose}
+                        className="w-full sm:w-auto bg-[#d82f2f] text-white hover:bg-[#991f1f] flex items-center justify-center"
+                    >
+                        <XCircle className="w-5 h-5 mr-2" />
+                        Cancelar
+                    </Button>
+                    <Button
+                        type="submit"
+                        onClick={form.handleSubmit(handleSubmit)}
+                        className="w-full sm:w-auto bg-emerald-600 text-white hover:bg-emerald-700 flex items-center justify-center"
+                    >
+                        <Save className="w-5 h-5 mr-2" />
+                        {isEditing ? "Guardar Cambios" : "Registrar"}
+                    </Button>
+                </DialogFooter>
             </DialogContent>
         </Dialog>
     );

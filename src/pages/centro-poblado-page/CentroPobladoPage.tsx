@@ -31,22 +31,29 @@ const tableVariants = {
   exit: { opacity: 0, scale: 0.95 },
 };
 
+const rowVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1 },
+  exit: { opacity: 0 },
+};
+
 const CentroPobladoPage: React.FC = () => {
-  const [centrosPobladosState, setCentrosPobladosState] = useState<CentroPobladoPaginatedResponse>({
-    data: centrosPobladosData,
-    pagination: {
-      currentPage: 1,
-      pageSize: 4,
-      totalItems: centrosPobladosData.length,
-      totalPages: Math.ceil(centrosPobladosData.length / 4),
-    },
-  });
+  const [centrosPobladosState, setCentrosPobladosState] =
+    useState<CentroPobladoPaginatedResponse>({
+      data: centrosPobladosData,
+      pagination: {
+        currentPage: 1,
+        pageSize: 4,
+        totalItems: centrosPobladosData.length,
+        totalPages: Math.ceil(centrosPobladosData.length / 4),
+      },
+    });
   const [, setCurrentPage] = useState<number>(1);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
-  const [selectedCentroPoblado, setSelectedCentroPoblado] = useState<CentroPoblado | undefined>(
-    undefined
-  );
+  const [selectedCentroPoblado, setSelectedCentroPoblado] = useState<
+    CentroPoblado | undefined
+  >(undefined);
   const [dataVersion, setDataVersion] = useState<number>(0);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
@@ -54,7 +61,9 @@ const CentroPobladoPage: React.FC = () => {
 
   const filteredCentrosPoblados = useMemo(() => {
     return centrosPobladosState.data.filter((centroPoblado) =>
-      centroPoblado.nombreCentroPoblado.toLowerCase().includes(searchTerm.toLowerCase())
+      centroPoblado.nombreCentroPoblado
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase())
     );
   }, [centrosPobladosState.data, searchTerm]);
 
@@ -66,7 +75,11 @@ const CentroPobladoPage: React.FC = () => {
       startIndex,
       startIndex + centrosPobladosState.pagination.pageSize
     );
-  }, [centrosPobladosState.pagination.currentPage, centrosPobladosState.pagination.pageSize, filteredCentrosPoblados]);
+  }, [
+    centrosPobladosState.pagination.currentPage,
+    centrosPobladosState.pagination.pageSize,
+    filteredCentrosPoblados,
+  ]);
 
   const handleEdit = (id?: number) => {
     if (id !== undefined) {
@@ -94,7 +107,9 @@ const CentroPobladoPage: React.FC = () => {
         (c) => c.id !== selectedCentroPoblado.id
       );
       const totalItems = updatedData.length;
-      const totalPages = Math.ceil(totalItems / centrosPobladosState.pagination.pageSize);
+      const totalPages = Math.ceil(
+        totalItems / centrosPobladosState.pagination.pageSize
+      );
       setCentrosPobladosState({
         data: updatedData,
         pagination: {
@@ -142,7 +157,9 @@ const CentroPobladoPage: React.FC = () => {
       const newCentroPoblado = { ...data, id: newId };
       const updatedData = [...centrosPobladosState.data, newCentroPoblado];
       const totalItems = updatedData.length;
-      const totalPages = Math.ceil(totalItems / centrosPobladosState.pagination.pageSize);
+      const totalPages = Math.ceil(
+        totalItems / centrosPobladosState.pagination.pageSize
+      );
       setCentrosPobladosState({
         data: updatedData,
         pagination: {
@@ -185,7 +202,7 @@ const CentroPobladoPage: React.FC = () => {
             setSelectedCentroPoblado(undefined);
             setIsModalOpen(true);
           }}
-          className="w-full sm:w-auto px-4 py-2 bg-[#03A64A] text-white rounded hover:bg-[#028a3b] transition-colors duration-200 flex items-center justify-center"
+          className="w-full sm:w-auto px-4 py-2 bg-[#145A32] text-white rounded hover:bg-[#0E3D22] transition-colors duration-200 flex items-center justify-center"
         >
           <Plus className="w-5 h-5 mr-2" />
           Agregar Centro Poblado
@@ -219,31 +236,38 @@ const CentroPobladoPage: React.FC = () => {
             >
               <Table className="min-w-full divide-y divide-gray-200">
                 <TableHeader>
-                  <TableRow className="bg-gray-50 border-b border-gray-200">
-                    <TableHead className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <TableRow className="bg-[#145A32] border-b border-[#0E3D22] hover:bg-[#0E3D22]">
+                    <TableHead className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       Id
                     </TableHead>
-                    <TableHead className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <TableHead className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       Nombre del Centro Poblado
                     </TableHead>
-                    <TableHead className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <TableHead className="px-4 py-3 text-right text-xs font-bold text-white uppercase tracking-wider">
                       Acciones
                     </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {currentCentrosPoblados.map((centroPoblado) => (
-                    <TableRow
+                  {currentCentrosPoblados.map((centroPoblado, index) => (
+                    <motion.tr
                       key={centroPoblado.id}
-                      className="hover:bg-gray-100 transition-colors"
+                      variants={rowVariants}
+                      initial="hidden"
+                      animate="visible"
+                      exit="exit"
+                      transition={{ duration: 0.3, delay: index * 0.05 }}
+                      className={`${
+                        index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                      } hover:bg-gray-100 transition-colors duration-150 ease-in-out`}
                     >
-                      <TableCell className="px-4 py-3 whitespace-nowrap">
+                      <TableCell className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {centroPoblado.id}
                       </TableCell>
-                      <TableCell className="px-4 py-3 whitespace-nowrap">
+                      <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
                         {centroPoblado.nombreCentroPoblado}
                       </TableCell>
-                      <TableCell className="px-4 py-3 whitespace-nowrap text-right">
+                      <TableCell className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <Button
                           onClick={() => handleEdit(centroPoblado.id)}
                           className="bg-amber-500 text-white hover:bg-amber-600 mr-2"
@@ -257,7 +281,7 @@ const CentroPobladoPage: React.FC = () => {
                           <Trash2 className="w-5 h-5" />
                         </Button>
                       </TableCell>
-                    </TableRow>
+                    </motion.tr>
                   ))}
                 </TableBody>
               </Table>

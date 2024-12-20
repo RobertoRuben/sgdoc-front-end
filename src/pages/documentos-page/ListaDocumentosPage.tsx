@@ -1,17 +1,28 @@
-import React, { useState, useMemo } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { Search, Pencil, Trash2, Download } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
-import { Pagination } from '@/components/ui/pagination';
-import { ActualizacionDocumentoModal } from '@/components/modal/documento-modal/actualizacion-documento-modal/ActualizacionDocumentoModal';
-import DeleteModal from '@/components/modal/alerts/delete-modal/DeleteModal';
-import { DocumentoDetails } from '@/model/documentoDetails';
-import { PaginatedDocumentoResponse } from '@/model/paginatedDocumentoResponse';
-import { DocumentoRequest } from '@/model/documento';
+import React, { useState, useMemo } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Search, Pencil, Trash2, Download } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { Pagination } from "@/components/ui/pagination";
+import { ActualizacionDocumentoModal } from "@/components/modal/documento-modal/actualizacion-documento-modal/ActualizacionDocumentoModal";
+import DeleteModal from "@/components/modal/alerts/delete-modal/DeleteModal";
+import { DocumentoDetails } from "@/model/documentoDetails";
+import { PaginatedDocumentoResponse } from "@/model/paginatedDocumentoResponse";
+import { DocumentoRequest } from "@/model/documento";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const initialDocumentos: PaginatedDocumentoResponse = {
   data: [
@@ -57,46 +68,73 @@ const rowVariants = {
 };
 
 const ListaDocumentosPage: React.FC = () => {
-  const [documentosState, setDocumentos] = useState<PaginatedDocumentoResponse>(initialDocumentos);
+  const [documentosState, setDocumentos] =
+    useState<PaginatedDocumentoResponse>(initialDocumentos);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
-  const [selectedDocumento, setSelectedDocumento] = useState<DocumentoDetails | undefined>(undefined);
+  const [selectedDocumento, setSelectedDocumento] = useState<
+    DocumentoDetails | undefined
+  >(undefined);
   const [dataVersion, setDataVersion] = useState<number>(0);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
   // Filtros adicionales
-  const [selectedCaserio, setSelectedCaserio] = useState<string | undefined>(undefined);
-  const [selectedCentroPoblado, setSelectedCentroPoblado] = useState<string | undefined>(undefined);
-  const [selectedAmbito, setSelectedAmbito] = useState<string | undefined>(undefined);
+  const [selectedCaserio, setSelectedCaserio] = useState<string | undefined>(
+    undefined
+  );
+  const [selectedCentroPoblado, setSelectedCentroPoblado] = useState<
+    string | undefined
+  >(undefined);
+  const [selectedAmbito, setSelectedAmbito] = useState<string | undefined>(
+    undefined
+  );
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
 
   const totalPages = documentosState.pagination.totalPages;
 
   const filteredDocumentos = useMemo(() => {
     return documentosState.data.filter((documento) => {
-      const matchesSearch =
-        documento.nombreDocumento.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = documento.nombreDocumento
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
 
-      const caserioFilter = (!selectedCaserio || selectedCaserio === "all")
-        ? true
-        : documento.nombreCaserio === selectedCaserio;
+      const caserioFilter =
+        !selectedCaserio || selectedCaserio === "all"
+          ? true
+          : documento.nombreCaserio === selectedCaserio;
 
-      const centroPobladoFilter = (!selectedCentroPoblado || selectedCentroPoblado === "all")
-        ? true
-        : documento.nombreCentroPoblado === selectedCentroPoblado;
+      const centroPobladoFilter =
+        !selectedCentroPoblado || selectedCentroPoblado === "all"
+          ? true
+          : documento.nombreCentroPoblado === selectedCentroPoblado;
 
-      const ambitoFilter = (!selectedAmbito || selectedAmbito === "all")
-        ? true
-        : documento.nombreAmbito === selectedAmbito;
+      const ambitoFilter =
+        !selectedAmbito || selectedAmbito === "all"
+          ? true
+          : documento.nombreAmbito === selectedAmbito;
 
       const dateFilter = !selectedDate
         ? true
-        : (new Date(documento.fechaIngreso).toDateString() === selectedDate.toDateString());
+        : new Date(documento.fechaIngreso).toDateString() ===
+          selectedDate.toDateString();
 
-      return matchesSearch && caserioFilter && centroPobladoFilter && ambitoFilter && dateFilter;
+      return (
+        matchesSearch &&
+        caserioFilter &&
+        centroPobladoFilter &&
+        ambitoFilter &&
+        dateFilter
+      );
     });
-  }, [documentosState.data, searchTerm, selectedCaserio, selectedCentroPoblado, selectedAmbito, selectedDate]);
+  }, [
+    documentosState.data,
+    searchTerm,
+    selectedCaserio,
+    selectedCentroPoblado,
+    selectedAmbito,
+    selectedDate,
+  ]);
 
   const currentDocumentos = useMemo(() => {
     const startIndex = (currentPage - 1) * documentosState.pagination.pageSize;
@@ -147,7 +185,8 @@ const ListaDocumentosPage: React.FC = () => {
           ...prevState.pagination,
           totalItems: prevState.pagination.totalItems - 1,
           totalPages: Math.ceil(
-            (prevState.pagination.totalItems - 1) / prevState.pagination.pageSize
+            (prevState.pagination.totalItems - 1) /
+              prevState.pagination.pageSize
           ),
         },
       }));
@@ -204,7 +243,11 @@ const ListaDocumentosPage: React.FC = () => {
           </div>
 
           {/* Select de Caserío */}
-          <Select onValueChange={(val) => setSelectedCaserio(val === "all" ? undefined : val)}>
+          <Select
+            onValueChange={(val) =>
+              setSelectedCaserio(val === "all" ? undefined : val)
+            }
+          >
             <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="Caserío" />
             </SelectTrigger>
@@ -216,7 +259,11 @@ const ListaDocumentosPage: React.FC = () => {
           </Select>
 
           {/* Select de Centro Poblado */}
-          <Select onValueChange={(val) => setSelectedCentroPoblado(val === "all" ? undefined : val)}>
+          <Select
+            onValueChange={(val) =>
+              setSelectedCentroPoblado(val === "all" ? undefined : val)
+            }
+          >
             <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="Centro Poblado" />
             </SelectTrigger>
@@ -228,7 +275,11 @@ const ListaDocumentosPage: React.FC = () => {
           </Select>
 
           {/* Select de Ámbito */}
-          <Select onValueChange={(val) => setSelectedAmbito(val === "all" ? undefined : val)}>
+          <Select
+            onValueChange={(val) =>
+              setSelectedAmbito(val === "all" ? undefined : val)
+            }
+          >
             <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="Ámbito" />
             </SelectTrigger>
@@ -242,8 +293,13 @@ const ListaDocumentosPage: React.FC = () => {
           {/* Selección de Fecha */}
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="w-full sm:w-[180px] justify-start text-left font-normal">
-                {selectedDate ? selectedDate.toLocaleDateString() : "Seleccionar Fecha"}
+              <Button
+                variant="outline"
+                className="w-full sm:w-[180px] justify-start text-left font-normal"
+              >
+                {selectedDate
+                  ? selectedDate.toLocaleDateString()
+                  : "Seleccionar Fecha"}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="p-0" align="start">
@@ -269,39 +325,39 @@ const ListaDocumentosPage: React.FC = () => {
               transition={{ duration: 0.5 }}
               className="w-full"
             >
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead>
-                  <tr className="bg-gray-50 border-b border-gray-200">
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <Table className="min-w-full divide-y divide-gray-200">
+                <TableHeader>
+                  <TableRow className="bg-[#145A32] border-b border-[#0E3D22] hover:bg-[#0E3D22]">
+                    <TableHead className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       ID
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    </TableHead>
+                    <TableHead className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       Documento
-                    </th>
-                    <th className="hidden sm:table-cell px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    </TableHead>
+                    <TableHead className="hidden sm:table-cell px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       DNI Remitente
-                    </th>
-                    <th className="hidden md:table-cell px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    </TableHead>
+                    <TableHead className="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       Fecha de Ingreso
-                    </th>
-                    <th className="hidden lg:table-cell px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    </TableHead>
+                    <TableHead className="hidden lg:table-cell px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       Ámbito
-                    </th>
-                    <th className="hidden xl:table-cell px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    </TableHead>
+                    <TableHead className="hidden xl:table-cell px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       Categoría
-                    </th>
-                    <th className="hidden xl:table-cell px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    </TableHead>
+                    <TableHead className="hidden xl:table-cell px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       Centro Poblado
-                    </th>
-                    <th className="hidden 2xl:table-cell px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    </TableHead>
+                    <TableHead className="hidden 2xl:table-cell px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       Caserío
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    </TableHead>
+                    <TableHead className="px-4 py-3 text-right text-xs font-bold text-white uppercase tracking-wider">
                       Acciones
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {currentDocumentos.map((documento, index) => (
                     <motion.tr
                       key={documento.id}
@@ -310,64 +366,60 @@ const ListaDocumentosPage: React.FC = () => {
                       animate="visible"
                       exit="exit"
                       transition={{ duration: 0.3, delay: index * 0.05 }}
-                      className={`${index % 2 === 0 ? "bg-white" : "bg-gray-50"} hover:bg-gray-100`}
+                      className={`${
+                        index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                      } hover:bg-gray-100`}
                     >
-                      <td className="px-4 py-3 text-sm text-gray-800">
+                      <TableCell className="px-4 py-3 text-sm text-gray-800">
                         {documento.id}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-800">
+                      </TableCell>
+                      <TableCell className="px-4 py-3 text-sm text-gray-800">
                         {documento.nombreDocumento}
-                      </td>
-                      <td className="hidden sm:table-cell px-4 py-3 text-sm text-gray-800">
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell px-4 py-3 text-sm text-gray-800">
                         {documento.dniRemitente}
-                      </td>
-                      <td className="hidden md:table-cell px-4 py-3 text-sm text-gray-800">
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell px-4 py-3 text-sm text-gray-800">
                         {new Date(documento.fechaIngreso).toLocaleDateString()}
-                      </td>
-                      <td className="hidden lg:table-cell px-4 py-3 text-sm text-gray-800">
+                      </TableCell>
+                      <TableCell className="hidden lg:table-cell px-4 py-3 text-sm text-gray-800">
                         {documento.nombreAmbito}
-                      </td>
-                      <td className="hidden xl:table-cell px-4 py-3 text-sm text-gray-800">
+                      </TableCell>
+                      <TableCell className="hidden xl:table-cell px-4 py-3 text-sm text-gray-800">
                         {documento.nombreCategoria}
-                      </td>
-                      <td className="hidden xl:table-cell px-4 py-3 text-sm text-gray-800">
+                      </TableCell>
+                      <TableCell className="hidden xl:table-cell px-4 py-3 text-sm text-gray-800">
                         {documento.nombreCentroPoblado}
-                      </td>
-                      <td className="hidden 2xl:table-cell px-4 py-3 text-sm text-gray-800">
+                      </TableCell>
+                      <TableCell className="hidden 2xl:table-cell px-4 py-3 text-sm text-gray-800">
                         {documento.nombreCaserio}
-                      </td>
-                      <td className="px-4 py-3 text-right text-sm font-medium">
+                      </TableCell>
+                      <TableCell className="px-4 py-4 text-right text-sm font-medium">
                         <div className="flex justify-end gap-2">
                           <Button
-                            variant="outline"
-                            size="sm"
                             onClick={() => handleEdit(documento.id)}
                             className="bg-amber-500 text-white hover:bg-amber-600"
                           >
                             <Pencil className="w-5 h-5" />
                           </Button>
                           <Button
-                            variant="outline"
-                            size="sm"
                             onClick={() => handleDeleteClick(documento.id)}
                             className="bg-red-500 text-white hover:bg-red-600"
                           >
                             <Trash2 className="w-5 h-5" />
                           </Button>
                           <Button
-                            variant="outline"
-                            size="sm"
                             onClick={() => handleDownload(documento.id)}
-                            className="bg-blue-500 text-white hover:bg-blue-600"
+                            className="bg-[#1496cc] text-white hover:bg-[#0d7ba8]"
                           >
                             <Download className="w-5 h-5" />
                           </Button>
                         </div>
-                      </td>
+                      </TableCell>
                     </motion.tr>
                   ))}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </motion.div>
           </AnimatePresence>
         </div>
@@ -389,11 +441,11 @@ const ListaDocumentosPage: React.FC = () => {
             documentoBytes: new File([], "empty.pdf"),
             nombre: selectedDocumento.nombreDocumento,
             folios: 0,
-            asunto: '',
+            asunto: "",
             ambitoId: 0,
             categoriaId: 0,
             centroPobladoId: 0,
-            caserioId: 0
+            caserioId: 0,
           }}
           onClose={() => setIsModalOpen(false)}
           onSubmit={handleUpdateDocumento}

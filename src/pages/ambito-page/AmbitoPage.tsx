@@ -1,4 +1,4 @@
-import { useState, useMemo} from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Search, Pencil, Trash2 } from "lucide-react";
 import { Ambito } from "@/model/ambito";
@@ -29,6 +29,12 @@ const tableVariants = {
   initial: { opacity: 0, scale: 0.95 },
   animate: { opacity: 1, scale: 1 },
   exit: { opacity: 0, scale: 0.95 },
+};
+
+const rowVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1 },
+  exit: { opacity: 0 },
 };
 
 const AmbitoPage: React.FC = () => {
@@ -66,7 +72,11 @@ const AmbitoPage: React.FC = () => {
       startIndex,
       startIndex + ambitosState.pagination.pageSize
     );
-  }, [ambitosState.pagination.currentPage, ambitosState.pagination.pageSize, filteredAmbitos]);
+  }, [
+    ambitosState.pagination.currentPage,
+    ambitosState.pagination.pageSize,
+    filteredAmbitos,
+  ]);
 
   const handleEdit = (id?: number) => {
     if (id !== undefined) {
@@ -94,7 +104,9 @@ const AmbitoPage: React.FC = () => {
         (a) => a.id !== selectedAmbito.id
       );
       const totalItems = updatedData.length;
-      const totalPages = Math.ceil(totalItems / ambitosState.pagination.pageSize);
+      const totalPages = Math.ceil(
+        totalItems / ambitosState.pagination.pageSize
+      );
       setAmbitosState({
         data: updatedData,
         pagination: {
@@ -144,7 +156,9 @@ const AmbitoPage: React.FC = () => {
       const newAmbito = { ...data, id: newId };
       const updatedData = [...ambitosState.data, newAmbito];
       const totalItems = updatedData.length;
-      const totalPages = Math.ceil(totalItems / ambitosState.pagination.pageSize);
+      const totalPages = Math.ceil(
+        totalItems / ambitosState.pagination.pageSize
+      );
       setAmbitosState({
         data: updatedData,
         pagination: {
@@ -187,7 +201,7 @@ const AmbitoPage: React.FC = () => {
             setSelectedAmbito(undefined);
             setIsModalOpen(true);
           }}
-          className="w-full sm:w-auto px-4 py-2 bg-[#03A64A] text-white rounded hover:bg-[#028a3b] transition-colors duration-200 flex items-center justify-center"
+          className="w-full sm:w-auto px-4 py-2 bg-[#145A32] text-white rounded hover:bg-[#0E3D22] transition-colors duration-200 flex items-center justify-center"
         >
           <Plus className="w-5 h-5 mr-2" />
           Agregar Ámbito
@@ -221,31 +235,38 @@ const AmbitoPage: React.FC = () => {
             >
               <Table className="min-w-full divide-y divide-gray-200">
                 <TableHeader>
-                  <TableRow className="bg-gray-50 border-b border-gray-200">
-                    <TableHead className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <TableRow className="bg-[#145A32] border-b border-[#0E3D22] hover:bg-[#0E3D22]">
+                    <TableHead className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       Id
                     </TableHead>
-                    <TableHead className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <TableHead className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       Nombre del Ámbito
                     </TableHead>
-                    <TableHead className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <TableHead className="px-4 py-3 text-right text-xs font-bold text-white uppercase tracking-wider">
                       Acciones
                     </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {currentAmbitos.map((ambito) => (
-                    <TableRow
+                  {currentAmbitos.map((ambito, index) => (
+                    <motion.tr
                       key={ambito.id}
-                      className="hover:bg-gray-100 transition-colors"
+                      variants={rowVariants}
+                      initial="hidden"
+                      animate="visible"
+                      exit="exit"
+                      transition={{ duration: 0.3, delay: index * 0.05 }}
+                      className={`${
+                        index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                      } hover:bg-gray-100 transition-colors duration-150 ease-in-out`}
                     >
-                      <TableCell className="px-4 py-3 whitespace-nowrap">
+                      <TableCell className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {ambito.id}
                       </TableCell>
-                      <TableCell className="px-4 py-3 whitespace-nowrap">
+                      <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
                         {ambito.nombreAmbito}
                       </TableCell>
-                      <TableCell className="px-4 py-3 whitespace-nowrap text-right">
+                      <TableCell className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <Button
                           onClick={() => handleEdit(ambito.id)}
                           className="bg-amber-500 text-white hover:bg-amber-600 mr-2"
@@ -259,7 +280,7 @@ const AmbitoPage: React.FC = () => {
                           <Trash2 className="w-5 h-5" />
                         </Button>
                       </TableCell>
-                    </TableRow>
+                    </motion.tr>
                   ))}
                 </TableBody>
               </Table>

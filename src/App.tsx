@@ -48,6 +48,7 @@ function App() {
                         <Route path="remitentes" element={<Navigate to="/remitentes/lista" replace />} />
                         <Route path="trabajadores" element={<Navigate to="/trabajadores/lista" replace />} />
                         <Route path="documentos" element={<Navigate to="/documentos/lista" replace />} />
+                        <Route path="usuarios" element={<Navigate to="/usuarios/lista" replace />} />
                         <Route path="mesa-partes" element={<Navigate to="/mesa-partes/ingreso" replace />} />
                         <Route path="usuarios/roles" element={<Navigate to="/usuarios/roles/lista" replace />} />
                         <Route path="documentos/ambitos" element={<Navigate to="/documentos/ambitos/lista" replace />} />

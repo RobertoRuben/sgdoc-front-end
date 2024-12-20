@@ -14,7 +14,7 @@ const ContentHeader: React.FC<ContentHeaderProps> = ({ breadcrumb }) => {
                 <ol className="flex">
                     {breadcrumb.map((crumb, index) => (
                         <li key={crumb.path} className="flex items-center">
-                            <Link to={crumb.path} className="text-[#03A64A] hover:text-[#03A64A] text-base">
+                            <Link to={crumb.path} className="text-[#04843c] hover:text-[#145A32] text-base">
                                 {crumb.name}
                             </Link>
                             {index < breadcrumb.length - 1 && (
