@@ -8,7 +8,6 @@ import {
     Settings,
     UserPlus,
     UserCheck,
-    Search,
     ChartColumnIcon,
     InboxIcon
 } from 'lucide-react';
@@ -30,12 +29,6 @@ export const navItems: NavItem[] = [
         allowedRoles: ['Administrador', 'Director', 'Auxiliar', 'Psicologo'],
     },
     {
-        name: "Consultas",
-        icon: Search,
-        path: "/consultas",
-        allowedRoles: ['Administrador', 'Director', 'Auxiliar', 'Psicologo'],
-    },
-    {
         name: "Dashboard",
         icon: ChartColumnIcon,
         path: "/dashboard",
@@ -50,12 +43,6 @@ export const navItems: NavItem[] = [
         ],
     },
     {
-        name: "Remitentes",
-        icon: UserPlus,
-        path: "/remitentes/lista",
-        allowedRoles: ['Administrador', 'Director', 'Auxiliar'],
-    },
-    {
         name: "Documentos",
         path: "/documentos",
         icon: FileText,
@@ -68,21 +55,18 @@ export const navItems: NavItem[] = [
         ],
     },
     {
+        name: "Remitentes",
+        icon: UserPlus,
+        path: "/remitentes/lista",
+        allowedRoles: ['Administrador', 'Director', 'Auxiliar'],
+    },
+    {
         name: "Distrito",
         icon: MapPin,
         allowedRoles: ['Administrador', 'Director'],
         subItems: [
             { name: "Centros Poblados", path: "/distrito/centros-poblados/lista" },
             { name: "Caseríos", path: "/distrito/caserios/lista" },
-        ],
-    },
-    {
-        name: "Usuarios",
-        icon: Users,
-        allowedRoles: ['Administrador'],
-        subItems: [
-            { name: "Lista de Usuarios", path: "/usuarios/lista" },
-            { name: "Roles", path: "/usuarios/roles/lista" },
         ],
     },
     {
@@ -99,6 +83,15 @@ export const navItems: NavItem[] = [
         icon: UserCheck,
         path: "/trabajadores/lista",
         allowedRoles: ['Administrador', 'Director'],
+    },
+    {
+        name: "Usuarios",
+        icon: Users,
+        allowedRoles: ['Administrador'],
+        subItems: [
+            { name: "Lista de Usuarios", path: "/usuarios/lista" },
+            { name: "Roles", path: "/usuarios/roles/lista" },
+        ],
     },
     {
         name: "Configuración",
