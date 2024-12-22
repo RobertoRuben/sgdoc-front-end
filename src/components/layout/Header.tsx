@@ -1,10 +1,10 @@
-// src/components/layout/Header.tsx
 'use client';
 
 import { ReactNode, useState } from 'react';
 import { Bell, LogOut, Menu, User, UserCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { UsuarioProfileModal } from '../modal/usuario-modal/usuario-perfil-modal/UsuarioPerfilModal';
+import LogoutModal from '../modal/alerts/logout-modal/LogoutModal';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -26,14 +26,52 @@ type HeaderProps = {
     title: ReactNode;
     notificationCount: number;
     onViewNotifications: () => void;
+    onModalStateChange: (isOpen: boolean) => void;
 };
 
-export function Header({ onOpenSidebar, title, notificationCount, onViewNotifications }: HeaderProps) {
+export function Header({
+    onOpenSidebar,
+    title,
+    notificationCount,
+    onViewNotifications,
+    onModalStateChange,
+}: HeaderProps) {
     const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+    const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
     const handlePasswordChange = (newPassword: string) => {
         console.log('Cambio de contraseña:', newPassword);
         setIsProfileModalOpen(false);
+        onModalStateChange(false);
+    };
+
+    const handleProfileModalOpen = () => {
+        setIsProfileModalOpen(true);
+        onModalStateChange(true);
+    };
+
+    const handleProfileModalClose = () => {
+        setIsProfileModalOpen(false);
+        onModalStateChange(false);
+    };
+
+    const handleLogout = async () => {
+        return new Promise<void>((resolve) => {
+            setTimeout(() => {
+                console.log('Cerrando sesión...');
+                resolve();
+            }, 1000);
+        });
+    };
+
+    const handleLogoutModalClose = () => {
+        setIsLogoutModalOpen(false);
+        onModalStateChange(false);
+    };
+
+    const handleLogoutModalOpen = () => {
+        setIsLogoutModalOpen(true);
+        onModalStateChange(true);
     };
 
     return (
@@ -59,7 +97,7 @@ export function Header({ onOpenSidebar, title, notificationCount, onViewNotifica
                                     aria-label="Notificaciones"
                                     className="relative text-white hover:bg-[#4F4F4F] transition-colors duration-200"
                                 >
-                                    <Bell className="h-5 w-5" strokeWidth={3}/>
+                                    <Bell className="h-5 w-5" strokeWidth={3} />
                                     {notificationCount > 0 && (
                                         <Badge className="absolute -top-1 -right-1 px-1.5 py-0.5 text-xs bg-[#03A64A] text-white rounded-full">
                                             {notificationCount}
@@ -68,8 +106,8 @@ export function Header({ onOpenSidebar, title, notificationCount, onViewNotifica
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="mt-2 bg-white">
-                                <DropdownMenuItem 
-                                    onClick={onViewNotifications} 
+                                <DropdownMenuItem
+                                    onClick={onViewNotifications}
                                     className="text-[#333333] hover:bg-[#F2F2F2] flex items-center"
                                 >
                                     <Bell className="mr-2 h-4 w-4" strokeWidth={3} />
@@ -89,15 +127,18 @@ export function Header({ onOpenSidebar, title, notificationCount, onViewNotifica
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="mt-2 bg-white">
-                                <DropdownMenuItem 
-                                    onClick={() => setIsProfileModalOpen(true)}
+                                <DropdownMenuItem
+                                    onClick={handleProfileModalOpen}
                                     className="text-[#333333] hover:bg-[#F2F2F2] flex items-center"
                                 >
                                     <UserCircle className="mr-2 h-4 w-4" strokeWidth={3} />
                                     Mi Perfil
                                 </DropdownMenuItem>
-                                <DropdownMenuItem className="text-[#333333] hover:bg-[#F2F2F2] flex items-center">
-                                    <LogOut className="mr-2 h-4 w-4" strokeWidth={3}/>
+                                <DropdownMenuItem
+                                    onClick={handleLogoutModalOpen}
+                                    className="text-[#333333] hover:bg-[#F2F2F2] flex items-center"
+                                >
+                                    <LogOut className="mr-2 h-4 w-4" strokeWidth={3} />
                                     Cerrar sesión
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
@@ -108,9 +149,16 @@ export function Header({ onOpenSidebar, title, notificationCount, onViewNotifica
 
             <UsuarioProfileModal
                 isOpen={isProfileModalOpen}
-                onClose={() => setIsProfileModalOpen(false)}
+                onClose={handleProfileModalClose}
                 user={mockUser}
                 onPasswordChange={handlePasswordChange}
+            />
+
+            <LogoutModal
+                isOpen={isLogoutModalOpen}
+                onClose={handleLogoutModalClose}
+                onConfirm={handleLogout}
+                username={mockUser.nombreUsuario}
             />
         </>
     );

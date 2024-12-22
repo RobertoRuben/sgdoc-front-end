@@ -1,4 +1,3 @@
-// src/components/layout/Layout.tsx
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
@@ -16,6 +15,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 export function Layout() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [modalOpen, setModalOpen] = useState(false); // Estado para controlar superposición
     const [notificationCount] = useState(0);
     const location = useLocation();
     const { isLoading, setLoading } = useLoading();
@@ -46,7 +46,11 @@ export function Layout() {
     const headerTitle = location.pathname === '/inicio' ? 'Bienvenido' : 'SGDOC';
 
     return (
-        <div className="flex h-screen overflow-hidden bg-gray-100">
+        <div
+            className={`flex h-screen overflow-hidden bg-gray-100 ${
+                modalOpen ? 'pointer-events-none' : 'pointer-events-auto'
+            }`}
+        >
             <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
             <div className="flex-1 flex flex-col min-w-0">
@@ -58,13 +62,12 @@ export function Layout() {
                     title={headerTitle}
                     notificationCount={notificationCount}
                     onViewNotifications={handleViewNotifications}
+                    onModalStateChange={setModalOpen} // Pasamos el estado del modal al Header
                 />
 
                 <MainContent>
                     {shouldShowContentHeader && (
-                        <ContentHeader
-                            breadcrumb={breadcrumb}
-                        />
+                        <ContentHeader breadcrumb={breadcrumb} />
                     )}
                     <AnimatePresence>
                         {isLoading && <LoadingSpinner />}

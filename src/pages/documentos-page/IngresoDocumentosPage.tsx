@@ -14,6 +14,7 @@ import { Pagination } from "@/components/ui/pagination";
 import RegistroDocumentoModal from "@/components/modal/documento-modal/registro-documento-modal/RegistroDocumentoModal";
 import { PaginatedDocumentoResponse } from "@/model/paginatedDocumentoResponse";
 import { AnimatePresence, motion } from "framer-motion";
+import DownloadModal from "@/components/modal/alerts/download-modal/DownloadModal";
 
 const initialDocumentos: PaginatedDocumentoResponse = {
   data: [
@@ -65,6 +66,14 @@ const IngresoDocumentosPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [dataVersion] = useState<number>(0);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<{
+    id: number;
+    nombreDocumento: string;
+    // Agregar propiedades simuladas para el ejemplo
+    fileSize: string;
+    fileType: string;
+  } | null>(null);
 
   const totalPages = documentosState.pagination.totalPages;
 
@@ -87,18 +96,42 @@ const IngresoDocumentosPage: React.FC = () => {
     documentosState.pagination.pageSize,
   ]);
 
+  // Modificar la función handleDownload
+  const handleDownload = (id?: number) => {
+    if (id !== undefined) {
+      const document = documentosState.data.find((doc) => doc.id === id);
+      if (document) {
+        setSelectedDocument({
+          id: document.id,
+          nombreDocumento: document.nombreDocumento,
+          fileSize: "2.5 MB", // Ejemplo estático - reemplazar con datos reales
+          fileType: "PDF", // Ejemplo estático - reemplazar con datos reales
+        });
+        setIsDownloadModalOpen(true);
+      }
+    }
+  };
+
+  // Agregar función para manejar la descarga
+  const handleConfirmDownload = async () => {
+    if (selectedDocument) {
+      try {
+        // Aquí iría la lógica real de descarga
+        console.log(`Descargando documento ${selectedDocument.id}`);
+        await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulación
+        // Mostrar notificación de éxito si es necesario
+      } catch (error) {
+        console.error("Error en la descarga:", error);
+        // Manejar el error apropiadamente
+      }
+    }
+  };
+
   // Manejador para enviar documento
   const handleSend = (id?: number) => {
     if (id !== undefined) {
       console.log(`Enviando documento ${id}`);
       // Implementar lógica de envío aquí
-    }
-  };
-
-  const handleDownload = (id?: number) => {
-    if (id !== undefined) {
-      console.log(`Descargando documento ${id}`);
-      // Implementar lógica de descarga
     }
   };
 
@@ -253,6 +286,17 @@ const IngresoDocumentosPage: React.FC = () => {
         <RegistroDocumentoModal
           isOpen={isModalOpen}
           onOpenChange={setIsModalOpen}
+        />
+      )}
+
+      {selectedDocument && (
+        <DownloadModal
+          isOpen={isDownloadModalOpen}
+          onClose={() => setIsDownloadModalOpen(false)}
+          onConfirm={handleConfirmDownload}
+          fileName={selectedDocument.nombreDocumento}
+          fileSize={selectedDocument.fileSize}
+          fileType={selectedDocument.fileType}
         />
       )}
     </div>

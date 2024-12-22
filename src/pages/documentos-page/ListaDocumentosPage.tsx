@@ -22,7 +22,15 @@ import DeleteModal from "@/components/modal/alerts/delete-modal/DeleteModal";
 import { DocumentoDetails } from "@/model/documentoDetails";
 import { PaginatedDocumentoResponse } from "@/model/paginatedDocumentoResponse";
 import { DocumentoRequest } from "@/model/documento";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import DownloadModal from "@/components/modal/alerts/download-modal/DownloadModal";
 
 const initialDocumentos: PaginatedDocumentoResponse = {
   data: [
@@ -90,6 +98,14 @@ const ListaDocumentosPage: React.FC = () => {
     undefined
   );
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+
+  const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<{
+    id: number;
+    nombreDocumento: string;
+    fileSize: string;
+    fileType: string;
+  } | null>(null);
 
   const totalPages = documentosState.pagination.totalPages;
 
@@ -169,10 +185,33 @@ const ListaDocumentosPage: React.FC = () => {
     }
   };
 
+  // 3. Reemplazar la función handleDownload existente por esta
   const handleDownload = (id?: number) => {
     if (id !== undefined) {
-      console.log(`Descargando documento ${id}`);
-      // Implementar lógica de descarga
+      const document = documentosState.data.find((doc) => doc.id === id);
+      if (document) {
+        setSelectedDocument({
+          id: document.id,
+          nombreDocumento: document.nombreDocumento,
+          fileSize: "2.5 MB", // Ejemplo estático - reemplazar con datos reales
+          fileType: "PDF", // Ejemplo estático - reemplazar con datos reales
+        });
+        setIsDownloadModalOpen(true);
+      }
+    }
+  };
+
+  // 4. Agregar esta nueva función
+  const handleConfirmDownload = async () => {
+    if (selectedDocument) {
+      try {
+        // Aquí iría la lógica real de descarga
+        console.log(`Descargando documento ${selectedDocument.id}`);
+        await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulación
+        setIsDownloadModalOpen(false);
+      } catch (error) {
+        console.error("Error en la descarga:", error);
+      }
     }
   };
 
@@ -458,6 +497,16 @@ const ListaDocumentosPage: React.FC = () => {
           onClose={() => setIsDeleteModalOpen(false)}
           onConfirm={handleDeleteConfirm}
           itemName={selectedDocumento?.nombreDocumento || ""}
+        />
+      )}
+      {selectedDocument && (
+        <DownloadModal
+          isOpen={isDownloadModalOpen}
+          onClose={() => setIsDownloadModalOpen(false)}
+          onConfirm={handleConfirmDownload}
+          fileName={selectedDocument.nombreDocumento}
+          fileSize={selectedDocument.fileSize}
+          fileType={selectedDocument.fileType}
         />
       )}
     </div>
