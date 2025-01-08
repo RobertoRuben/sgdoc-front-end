@@ -1,43 +1,49 @@
 import { useState, useEffect, useCallback } from "react";
 import debounce from "lodash/debounce";
-import { Ambito } from "@/model/ambito";
-import { AmbitoPaginatedResponse } from "@/model/ambitoPaginatedResponse";
-import { AmbitoHeader } from "./AmbitoHeader";
-import { AmbitoSearch } from "./AmbitoSearch";
-import { AmbitoTable } from "./AmbitoTable";
-import { AmbitoModal } from "@/components/modal/ambito-modal/AmbitoModal";
+import { Categoria } from "@/model/categoria";
+import { CategoriaPaginatedResponse } from "@/model/categoriaPaginatedResponse";
+import { CategoriaHeader } from "./CategoriaHeader";
+import { CategoriaSearch } from "./CategoriaSearch";
+import { CategoriaTable } from "./CategoriaTable";
+import { CategoriaModal } from "@/components/modal/categoria-modal/CategoriaModal";
+import NoResultsModal from "@/components/modal/alerts/no-results-modal/NoResultsModal";
 import DeleteModal from "@/components/modal/alerts/delete-modal/DeleteModal";
 import ErrorModal from "@/components/modal/alerts/error-modal/ErrorModal";
 import SuccessModal from "@/components/modal/alerts/success-modal/SuccessModal";
 import UpdateSuccessModal from "@/components/modal/alerts/update-modal/UpdateSuccessModal";
 import { Pagination } from "@/components/ui/pagination";
 import {
-  getPaginatedAmbitos,
-  createAmbito,
-  updateAmbito,
+  getCategoriasPaginated,
+  createCategoria,
+  updateCategoria,
   findByString,
-  deleteAmbito,
-  getAmbitoById,
-} from "@/service/ambitoService";
+  deleteCategoria,
+  getCategoriaById,
+} from "@/service/categoriaService";
 import LoadingSpinner from "@/components/layout/LoadingSpinner";
 
-export const AmbitoContainer: React.FC = () => {
-  const [ambitosState, setAmbitosState] = useState<AmbitoPaginatedResponse>({
-    data: [],
-    pagination: {
-      currentPage: 1,
-      pageSize: 10,
-      totalItems: 0,
-      totalPages: 0,
-    },
-  });
+export const CategoriaContainer: React.FC = () => {
+  const [categoriasState, setCategoriasState] =
+    useState<CategoriaPaginatedResponse>({
+      data: [],
+      pagination: {
+        currentPage: 1,
+        pageSize: 10,
+        totalItems: 0,
+        totalPages: 0,
+      },
+    });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedAmbito, setSelectedAmbito] = useState<Ambito | undefined>();
+  const [selectedCategoria, setSelectedCategoria] = useState<
+    Categoria | undefined
+  >();
   const [dataVersion, setDataVersion] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSearchMode, setIsSearchMode] = useState(false);
+  const [showNoResults, setShowNoResults] = useState(false);
+  const [noResultsMessage, setNoResultsMessage] = useState("");
   const [errorModalConfig, setErrorModalConfig] = useState<{
     isOpen: boolean;
     message: string;
@@ -45,7 +51,6 @@ export const AmbitoContainer: React.FC = () => {
     isOpen: false,
     message: "",
   });
-
   const showError = (message: string) => {
     setErrorModalConfig({
       isOpen: true,
@@ -59,7 +64,6 @@ export const AmbitoContainer: React.FC = () => {
     isOpen: false,
     message: "",
   });
-
   const [updateSuccessConfig, setUpdateSuccessConfig] = useState<{
     isOpen: boolean;
     message: string;
@@ -78,13 +82,13 @@ export const AmbitoContainer: React.FC = () => {
   const loadPaginatedData = async (page: number) => {
     try {
       setIsLoading(true);
-      const response = await getPaginatedAmbitos(
+      const response = await getCategoriasPaginated(
         page,
-        ambitosState.pagination.pageSize
+        categoriasState.pagination.pageSize
       );
-      setAmbitosState(response);
+      setCategoriasState(response);
     } catch (error) {
-      showError("Error al cargar los ámbitos");
+      showError("Error al cargar las categorías");
     } finally {
       setIsLoading(false);
     }
@@ -96,33 +100,59 @@ export const AmbitoContainer: React.FC = () => {
         setIsLoading(true);
         if (searchValue.trim()) {
           const searchResults = await findByString(searchValue);
-          setAmbitosState((prev) => ({
-            data: searchResults,
-            pagination: {
-              ...prev.pagination,
-              currentPage: 1,
-              totalItems: searchResults.length,
-              totalPages: 1,
-            },
-          }));
+          if (searchResults.length === 0) {
+            setNoResultsMessage(
+              "No se encontraron resultados para la búsqueda"
+            );
+            setShowNoResults(true);
+            setCategoriasState((prev) => ({
+              ...prev,
+              data: [],
+            }));
+          } else {
+            setCategoriasState((prev) => ({
+              data: searchResults,
+              pagination: {
+                ...prev.pagination,
+                currentPage: 1,
+                totalItems: searchResults.length,
+                totalPages: 1,
+              },
+            }));
+          }
           setIsSearchMode(true);
         } else {
           setIsSearchMode(false);
           loadPaginatedData(1);
         }
-      } catch (error) {
-        showError("Error al buscar los ámbitos");
+      } catch (error: unknown) {
+        if (error instanceof Error && error.name === "NotFoundError") {
+          setNoResultsMessage(error.message);
+          setShowNoResults(true);
+          setCategoriasState((prev) => ({
+            ...prev,
+            data: [],
+          }));
+        } else if (error instanceof Error) {
+          showError(error.message);
+        } else {
+          showError("Ocurrió un error en el servidor");
+        }
       } finally {
         setIsLoading(false);
       }
     }, 500),
     []
   );
-
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchTerm(value);
-    debouncedSearch(value);
+    if (value.trim() === "") {
+      setIsSearchMode(false);
+      loadPaginatedData(1);
+    } else {
+      debouncedSearch(value);
+    }
   };
 
   useEffect(() => {
@@ -130,7 +160,11 @@ export const AmbitoContainer: React.FC = () => {
   }, []);
 
   const handlePageChange = (page: number) => {
-    if (isSearchMode || page < 1 || page > ambitosState.pagination.totalPages)
+    if (
+      isSearchMode ||
+      page < 1 ||
+      page > categoriasState.pagination.totalPages
+    )
       return;
     loadPaginatedData(page);
   };
@@ -138,14 +172,14 @@ export const AmbitoContainer: React.FC = () => {
   const handleEdit = async (id?: number) => {
     try {
       if (id !== undefined) {
-        const data = await getAmbitoById(id);
+        const data = await getCategoriaById(id);
         if (data) {
-          setSelectedAmbito(data);
+          setSelectedCategoria(data);
           setIsModalOpen(true);
         }
       }
     } catch (error) {
-      showError("Error al cargar los datos del ámbito");
+      showError("Error al cargar los datos de la categoría");
     } finally {
       setIsLoading(false);
     }
@@ -153,9 +187,9 @@ export const AmbitoContainer: React.FC = () => {
 
   const handleDeleteClick = (id?: number) => {
     if (id !== undefined) {
-      const ambito = ambitosState.data.find((a) => a.id === id);
-      if (ambito) {
-        setSelectedAmbito(ambito);
+      const categoria = categoriasState.data.find((c) => c.id === id);
+      if (categoria) {
+        setSelectedCategoria(categoria);
         setIsDeleteModalOpen(true);
       }
     }
@@ -163,70 +197,69 @@ export const AmbitoContainer: React.FC = () => {
 
   const handleDeleteConfirm = async () => {
     try {
-      if (selectedAmbito?.id) {
+      if (selectedCategoria?.id) {
         setIsLoading(true);
-        await deleteAmbito(selectedAmbito.id);
+        await deleteCategoria(selectedCategoria.id);
 
-        const newTotalItems = ambitosState.pagination.totalItems - 1;
+        const newTotalItems = categoriasState.pagination.totalItems - 1;
         const newTotalPages = Math.ceil(
-          newTotalItems / ambitosState.pagination.pageSize
+          newTotalItems / categoriasState.pagination.pageSize
         );
 
         const pageToLoad =
-          ambitosState.pagination.currentPage > newTotalPages
+          categoriasState.pagination.currentPage > newTotalPages
             ? newTotalPages
-            : ambitosState.pagination.currentPage;
+            : categoriasState.pagination.currentPage;
 
         await loadPaginatedData(pageToLoad);
         setIsDeleteModalOpen(false);
-        setSelectedAmbito(undefined);
+        setSelectedCategoria(undefined);
         setDataVersion((prev) => prev + 1);
-        showSuccess("Ámbito eliminado correctamente");
+        showSuccess("Categoría eliminada correctamente");
       }
     } catch (error) {
       if (error instanceof Error) {
         showError(error.message);
       } else {
-        showError("Error al eliminar el ámbito");
+        showError("Error al eliminar la categoría");
       }
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleModalSubmit = async (data: Ambito) => {
+  const handleModalSubmit = async (data: Categoria) => {
     try {
       setIsLoading(true);
 
       if (data.id) {
-        await updateAmbito(data.id, {
-          nombreAmbito: data.nombreAmbito,
+        await updateCategoria(data.id, {
+          nombreCategoria: data.nombreCategoria,
         });
-        await loadPaginatedData(1);
+        await loadPaginatedData(categoriasState.pagination.currentPage);
         setUpdateSuccessConfig({
           isOpen: true,
-          message: "Ámbito actualizado correctamente",
+          message: "Categoría actualizada correctamente",
         });
       } else {
-        await createAmbito({
-          nombreAmbito: data.nombreAmbito,
+        await createCategoria({
+          nombreCategoria: data.nombreCategoria,
         });
-        showSuccess("Ámbito creado correctamente");
-        const totalItems = ambitosState.pagination.totalItems + 1;
+        const totalItems = categoriasState.pagination.totalItems + 1;
         const newPage = Math.ceil(
-          totalItems / ambitosState.pagination.pageSize
+          totalItems / categoriasState.pagination.pageSize
         );
         await loadPaginatedData(newPage);
+        showSuccess("Categoría creada correctamente");
       }
-
       setIsModalOpen(false);
-      setSelectedAmbito(undefined);
+      setSelectedCategoria(undefined);
       setDataVersion((prev) => prev + 1);
     } catch (error) {
       if (error instanceof Error) {
         showError(error.message);
       } else {
-        showError(`Error al ${data.id ? "actualizar" : "crear"} el ámbito`);
+        showError(`Error al ${data.id ? "actualizar" : "crear"} la categoría`);
       }
     } finally {
       setIsLoading(false);
@@ -235,25 +268,33 @@ export const AmbitoContainer: React.FC = () => {
 
   return (
     <div className="pt-0.5 pr-0.5 pb-1 pl-0.5 sm:pt-2 sm:pr-2 sm:pb-4 sm:pl-2 bg-transparent">
-      <AmbitoHeader onAddClick={() => setIsModalOpen(true)} />
+      <CategoriaHeader onAddClick={() => setIsModalOpen(true)} />
 
       <div className="w-full overflow-hidden bg-white rounded-lg shadow-lg">
-        <AmbitoSearch searchTerm={searchTerm} onSearch={handleSearch} />
+        <CategoriaSearch
+          searchTerm={searchTerm}
+          onSearch={handleSearch}
+          onClear={() => {
+            setSearchTerm("");
+            setIsSearchMode(false);
+            loadPaginatedData(1);
+          }}
+        />
 
         {isLoading ? (
           <div className="w-full h-[400px] flex items-center justify-center">
             <LoadingSpinner
               size="lg"
-              message="Cargando ámbitos..."
+              message="Cargando categorías..."
               color="#145A32"
               backgroundColor="rgba(20, 90, 50, 0.2)"
             />
           </div>
         ) : (
-          <AmbitoTable
-            ambitos={ambitosState.data}
+          <CategoriaTable
+            categorias={categoriasState.data}
             dataVersion={dataVersion}
-            currentPage={ambitosState.pagination.currentPage}
+            currentPage={categoriasState.pagination.currentPage}
             searchTerm={searchTerm}
             onEdit={handleEdit}
             onDelete={handleDeleteClick}
@@ -263,8 +304,8 @@ export const AmbitoContainer: React.FC = () => {
         {!isSearchMode && (
           <div className="py-4 px-4 sm:px-6 border-t border-gray-200">
             <Pagination
-              currentPage={ambitosState.pagination.currentPage}
-              totalPages={ambitosState.pagination.totalPages}
+              currentPage={categoriasState.pagination.currentPage}
+              totalPages={categoriasState.pagination.totalPages}
               onPageChange={handlePageChange}
             />
           </div>
@@ -272,11 +313,11 @@ export const AmbitoContainer: React.FC = () => {
       </div>
 
       {isModalOpen && (
-        <AmbitoModal
+        <CategoriaModal
           isOpen={isModalOpen}
-          ambito={selectedAmbito}
+          categoria={selectedCategoria}
           onClose={() => {
-            setSelectedAmbito(undefined);
+            setSelectedCategoria(undefined);
             setIsModalOpen(false);
           }}
           onSubmit={handleModalSubmit}
@@ -288,9 +329,10 @@ export const AmbitoContainer: React.FC = () => {
           isOpen={isDeleteModalOpen}
           onClose={() => setIsDeleteModalOpen(false)}
           onConfirm={handleDeleteConfirm}
-          itemName={selectedAmbito?.nombreAmbito || ""}
+          itemName={selectedCategoria?.nombreCategoria || ""}
         />
       )}
+
       <SuccessModal
         isOpen={successModalConfig.isOpen}
         onClose={() =>
@@ -308,6 +350,7 @@ export const AmbitoContainer: React.FC = () => {
         title="Error"
         errorMessage={errorModalConfig.message}
       />
+
       <UpdateSuccessModal
         isOpen={updateSuccessConfig.isOpen}
         onClose={() =>
@@ -315,6 +358,11 @@ export const AmbitoContainer: React.FC = () => {
         }
         title="Actualización Exitosa"
         message={updateSuccessConfig.message}
+      />
+      <NoResultsModal
+        isOpen={showNoResults}
+        onClose={() => setShowNoResults(false)}
+        message={noResultsMessage}
       />
     </div>
   );

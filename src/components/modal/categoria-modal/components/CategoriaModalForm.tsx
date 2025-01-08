@@ -11,30 +11,30 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { AmbitoModalFooter } from "./AmbitoModalFooter";
-import { Ambito } from "@/model/ambito";
+import { CategoriaModalFooter } from "./CategoriaModalFooter";
+import { Categoria } from "@/model/categoria";
 
 const formSchema = z.object({
-  nombreAmbito: z
+  nombreCategoria: z
     .string()
     .min(2, {
-      message: "El nombre del ámbito debe tener al menos 2 caracteres",
+      message: "El nombre de la categoría debe tener al menos 2 caracteres",
     })
     .regex(/^[A-Za-zÀ-ÿ\s]+$/, {
-      message: "El nombre del ámbito no debe contener números",
+      message: "El nombre de la categoría no debe contener números",
     }),
 });
 
-interface AmbitoModalFormProps {
-  ambito?: Ambito;
+interface CategoriaModalFormProps {
+  categoria?: Categoria;
   isEditing: boolean;
   onClose: () => void;
-  onSubmit: (data: Ambito) => Promise<void>;
+  onSubmit: (data: Categoria) => Promise<void>;
   isLoading?: boolean;
 }
 
-export const AmbitoModalForm: React.FC<AmbitoModalFormProps> = ({
-  ambito,
+export const CategoriaModalForm: React.FC<CategoriaModalFormProps> = ({
+  categoria,
   isEditing,
   onClose,
   onSubmit,
@@ -43,41 +43,38 @@ export const AmbitoModalForm: React.FC<AmbitoModalFormProps> = ({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      nombreAmbito: "",
+      nombreCategoria: "",
     },
   });
 
   useEffect(() => {
-    if (ambito) {
+    if (categoria) {
       form.reset({
-        nombreAmbito: ambito.nombreAmbito,
+        nombreCategoria: categoria.nombreCategoria,
       });
     }
-  }, [ambito, form]);
+  }, [categoria, form]);
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
-    const ambitoData: Ambito = {
-      id: ambito?.id || 0,
-      nombreAmbito: values.nombreAmbito,
+    const categoriaData: Categoria = {
+      id: categoria?.id || 0,
+      nombreCategoria: values.nombreCategoria,
     };
-    await onSubmit(ambitoData);
+    await onSubmit(categoriaData);
   };
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(handleSubmit) }
-        className="p-6 space-y-6"
-      >
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="p-6 space-y-6">
         <FormField
           control={form.control}
-          name="nombreAmbito"
+          name="nombreCategoria"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Nombre del Ámbito</FormLabel>
+              <FormLabel>Nombre de la Categoría</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Ingrese el nombre del ámbito"
+                  placeholder="Ingrese el nombre de la categoría"
                   disabled={isLoading}
                   {...field}
                 />
@@ -86,8 +83,8 @@ export const AmbitoModalForm: React.FC<AmbitoModalFormProps> = ({
             </FormItem>
           )}
         />
-        <AmbitoModalFooter
-          isEditing={isEditing}
+        <CategoriaModalFooter 
+          isEditing={isEditing} 
           onClose={onClose}
           isLoading={isLoading}
         />

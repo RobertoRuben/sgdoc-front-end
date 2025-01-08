@@ -1,13 +1,14 @@
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
 import humps from "humps";
 import { Ambito } from "@/model/ambito";
 import { AmbitoPaginatedResponse } from "@/model/ambitoPaginatedResponse";
+import axiosInstance from './axiosConfig';
 
-const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL}/ambitos/`;
+const API_BASE_URL = `/ambitos/`;
 
 export const getAmbitos = async (): Promise<Ambito[]> => {
   try {
-    const response = await axios.get(API_BASE_URL);
+    const response = await axiosInstance.get(API_BASE_URL);
     return humps.camelizeKeys(response.data) as Ambito[];
   } catch (error) {
     if (error instanceof AxiosError && error.response?.data?.detail) {
@@ -17,36 +18,25 @@ export const getAmbitos = async (): Promise<Ambito[]> => {
   }
 };
 
-
 export const createAmbito = async (ambito: Ambito): Promise<Ambito> => {
-    try{
+    try {
         const payload = humps.decamelizeKeys(ambito);
-        const response = await axios.post(API_BASE_URL, payload, {
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
+        const response = await axiosInstance.post(API_BASE_URL, payload);
         return humps.camelizeKeys(response.data) as Ambito;
-    }catch(error){
+    } catch(error) {
         if (error instanceof AxiosError && error.response?.data?.detail) {
             throw new Error(error.response.data.detail);
         }
         throw new Error("Error al crear el ambito");
     }
-
 };
 
-
 export const updateAmbito = async (id: number, ambito: Omit<Ambito, "id">): Promise<Ambito | null> => {
-    try{
+    try {
         const payload = humps.decamelizeKeys(ambito);
-        const response = await axios.put(`${API_BASE_URL}${id}/`, payload, {
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
+        const response = await axiosInstance.put(`${API_BASE_URL}${id}/`, payload);
         return humps.camelizeKeys(response.data) as Ambito;
-    }catch(error){
+    } catch(error) {
         if (error instanceof AxiosError && error.response?.data?.detail) {
             throw new Error(error.response.data.detail);
         }
@@ -54,34 +44,26 @@ export const updateAmbito = async (id: number, ambito: Omit<Ambito, "id">): Prom
     }
 };
 
-
 export const deleteAmbito = async (id: number): Promise<boolean> => {
-    try{
-        await axios.delete(`${API_BASE_URL}${id}/`);
+    try {
+        await axiosInstance.delete(`${API_BASE_URL}${id}/`);
         return true;
-    }catch(error){
+    } catch(error) {
         if (error instanceof AxiosError && error.response?.data?.detail) {
             throw new Error(error.response.data.detail);
         }
         throw new Error("Error al eliminar el ambito con id: " + id);
     }
-}
-
+};
 
 export const getAmbitoById = async (id: number): Promise<Ambito | null> => {
     try {
-        const response = await axios.get(`${API_BASE_URL}${id}/`);
-        
-        if (!response.data) {
-            return null;
-        }
-        
+        const response = await axiosInstance.get(`${API_BASE_URL}${id}/`);
+        if (!response.data) return null;
         return humps.camelizeKeys(response.data) as Ambito;
     } catch (error) {
         if (error instanceof AxiosError) {
-            if (error.response?.status === 404) {
-                return null;
-            }
+            if (error.response?.status === 404) return null;
             if (error.response?.data?.detail) {
                 throw new Error(error.response.data.detail);
             }
@@ -90,27 +72,26 @@ export const getAmbitoById = async (id: number): Promise<Ambito | null> => {
     }
 };
 
-
 export const findByString = async (searchString: string): Promise<Ambito[]> => {
-    try{
-        const response = await axios.get(`${API_BASE_URL}search`, {
+    try {
+        const response = await axiosInstance.get(`${API_BASE_URL}search`, {
             params: humps.decamelizeKeys({ searchString }),
         });
         return humps.camelizeKeys(response.data) as Ambito[];
-    }catch(error){
+    } catch(error) {
         if (error instanceof AxiosError && error.response?.data?.detail) {
             throw new Error(error.response.data.detail);
         }
         throw new Error("Error al buscar los ambitos");
     }
-}
+};
 
 export const getPaginatedAmbitos = async (
     page: number = 1,
     perPage: number = 10
 ): Promise<AmbitoPaginatedResponse> => {
     try {
-        const response = await axios.get(`${API_BASE_URL}paginated`, {
+        const response = await axiosInstance.get(`${API_BASE_URL}paginated`, {
             params: {
                 page,
                 per_page: perPage
