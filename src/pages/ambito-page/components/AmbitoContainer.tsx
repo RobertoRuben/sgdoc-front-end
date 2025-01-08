@@ -6,6 +6,7 @@ import { AmbitoHeader } from "./AmbitoHeader";
 import { AmbitoSearch } from "./AmbitoSearch";
 import { AmbitoTable } from "./AmbitoTable";
 import { AmbitoModal } from "@/components/modal/ambito-modal/AmbitoModal";
+import NoResultsModal from "@/components/modal/alerts/no-results-modal/NoResultsModal";
 import DeleteModal from "@/components/modal/alerts/delete-modal/DeleteModal";
 import ErrorModal from "@/components/modal/alerts/error-modal/ErrorModal";
 import SuccessModal from "@/components/modal/alerts/success-modal/SuccessModal";
@@ -38,6 +39,8 @@ export const AmbitoContainer: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSearchMode, setIsSearchMode] = useState(false);
+  const [showNoResults, setShowNoResults] = useState(false);
+  const [noResultsMessage, setNoResultsMessage] = useState("");
   const [errorModalConfig, setErrorModalConfig] = useState<{
     isOpen: boolean;
     message: string;
@@ -96,22 +99,44 @@ export const AmbitoContainer: React.FC = () => {
         setIsLoading(true);
         if (searchValue.trim()) {
           const searchResults = await findByString(searchValue);
-          setAmbitosState((prev) => ({
-            data: searchResults,
-            pagination: {
-              ...prev.pagination,
-              currentPage: 1,
-              totalItems: searchResults.length,
-              totalPages: 1,
-            },
-          }));
+          if (searchResults.length === 0) {
+            setNoResultsMessage(
+              "No se encontraron resultados para la búsqueda"
+            );
+            setShowNoResults(true);
+            setAmbitosState((prev) => ({
+              ...prev,
+              data: [],
+            }));
+          } else {
+            setAmbitosState((prev) => ({
+              data: searchResults,
+              pagination: {
+                ...prev.pagination,
+                currentPage: 1,
+                totalItems: searchResults.length,
+                totalPages: 1,
+              },
+            }));
+          }
           setIsSearchMode(true);
         } else {
           setIsSearchMode(false);
           loadPaginatedData(1);
         }
-      } catch (error) {
-        showError("Error al buscar los ámbitos");
+      } catch (error: unknown) {
+        if (error instanceof Error && error.name === "NotFoundError") {
+          setNoResultsMessage(error.message);
+          setShowNoResults(true);
+          setAmbitosState((prev) => ({
+            ...prev,
+            data: [],
+          }));
+        } else if (error instanceof Error) {
+          showError(error.message);
+        } else {
+          showError("Ocurrió un error en el servidor");
+        }
       } finally {
         setIsLoading(false);
       }
@@ -238,7 +263,15 @@ export const AmbitoContainer: React.FC = () => {
       <AmbitoHeader onAddClick={() => setIsModalOpen(true)} />
 
       <div className="w-full overflow-hidden bg-white rounded-lg shadow-lg">
-        <AmbitoSearch searchTerm={searchTerm} onSearch={handleSearch} />
+        <AmbitoSearch
+          searchTerm={searchTerm}
+          onSearch={handleSearch}
+          onClear={() => {
+            setSearchTerm("");
+            setIsSearchMode(false);
+            loadPaginatedData(1);
+          }}
+        />
 
         {isLoading ? (
           <div className="w-full h-[400px] flex items-center justify-center">
@@ -315,6 +348,11 @@ export const AmbitoContainer: React.FC = () => {
         }
         title="Actualización Exitosa"
         message={updateSuccessConfig.message}
+      />
+      <NoResultsModal
+        isOpen={showNoResults}
+        onClose={() => setShowNoResults(false)}
+        message={noResultsMessage}
       />
     </div>
   );
