@@ -16,26 +16,25 @@ export function UpdateIcon() {
             <motion.div
                 animate={{
                     scale: [1, 1.2, 1],
-                    opacity: [0.3, 0.6, 0.3]
+                    opacity: [0.5, 0.8, 0.5]
                 }}
                 transition={{
                     duration: 2,
                     repeat: Infinity,
                     ease: "easeInOut"
                 }}
-                className="absolute inset-0 bg-blue-500/20 rounded-full blur-xl"
+                className="absolute inset-0 bg-green-500/20 rounded-full blur-xl"
             />
-
             <motion.div
                 animate={{ rotate: 360 }}
                 transition={{
-                    duration: 3,
+                    duration: 2,
                     repeat: Infinity,
                     ease: "linear"
                 }}
                 className="relative z-10"
             >
-                <RefreshCw className="w-16 h-16 text-blue-500" />
+                <RefreshCw className="w-16 h-16 text-green-500" />
             </motion.div>
         </motion.div>
     );
