@@ -40,6 +40,13 @@ export const CentroPobladoTable: React.FC<CentroPobladoTableProps> = ({
   onEdit,
   onDelete,
 }) => {
+  if (centrosPoblados.length === 0) {
+    return (
+      <div className="w-full p-8 text-center">
+        <p className="text-gray-500">No se encontraron centros poblados</p>
+      </div>
+    );
+  }
   return (
     <div className="overflow-x-auto">
       <AnimatePresence mode="wait">

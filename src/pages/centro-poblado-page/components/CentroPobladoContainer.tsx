@@ -1,55 +1,191 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
+import debounce from "lodash/debounce";
 import { CentroPoblado } from "@/model/centroPoblado";
 import { CentroPobladoPaginatedResponse } from "@/model/centroPobladoPaginatedResponse";
 import { CentroPobladoHeader } from "./CentroPobladoHeader";
 import { CentroPobladoSearch } from "./CentroPobladoSearch";
 import { CentroPobladoTable } from "./CentroPobladoTable";
 import { CentroPobladoModal } from "@/components/modal/centro-poblado-modal/CentroPobladoModal";
+import NoResultsModal from "@/components/modal/alerts/no-results-modal/NoResultsModal";
 import DeleteModal from "@/components/modal/alerts/delete-modal/DeleteModal";
+import ErrorModal from "@/components/modal/alerts/error-modal/ErrorModal";
+import SuccessModal from "@/components/modal/alerts/success-modal/SuccessModal";
+import UpdateSuccessModal from "@/components/modal/alerts/update-modal/UpdateSuccessModal";
 import { Pagination } from "@/components/ui/pagination";
-
-const centrosPobladosData: CentroPoblado[] = [
-  { id: 1, nombreCentroPoblado: "Centro Poblado 1" },
-  { id: 2, nombreCentroPoblado: "Centro Poblado 2" },
-  { id: 3, nombreCentroPoblado: "Centro Poblado 3" },
-  { id: 4, nombreCentroPoblado: "Centro Poblado 4" },
-  { id: 5, nombreCentroPoblado: "Centro Poblado 5" },
-];
+import {
+  getCentrosPobladosPaginated,
+  createCentroPoblado,
+  updateCentroPoblado,
+  findByString,
+  deleteCentroPoblado,
+  getCentroPobladoById,
+} from "@/service/centroPobladoService";
+import LoadingSpinner from "@/components/layout/LoadingSpinner";
 
 export const CentroPobladoContainer: React.FC = () => {
-  const [centrosPobladosState, setCentrosPobladosState] = useState<CentroPobladoPaginatedResponse>({
-    data: centrosPobladosData,
-    pagination: {
-      currentPage: 1,
-      pageSize: 4,
-      totalItems: centrosPobladosData.length,
-      totalPages: Math.ceil(centrosPobladosData.length / 4),
-    },
+  const [centrosPobladosState, setCentrosPobladosState] =
+    useState<CentroPobladoPaginatedResponse>({
+      data: [],
+      pagination: {
+        currentPage: 1,
+        pageSize: 10,
+        totalItems: 0,
+        totalPages: 0,
+      },
+    });
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedCentroPoblado, setSelectedCentroPoblado] = useState<
+    CentroPoblado | undefined
+  >();
+  const [dataVersion, setDataVersion] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSearchMode, setIsSearchMode] = useState(false);
+  const [showNoResults, setShowNoResults] = useState(false);
+  const [noResultsMessage, setNoResultsMessage] = useState("");
+  const [errorModalConfig, setErrorModalConfig] = useState<{
+    isOpen: boolean;
+    message: string;
+  }>({
+    isOpen: false,
+    message: "",
   });
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
-  const [selectedCentroPoblado, setSelectedCentroPoblado] = useState<CentroPoblado | undefined>(undefined);
-  const [dataVersion, setDataVersion] = useState<number>(0);
-  const [searchTerm, setSearchTerm] = useState<string>("");
+  
+  const [successModalConfig, setSuccessModalConfig] = useState<{
+    isOpen: boolean;
+    message: string;
+  }>({
+    isOpen: false,
+    message: "",
+  });
 
-  const filteredCentrosPoblados = useMemo(() => {
-    return centrosPobladosState.data.filter((centroPoblado) =>
-      centroPoblado.nombreCentroPoblado.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [centrosPobladosState.data, searchTerm]);
+  const [updateSuccessConfig, setUpdateSuccessConfig] = useState<{
+    isOpen: boolean;
+    message: string;
+  }>({
+    isOpen: false,
+    message: "",
+  });
 
-  const currentCentrosPoblados = useMemo(() => {
-    const startIndex = (centrosPobladosState.pagination.currentPage - 1) * centrosPobladosState.pagination.pageSize;
-    return filteredCentrosPoblados.slice(startIndex, startIndex + centrosPobladosState.pagination.pageSize);
-  }, [centrosPobladosState.pagination.currentPage, centrosPobladosState.pagination.pageSize, filteredCentrosPoblados]);
+  const showError = (message: string) => {
+    setErrorModalConfig({
+      isOpen: true,
+      message,
+    });
+  };
 
-  const handleEdit = (id?: number) => {
-    if (id !== undefined) {
-      const centroPoblado = centrosPobladosState.data.find((c) => c.id === id);
-      if (centroPoblado) {
-        setSelectedCentroPoblado(centroPoblado);
-        setIsModalOpen(true);
+  const showSuccess = (message: string) => {
+    setSuccessModalConfig({
+      isOpen: true,
+      message,
+    });
+  };
+
+  const loadPaginatedData = async (page: number) => {
+    try {
+      setIsLoading(true);
+      const response = await getCentrosPobladosPaginated(
+        page,
+        centrosPobladosState.pagination.pageSize
+      );
+      setCentrosPobladosState(response);
+    } catch (error) {
+      showError("Error al cargar los centros poblados");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const debouncedSearch = useCallback(
+    debounce(async (searchValue: string) => {
+      try {
+        setIsLoading(true);
+        if (searchValue.trim()) {
+          const searchResults = await findByString(searchValue);
+          if (searchResults.length === 0) {
+            setNoResultsMessage(
+              "No se encontraron resultados para la búsqueda"
+            );
+            setShowNoResults(true);
+            setCentrosPobladosState((prev) => ({
+              ...prev,
+              data: [],
+            }));
+          } else {
+            setCentrosPobladosState((prev) => ({
+              data: searchResults,
+              pagination: {
+                ...prev.pagination,
+                currentPage: 1,
+                totalItems: searchResults.length,
+                totalPages: 1,
+              },
+            }));
+          }
+          setIsSearchMode(true);
+        } else {
+          setIsSearchMode(false);
+          loadPaginatedData(1);
+        }
+      } catch (error: unknown) {
+        if (error instanceof Error && error.name === "NotFoundError") {
+          setNoResultsMessage(error.message);
+          setShowNoResults(true);
+          setCentrosPobladosState((prev) => ({
+            ...prev,
+            data: [],
+          }));
+        } else if (error instanceof Error) {
+          showError(error.message);
+        } else {
+          showError("Ocurrió un error en el servidor");
+        }
+      } finally {
+        setIsLoading(false);
       }
+    }, 500),
+    []
+  );
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    if (value.trim() === "") {
+      setIsSearchMode(false);
+      loadPaginatedData(1);
+    } else {
+      debouncedSearch(value);
+    }
+  };
+
+  useEffect(() => {
+    loadPaginatedData(1);
+  }, []);
+
+  const handlePageChange = (page: number) => {
+    if (
+      isSearchMode ||
+      page < 1 ||
+      page > centrosPobladosState.pagination.totalPages
+    )
+      return;
+    loadPaginatedData(page);
+  };
+
+  const handleEdit = async (id?: number) => {
+    try {
+      if (id !== undefined) {
+        const data = await getCentroPobladoById(id);
+        if (data) {
+          setSelectedCentroPoblado(data);
+          setIsModalOpen(true);
+        }
+      }
+    } catch (error) {
+      showError("Error al cargar los datos del centro poblado");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -64,102 +200,122 @@ export const CentroPobladoContainer: React.FC = () => {
   };
 
   const handleDeleteConfirm = async () => {
-    if (selectedCentroPoblado) {
-      const updatedData = centrosPobladosState.data.filter((c) => c.id !== selectedCentroPoblado.id);
-      const totalItems = updatedData.length;
-      const totalPages = Math.ceil(totalItems / centrosPobladosState.pagination.pageSize);
-      setCentrosPobladosState({
-        data: updatedData,
-        pagination: {
-          ...centrosPobladosState.pagination,
-          totalItems,
-          totalPages,
-          currentPage:
-            centrosPobladosState.pagination.currentPage > totalPages
-              ? totalPages
-              : centrosPobladosState.pagination.currentPage,
-        },
-      });
-      setIsDeleteModalOpen(false);
-      setSelectedCentroPoblado(undefined);
-      setDataVersion((prev) => prev + 1);
-    }
-  };
+    try {
+      if (selectedCentroPoblado?.id) {
+        setIsLoading(true);
+        await deleteCentroPoblado(selectedCentroPoblado.id);
 
-  const handlePageChange = (page: number) => {
-    if (page < 1 || page > centrosPobladosState.pagination.totalPages) return;
-    setCentrosPobladosState((prevState) => ({
-      ...prevState,
-      pagination: {
-        ...prevState.pagination,
-        currentPage: page,
-      },
-    }));
+        const newTotalItems = centrosPobladosState.pagination.totalItems - 1;
+        const newTotalPages = Math.ceil(
+          newTotalItems / centrosPobladosState.pagination.pageSize
+        );
+
+        const pageToLoad =
+          centrosPobladosState.pagination.currentPage > newTotalPages
+            ? newTotalPages
+            : centrosPobladosState.pagination.currentPage;
+
+        await loadPaginatedData(pageToLoad);
+        setIsDeleteModalOpen(false);
+        setSelectedCentroPoblado(undefined);
+        setDataVersion((prev) => prev + 1);
+        showSuccess("Centro poblado eliminado correctamente");
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        showError(error.message);
+      } else {
+        showError("Error al eliminar el centro poblado");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleModalSubmit = async (data: CentroPoblado) => {
-    if (data.id) {
-      const updatedData = centrosPobladosState.data.map((c) => (c.id === data.id ? data : c));
-      setCentrosPobladosState((prevState) => ({
-        ...prevState,
-        data: updatedData,
-      }));
-    } else {
-      const newId = centrosPobladosState.data.length > 0
-        ? Math.max(...centrosPobladosState.data.map((c) => c.id || 0)) + 1
-        : 1;
-      const newCentroPoblado = { ...data, id: newId };
-      const updatedData = [...centrosPobladosState.data, newCentroPoblado];
-      const totalItems = updatedData.length;
-      const totalPages = Math.ceil(totalItems / centrosPobladosState.pagination.pageSize);
-      setCentrosPobladosState({
-        data: updatedData,
-        pagination: {
-          ...centrosPobladosState.pagination,
-          totalItems,
-          totalPages,
-        },
-      });
-    }
-    setIsModalOpen(false);
-    setSelectedCentroPoblado(undefined);
-    setDataVersion((prev) => prev + 1);
-  };
+    try {
+      setIsLoading(true);
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-    setCentrosPobladosState((prevState) => ({
-      ...prevState,
-      pagination: {
-        ...prevState.pagination,
-        currentPage: 1,
-      },
-    }));
+      if (data.id) {
+        await updateCentroPoblado(data.id, {
+          nombreCentroPoblado: data.nombreCentroPoblado,
+        });
+        await loadPaginatedData(centrosPobladosState.pagination.currentPage);
+        setUpdateSuccessConfig({
+          isOpen: true,
+          message: "Centro poblado actualizado correctamente",
+        });
+      } else {
+        await createCentroPoblado({
+          nombreCentroPoblado: data.nombreCentroPoblado,
+        });
+        const totalItems = centrosPobladosState.pagination.totalItems + 1;
+        const newPage = Math.ceil(
+          totalItems / centrosPobladosState.pagination.pageSize
+        );
+        await loadPaginatedData(newPage);
+        showSuccess("Centro poblado creado correctamente");
+      }
+      setIsModalOpen(false);
+      setSelectedCentroPoblado(undefined);
+      setDataVersion((prev) => prev + 1);
+    } catch (error) {
+      if (error instanceof Error) {
+        showError(error.message);
+      } else {
+        showError(
+          `Error al ${data.id ? "actualizar" : "crear"} el centro poblado`
+        );
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="pt-0.5 pr-0.5 pb-1 pl-0.5 sm:pt-2 sm:pr-2 sm:pb-4 sm:pl-2 bg-transparent">
       <CentroPobladoHeader onAddClick={() => setIsModalOpen(true)} />
-      
+
       <div className="w-full overflow-hidden bg-white rounded-lg shadow-lg">
-        <CentroPobladoSearch searchTerm={searchTerm} onSearch={handleSearch} />
-        
-        <CentroPobladoTable
-          centrosPoblados={currentCentrosPoblados}
-          dataVersion={dataVersion}
-          currentPage={centrosPobladosState.pagination.currentPage}
+        <CentroPobladoSearch
           searchTerm={searchTerm}
-          onEdit={handleEdit}
-          onDelete={handleDeleteClick}
+          onSearch={handleSearch}
+          onClear={() => {
+            setSearchTerm("");
+            setIsSearchMode(false);
+            loadPaginatedData(1);
+          }}
         />
 
-        <div className="py-4 px-4 sm:px-6 border-t border-gray-200">
-          <Pagination
+        {isLoading ? (
+          <div className="w-full h-[400px] flex items-center justify-center">
+            <LoadingSpinner
+              size="lg"
+              message="Cargando centros poblados..."
+              color="#145A32"
+              backgroundColor="rgba(20, 90, 50, 0.2)"
+            />
+          </div>
+        ) : (
+          <CentroPobladoTable
+            centrosPoblados={centrosPobladosState.data}
+            dataVersion={dataVersion}
             currentPage={centrosPobladosState.pagination.currentPage}
-            totalPages={centrosPobladosState.pagination.totalPages}
-            onPageChange={handlePageChange}
+            searchTerm={searchTerm}
+            onEdit={handleEdit}
+            onDelete={handleDeleteClick}
           />
-        </div>
+        )}
+
+        {!isSearchMode && (
+          <div className="py-4 px-4 sm:px-6 border-t border-gray-200">
+            <Pagination
+              currentPage={centrosPobladosState.pagination.currentPage}
+              totalPages={centrosPobladosState.pagination.totalPages}
+              onPageChange={handlePageChange}
+            />
+          </div>
+        )}
       </div>
 
       {isModalOpen && (
@@ -182,6 +338,38 @@ export const CentroPobladoContainer: React.FC = () => {
           itemName={selectedCentroPoblado?.nombreCentroPoblado || ""}
         />
       )}
+
+      <SuccessModal
+        isOpen={successModalConfig.isOpen}
+        onClose={() =>
+          setSuccessModalConfig((prev) => ({ ...prev, isOpen: false }))
+        }
+        title="Operación Exitosa"
+        message={successModalConfig.message}
+      />
+
+      <ErrorModal
+        isOpen={errorModalConfig.isOpen}
+        onClose={() =>
+          setErrorModalConfig((prev) => ({ ...prev, isOpen: false }))
+        }
+        title="Error"
+        errorMessage={errorModalConfig.message}
+      />
+
+      <UpdateSuccessModal
+        isOpen={updateSuccessConfig.isOpen}
+        onClose={() =>
+          setUpdateSuccessConfig((prev) => ({ ...prev, isOpen: false }))
+        }
+        title="Actualización Exitosa"
+        message={updateSuccessConfig.message}
+      />
+      <NoResultsModal
+        isOpen={showNoResults}
+        onClose={() => setShowNoResults(false)}
+        message={noResultsMessage}
+      />
     </div>
   );
 };

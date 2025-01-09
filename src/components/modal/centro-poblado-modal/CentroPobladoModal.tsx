@@ -1,38 +1,9 @@
-import { useEffect } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Edit, Save, XCircle, Plus } from "lucide-react";
+import { useState } from "react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { CentroPobladoModalHeader } from "./components/CentroPobladoModalHeader";
+import { CentroPobladoModalForm } from "./components/CentroPobladoModalForm";
 import { CentroPoblado } from "@/model/centroPoblado";
-
-const formSchema = z.object({
-  nombreCentroPoblado: z
-    .string()
-    .min(2, {
-      message: "El nombre del centro poblado debe tener al menos 2 caracteres",
-    })
-    .regex(/^[A-Za-zÀ-ÿ\s]+$/, {
-      message: "El nombre del centro poblado no debe contener números",
-    }),
-});
+import { AnimatePresence, motion } from "framer-motion";
 
 interface CentroPobladoModalProps {
   isOpen: boolean;
@@ -41,107 +12,65 @@ interface CentroPobladoModalProps {
   onSubmit: (data: CentroPoblado) => Promise<void>;
 }
 
+const fadeInVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.3 } },
+  exit: { opacity: 0, transition: { duration: 0.2 } }
+};
+
+const contentVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.3, delay: 0.1 } },
+  exit: { opacity: 0, y: -20, transition: { duration: 0.2 } }
+};
+
 export function CentroPobladoModal({
   isOpen,
   centroPoblado,
   onClose,
   onSubmit,
 }: CentroPobladoModalProps) {
-  const isEditing = centroPoblado?.id && centroPoblado.id > 0;
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      nombreCentroPoblado: "",
-    },
-  });
-
-  useEffect(() => {
-    if (centroPoblado) {
-      form.reset({
-        nombreCentroPoblado: centroPoblado.nombreCentroPoblado,
-      });
-    } else {
-      form.reset({
-        nombreCentroPoblado: "",
-      });
-    }
-  }, [centroPoblado, form]);
-
-  const handleSubmit = async (values: z.infer<typeof formSchema>) => {
-    const centroPobladoData: CentroPoblado = {
-      id: centroPoblado?.id || 0,
-      nombreCentroPoblado: values.nombreCentroPoblado,
-    };
-    await onSubmit(centroPobladoData);
-    handleClose();
-  };
-
-  const handleClose = () => {
-    form.reset();
-    onClose();
-  };
+  const [loading, setLoading] = useState(false);
+  const isEditing = !!(centroPoblado?.id && centroPoblado.id > 0);
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[600px] p-0 bg-white max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogHeader className="bg-gradient-to-l from-[#028a3b] via-[#014920] to-black text-white p-6 rounded-t-lg shadow-md">
-          <DialogTitle className="text-2xl font-bold flex items-center">
-            {isEditing ? (
-              <Edit className="mr-2 h-6 w-6" />
-            ) : (
-              <Plus className="mr-2 h-6 w-6" />
-            )}
-            {isEditing ? "Editar Centro Poblado" : "Registrar Centro Poblado"}
-          </DialogTitle>
-          <DialogDescription className="text-sm text-emerald-100">
-            {isEditing
-              ? "Modifica los datos del centro poblado según sea necesario."
-              : "Complete el formulario para registrar un nuevo centro poblado."}
-          </DialogDescription>
-        </DialogHeader>
-        <div className="overflow-y-auto flex-grow scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(handleSubmit)}
-              className="p-6 space-y-6"
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[600px] p-0 bg-white max-h-[90vh] overflow-hidden">
+        <motion.div
+          variants={fadeInVariants}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          className="flex flex-col h-full"
+        >
+          <CentroPobladoModalHeader isEditing={isEditing} />
+          <AnimatePresence mode="wait">
+            <motion.div
+              variants={contentVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="flex-grow"
             >
-              <FormField
-                control={form.control}
-                name="nombreCentroPoblado"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nombre del Centro Poblado</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Ingrese el nombre del centro poblado"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <DialogFooter className="pt-6 flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
-                <Button
-                  type="button"
-                  onClick={handleClose}
-                  className="w-full sm:w-auto bg-[#d82f2f] text-white hover:bg-[#991f1f] flex items-center justify-center"
-                >
-                  <XCircle className="w-5 h-5 mr-2" />
-                  Cancelar
-                </Button>
-                <Button
-                  type="submit"
-                  className="w-full sm:w-auto bg-emerald-600 text-white hover:bg-emerald-700 flex items-center justify-center"
-                >
-                  <Save className="w-5 h-5 mr-2" />
-                  {isEditing ? "Guardar Cambios" : "Registrar"}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </div>
+              <div className="overflow-y-auto flex-grow scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
+                <CentroPobladoModalForm
+                  centroPoblado={centroPoblado}
+                  isEditing={isEditing}
+                  onClose={onClose}
+                  onSubmit={async (data) => {
+                    try {
+                      setLoading(true);
+                      await onSubmit(data);
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}
+                  isLoading={loading}
+                />
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        </motion.div>
       </DialogContent>
     </Dialog>
   );
