@@ -1,202 +1,115 @@
-import { useEffect } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Edit, Save, XCircle, Plus } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { CaserioModalHeader } from "./components/CaserioModalHeader";
+import { CaserioModalForm } from "./components/CaserioModalForm";
 import { Caserio } from "@/model/caserio";
 import { CentroPoblado } from "@/model/centroPoblado";
-
-const formSchema = z.object({
-  nombreCaserio: z
-    .string()
-    .min(2, {
-      message: "El nombre del caserío debe tener al menos 2 caracteres",
-    })
-    .regex(/^[A-Za-zÀ-ÿ\s]+$/, {
-      message: "El nombre del caserío no debe contener números",
-    }),
-  CentroPobladoId: z.string({
-    required_error: "Por favor seleccione un centro poblado",
-  }),
-});
+import { getCentrosPoblados } from "@/service/centroPobladoService";
+import LoadingSpinner from "@/components/layout/LoadingSpinner";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface CaserioModalProps {
   isOpen: boolean;
   caserio?: Caserio;
-  centrosPoblados: CentroPoblado[];
   onClose: () => void;
   onSubmit: (data: Caserio) => Promise<void>;
 }
 
+const fadeInVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.3 } },
+  exit: { opacity: 0, transition: { duration: 0.2 } }
+};
+
+const contentVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.3, delay: 0.1 } },
+  exit: { opacity: 0, y: -20, transition: { duration: 0.2 } }
+};
+
 export function CaserioModal({
   isOpen,
   caserio,
-  centrosPoblados,
   onClose,
   onSubmit,
 }: CaserioModalProps) {
-  const isEditing = caserio?.id && caserio.id > 0;
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      nombreCaserio: "",
-      CentroPobladoId: "",
-    },
-  });
+  const [loading, setLoading] = useState(false); // Renombrar isLoading a loading
+  const isEditing = !!(caserio?.id && caserio.id > 0); // Usar !! para ser consistente
+  const [centrosPoblados, setCentrosPoblados] = useState<CentroPoblado[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (caserio) {
-      form.reset({
-        nombreCaserio: caserio.nombreCaserio,
-        CentroPobladoId: caserio.CentroPobladoId?.toString() || "",
-      });
-    } else {
-      form.reset({
-        nombreCaserio: "",
-        CentroPobladoId: "",
-      });
-    }
-  }, [caserio, form]);
-
-  const handleSubmit = async (values: z.infer<typeof formSchema>) => {
-    const caserioData: Caserio = {
-      id: caserio?.id || 0,
-      nombreCaserio: values.nombreCaserio,
-      CentroPobladoId: parseInt(values.CentroPobladoId),
+    const loadCentrosPoblados = async () => {
+      try {
+        setLoading(true);
+        const data = await getCentrosPoblados();
+        setCentrosPoblados(data);
+      } catch (error) {
+        setError("Error al cargar los centros poblados");
+      } finally {
+        setLoading(false);
+      }
     };
-    await onSubmit(caserioData);
-    handleClose();
-  };
 
-  const handleClose = () => {
-    form.reset();
-    onClose();
-  };
+    if (isOpen) {
+      loadCentrosPoblados();
+    }
+  }, [isOpen]);
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[600px] p-0 bg-white max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogHeader className="bg-gradient-to-l from-[#028a3b] via-[#014920] to-black text-white p-6 rounded-t-lg shadow-md">
-          <DialogTitle className="text-2xl font-bold flex items-center">
-            {isEditing ? (
-              <Edit className="mr-2 h-6 w-6" />
-            ) : (
-              <Plus className="mr-2 h-6 w-6" />
-            )}
-            {isEditing ? "Editar Caserío" : "Registrar Caserío"}
-          </DialogTitle>
-          <DialogDescription className="text-sm text-emerald-100">
-            {isEditing
-              ? "Modifica los datos del caserío según sea necesario."
-              : "Complete el formulario para registrar un nuevo caserío."}
-          </DialogDescription>
-        </DialogHeader>
-        <div className="overflow-y-auto flex-grow scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(handleSubmit)}
-              className="p-6 space-y-6"
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[600px] p-0 bg-white max-h-[90vh] overflow-hidden">
+        <motion.div
+          variants={fadeInVariants}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          className="flex flex-col h-full"
+        >
+          <CaserioModalHeader isEditing={isEditing} />
+          <AnimatePresence mode="wait">
+            <motion.div
+              variants={contentVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="flex-grow"
             >
-              <FormField
-                control={form.control}
-                name="nombreCaserio"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel htmlFor="nombreCaserio-input">
-                      Nombre del Caserío
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        id="nombreCaserio-input"
-                        placeholder="Ingrese el nombre del caserío"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+              <div className="overflow-y-auto flex-grow scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
+                {loading ? (
+                  <div className="p-6 flex justify-center items-center">
+                    <LoadingSpinner 
+                      size="lg"
+                      message="Cargando centros poblados..." 
+                      color="#145A32"
+                      backgroundColor="rgba(20, 90, 50, 0.2)"
+                    />
+                  </div>
+                ) : error ? (
+                  <div className="p-6 text-center text-red-500">
+                    {error}
+                  </div>
+                ) : (
+                  <CaserioModalForm
+                    caserio={caserio}
+                    centrosPoblados={centrosPoblados}
+                    isEditing={isEditing}
+                    onClose={onClose}
+                    onSubmit={async (data) => {
+                      try {
+                        setLoading(true);
+                        await onSubmit(data);
+                      } finally {
+                        setLoading(false);
+                      }
+                    }}
+                    isLoading={loading}
+                  />
                 )}
-              />
-
-              <FormField
-                control={form.control}
-                name="CentroPobladoId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel htmlFor="centroPoblado-select">
-                      Centro Poblado
-                    </FormLabel>
-                    <Select
-                      name="CentroPobladoId"
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger id="centroPoblado-select">
-                          <SelectValue placeholder="Seleccione un centro poblado" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {centrosPoblados.map((cp) => (
-                          <SelectItem
-                            key={cp.id ?? 0}
-                            value={(cp.id ?? 0).toString()}
-                          >
-                            {cp.nombreCentroPoblado}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <DialogFooter className="pt-6 flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
-                <Button
-                  type="button"
-                  onClick={handleClose}
-                  className="w-full sm:w-auto bg-[#d82f2f] text-white hover:bg-[#991f1f] flex items-center justify-center"
-                >
-                  <XCircle className="w-5 h-5 mr-2" />
-                  Cancelar
-                </Button>
-                <Button
-                  type="submit"
-                  className="w-full sm:w-auto bg-emerald-600 text-white hover:bg-emerald-700 flex items-center justify-center"
-                >
-                  <Save className="w-5 h-5 mr-2" />
-                  {isEditing ? "Guardar Cambios" : "Registrar"}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </div>
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        </motion.div>
       </DialogContent>
     </Dialog>
   );
