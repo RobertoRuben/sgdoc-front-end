@@ -96,7 +96,7 @@ export const getCaserioById = async (
   }
 };
 
-export const findByStringCaserio = async (
+export const findByString = async (
   searchString: string
 ): Promise<CaserioDetails[]> => {
   try {

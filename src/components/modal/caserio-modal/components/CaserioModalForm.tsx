@@ -65,16 +65,18 @@ export const CaserioModalForm: React.FC<CaserioModalFormProps> = ({
     if (caserio) {
       form.reset({
         nombreCaserio: caserio.nombreCaserio,
-        CentroPobladoId: caserio.CentroPobladoId?.toString() || "",
+        CentroPobladoId: caserio.centroPobladoId?.toString() || "",
       });
     }
+    // Set focus on the nombreCaserio input field
+    form.setFocus("nombreCaserio");
   }, [caserio, form]);
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     const caserioData: Caserio = {
       id: caserio?.id || 0,
       nombreCaserio: values.nombreCaserio,
-      CentroPobladoId: parseInt(values.CentroPobladoId),
+      centroPobladoId: parseInt(values.CentroPobladoId),
     };
     await onSubmit(caserioData);
   };
@@ -114,7 +116,7 @@ export const CaserioModalForm: React.FC<CaserioModalFormProps> = ({
               <Select
                 name="CentroPobladoId"
                 onValueChange={field.onChange}
-                defaultValue={field.value}
+                value={field.value}
                 disabled={isLoading}
               >
                 <FormControl>
@@ -124,10 +126,7 @@ export const CaserioModalForm: React.FC<CaserioModalFormProps> = ({
                 </FormControl>
                 <SelectContent>
                   {centrosPoblados.map((cp) => (
-                    <SelectItem
-                      key={cp.id ?? 0}
-                      value={(cp.id ?? 0).toString()}
-                    >
+                    <SelectItem key={cp.id ?? 0} value={(cp.id ?? 0).toString()}>
                       {cp.nombreCentroPoblado}
                     </SelectItem>
                   ))}
@@ -147,3 +146,4 @@ export const CaserioModalForm: React.FC<CaserioModalFormProps> = ({
     </Form>
   );
 };
+
