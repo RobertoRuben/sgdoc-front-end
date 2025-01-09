@@ -1,57 +1,56 @@
 import { AxiosError } from "axios";
 import humps from "humps";
-import { Categoria } from "@/model/categoria";
-import { CategoriaPaginatedResponse } from "@/model/categoriaPaginatedResponse";
+import { CentroPoblado } from "@/model/centroPoblado";
+import { CentroPobladoPaginatedResponse } from "@/model/centroPobladoPaginatedResponse";
 import axiosInstance from "./axiosConfig";
 
-const API_BASE_URL = `/categorias/`;
+const API_BASE_URL = "/centros-poblados/";
 
-export const getCategorias = async (): Promise<Categoria[]> => {
+export const getCentrosPoblados = async (): Promise<CentroPoblado[]> => {
   try {
     const response = await axiosInstance.get(API_BASE_URL);
-    return humps.camelizeKeys(response.data) as Categoria[];
+    return humps.camelizeKeys(response.data) as CentroPoblado[];
   } catch (error) {
     if (error instanceof AxiosError && error.response?.data?.detail) {
       throw new Error(error.response.data.detail);
     }
-    throw new Error("Error al obtener las categorias de documentos");
+    throw new Error("Error al obtener los centros poblados");
   }
 };
 
-export const createCategoria = async (
-  categoria: Categoria
-): Promise<Categoria> => {
+export const createCentroPoblado = async (
+  centroPoblado: CentroPoblado
+): Promise<CentroPoblado> => {
   try {
-    const payload = humps.decamelizeKeys(categoria);
+    const payload = humps.decamelizeKeys(centroPoblado);
     const response = await axiosInstance.post(API_BASE_URL, payload);
-    return humps.camelizeKeys(response.data) as Categoria;
+    return humps.camelizeKeys(response.data) as CentroPoblado;
   } catch (error) {
     if (error instanceof AxiosError && error.response?.data?.detail) {
       throw new Error(error.response.data.detail);
     }
-    throw new Error("Error al crear la categoria de documento");
+    throw new Error("Error al crear el centro poblado");
   }
 };
 
-export const updateCategoria = async (
+export const updateCentroPoblado = async(
   id: number,
-  categoria: Omit<Categoria, "id">
-): Promise<Categoria | null> => {
+  centroPoblado: Omit<CentroPoblado, "id">
+): Promise<CentroPoblado | null> => {
   try {
-    const payload = humps.decamelizeKeys(categoria);
+    const payload = humps.decamelizeKeys(centroPoblado);
     const response = await axiosInstance.put(`${API_BASE_URL}${id}/`, payload);
-    return humps.camelizeKeys(response.data) as Categoria;
+    return humps.camelizeKeys(response.data) as CentroPoblado;
   } catch (error) {
     if (error instanceof AxiosError && error.response?.data?.detail) {
       throw new Error(error.response.data.detail);
     }
-    throw new Error(
-      "Error al actualizar la categoria de documento con id: " + id
-    );
+    throw new Error("Error al actualizar el centro poblado con id: " + id);
   }
 };
 
-export const deleteCategoria = async (id: number): Promise<boolean> => {
+
+export const deleteCentroPoblado = async (id: number): Promise<boolean> => {
   try {
     await axiosInstance.delete(`${API_BASE_URL}${id}/`);
     return true;
@@ -59,19 +58,17 @@ export const deleteCategoria = async (id: number): Promise<boolean> => {
     if (error instanceof AxiosError && error.response?.data?.detail) {
       throw new Error(error.response.data.detail);
     }
-    throw new Error(
-      "Error al eliminar la categoria de documento con id: " + id
-    );
+    throw new Error("Error al eliminar el centro poblado con id: " + id);
   }
 };
 
-export const getCategoriaById = async (
+export const getCentroPobladoById = async (
   id: number
-): Promise<Categoria | null> => {
+): Promise<CentroPoblado | null> => {
   try {
     const response = await axiosInstance.get(`${API_BASE_URL}${id}/`);
     if (!response.data) return null;
-    return humps.camelizeKeys(response.data) as Categoria;
+    return humps.camelizeKeys(response.data) as CentroPoblado;
   } catch (error) {
     if (error instanceof AxiosError) {
       if (error.response?.status === 404) {
@@ -81,18 +78,18 @@ export const getCategoriaById = async (
         throw new Error(error.response.data.detail);
       }
     }
-    throw new Error("Error al obtener la categoria de documento con id: " + id);
+    throw new Error("Error al obtener el centro poblado con id: " + id);
   }
 };
 
 export const findByString = async (
   searchString: string
-): Promise<Categoria[]> => {
+): Promise<CentroPoblado[]> => {
   try {
     const response = await axiosInstance.get(`${API_BASE_URL}search`, {
       params: humps.decamelizeKeys({ searchString }),
     });
-    return humps.camelizeKeys(response.data) as Categoria[];
+    return humps.camelizeKeys(response.data) as CentroPoblado[];
   } catch (error) {
     if (error instanceof AxiosError) {
       if (error.response?.status === 404) {
@@ -110,10 +107,11 @@ export const findByString = async (
   }
 };
 
-export const getCategoriasPaginated = async (
+
+export const getCentrosPobladosPaginated = async (
   page: number,
   pageSize: number
-): Promise<CategoriaPaginatedResponse> => {
+): Promise<CentroPobladoPaginatedResponse> => {
   try {
     const response = await axiosInstance.get(`${API_BASE_URL}paginated`, {
       params: {
@@ -123,7 +121,7 @@ export const getCategoriasPaginated = async (
     });
     const rawData = response.data;
     return {
-      data: humps.camelizeKeys(rawData.data) as Categoria[],
+      data: humps.camelizeKeys(rawData.data) as CentroPoblado[],
       pagination: {
         currentPage: rawData.pagination.current_page,
         pageSize: rawData.pagination.page_size,
