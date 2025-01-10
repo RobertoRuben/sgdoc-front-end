@@ -1,93 +1,86 @@
 import { useState, useEffect, useCallback } from "react";
 import debounce from "lodash/debounce";
-import { Ambito } from "@/model/ambito";
-import { AmbitoPaginatedResponse } from "@/model/ambitoPaginatedResponse";
-import { AmbitoHeader } from "./AmbitoHeader";
-import { AmbitoSearch } from "./AmbitoSearch";
-import { AmbitoTable } from "./AmbitoTable";
-import { AmbitoModal } from "@/components/modal/ambito-modal/AmbitoModal";
+import { Remitente } from "@/model/remitente";
+import { RemitentePaginatedResponse } from "@/model/remitentePaginatedResponse";
+import { RemitenteHeader } from "./RemitenteHeader";
+import { RemitenteSearch } from "./RemitenteSearch";
+import { RemitenteTable } from "./RemitenteTable";
+import { RemitenteModal } from "@/components/modal/remitente-modal/RemitenteModal";
 import NoResultsModal from "@/components/modal/alerts/no-results-modal/NoResultsModal";
 import DeleteModal from "@/components/modal/alerts/delete-modal/DeleteModal";
 import ErrorModal from "@/components/modal/alerts/error-modal/ErrorModal";
 import SuccessModal from "@/components/modal/alerts/success-modal/SuccessModal";
 import UpdateSuccessModal from "@/components/modal/alerts/update-modal/UpdateSuccessModal";
 import { Pagination } from "@/components/ui/pagination";
-import {
-  getPaginatedAmbitos,
-  createAmbito,
-  updateAmbito,
-  findByString,
-  deleteAmbito,
-  getAmbitoById,
-} from "@/service/ambitoService";
 import LoadingSpinner from "@/components/layout/LoadingSpinner";
 
-export const AmbitoContainer: React.FC = () => {
-  const [ambitosState, setAmbitosState] = useState<AmbitoPaginatedResponse>({
-    data: [],
-    pagination: {
-      currentPage: 1,
-      pageSize: 10,
-      totalItems: 0,
-      totalPages: 0,
-    },
-  });
+import {
+  getRemitentesPaginated,
+  createRemitente,
+  updateRemitente,
+  findByString,
+  deleteRemitente,
+  getRemitenteById,
+} from "@/service/remitenteService";
+
+export const RemitenteContainer: React.FC = () => {
+  const [remitentesState, setRemitentesState] =
+    useState<RemitentePaginatedResponse>({
+      data: [],
+      pagination: {
+        currentPage: 1,
+        pageSize: 4,
+        totalItems: 0,
+        totalPages: 0,
+      },
+    });
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedAmbito, setSelectedAmbito] = useState<Ambito | undefined>();
+  const [selectedRemitente, setSelectedRemitente] = useState<
+    Remitente | undefined
+  >(undefined);
   const [dataVersion, setDataVersion] = useState(0);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSearchMode, setIsSearchMode] = useState(false);
   const [showNoResults, setShowNoResults] = useState(false);
   const [noResultsMessage, setNoResultsMessage] = useState("");
+
   const [errorModalConfig, setErrorModalConfig] = useState<{
     isOpen: boolean;
     message: string;
-  }>({
-    isOpen: false,
-    message: "",
-  });
+  }>({ isOpen: false, message: "" });
 
-  const showError = (message: string) => {
-    setErrorModalConfig({
-      isOpen: true,
-      message,
-    });
-  };
   const [successModalConfig, setSuccessModalConfig] = useState<{
     isOpen: boolean;
     message: string;
-  }>({
-    isOpen: false,
-    message: "",
-  });
+  }>({ isOpen: false, message: "" });
 
   const [updateSuccessConfig, setUpdateSuccessConfig] = useState<{
     isOpen: boolean;
     message: string;
-  }>({
-    isOpen: false,
-    message: "",
-  });
+  }>({ isOpen: false, message: "" });
+
+  const showError = (message: string) => {
+    setErrorModalConfig({ isOpen: true, message });
+  };
 
   const showSuccess = (message: string) => {
-    setSuccessModalConfig({
-      isOpen: true,
-      message,
-    });
+    setSuccessModalConfig({ isOpen: true, message });
   };
 
   const loadPaginatedData = async (page: number) => {
     try {
       setIsLoading(true);
-      const response = await getPaginatedAmbitos(
+      const response = await getRemitentesPaginated(
         page,
-        ambitosState.pagination.pageSize
+        remitentesState.pagination.pageSize
       );
-      setAmbitosState(response);
+      setRemitentesState(response);
     } catch (error) {
-      showError("Error al cargar los ámbitos");
+      showError("Error al cargar los remitentes");
     } finally {
       setIsLoading(false);
     }
@@ -104,12 +97,12 @@ export const AmbitoContainer: React.FC = () => {
               "No se encontraron resultados para la búsqueda"
             );
             setShowNoResults(true);
-            setAmbitosState((prev) => ({
+            setRemitentesState((prev) => ({
               ...prev,
               data: [],
             }));
           } else {
-            setAmbitosState((prev) => ({
+            setRemitentesState((prev) => ({
               data: searchResults,
               pagination: {
                 ...prev.pagination,
@@ -125,18 +118,12 @@ export const AmbitoContainer: React.FC = () => {
           loadPaginatedData(1);
         }
       } catch (error: unknown) {
-        if (error instanceof Error && error.name === "NotFoundError") {
-          setNoResultsMessage(error.message);
-          setShowNoResults(true);
-          setAmbitosState((prev) => ({
-            ...prev,
-            data: [],
-          }));
-        } else if (error instanceof Error) {
-          showError(error.message);
-        } else {
-          showError("Ocurrió un error en el servidor");
-        }
+        setNoResultsMessage("No se encontraron resultados");
+        setShowNoResults(true);
+        setRemitentesState((prev) => ({
+          ...prev,
+          data: [],
+        }));
       } finally {
         setIsLoading(false);
       }
@@ -155,7 +142,11 @@ export const AmbitoContainer: React.FC = () => {
   }, []);
 
   const handlePageChange = (page: number) => {
-    if (isSearchMode || page < 1 || page > ambitosState.pagination.totalPages)
+    if (
+      isSearchMode ||
+      page < 1 ||
+      page > remitentesState.pagination.totalPages
+    )
       return;
     loadPaginatedData(page);
   };
@@ -163,14 +154,14 @@ export const AmbitoContainer: React.FC = () => {
   const handleEdit = async (id?: number) => {
     try {
       if (id !== undefined) {
-        const data = await getAmbitoById(id);
+        const data = await getRemitenteById(id);
         if (data) {
-          setSelectedAmbito(data);
+          setSelectedRemitente(data);
           setIsModalOpen(true);
         }
       }
     } catch (error) {
-      showError("Error al cargar los datos del ámbito");
+      showError("Error al cargar los datos del remitente");
     } finally {
       setIsLoading(false);
     }
@@ -178,9 +169,9 @@ export const AmbitoContainer: React.FC = () => {
 
   const handleDeleteClick = (id?: number) => {
     if (id !== undefined) {
-      const ambito = ambitosState.data.find((a) => a.id === id);
-      if (ambito) {
-        setSelectedAmbito(ambito);
+      const remitente = remitentesState.data.find((r) => r.id === id);
+      if (remitente) {
+        setSelectedRemitente(remitente);
         setIsDeleteModalOpen(true);
       }
     }
@@ -188,69 +179,74 @@ export const AmbitoContainer: React.FC = () => {
 
   const handleDeleteConfirm = async () => {
     try {
-      if (selectedAmbito?.id) {
+      if (selectedRemitente?.id) {
         setIsLoading(true);
-        await deleteAmbito(selectedAmbito.id);
+        await deleteRemitente(selectedRemitente.id);
 
-        const newTotalItems = ambitosState.pagination.totalItems - 1;
+        const newTotalItems = remitentesState.pagination.totalItems - 1;
         const newTotalPages = Math.ceil(
-          newTotalItems / ambitosState.pagination.pageSize
+          newTotalItems / remitentesState.pagination.pageSize
         );
 
         const pageToLoad =
-          ambitosState.pagination.currentPage > newTotalPages
+          remitentesState.pagination.currentPage > newTotalPages
             ? newTotalPages
-            : ambitosState.pagination.currentPage;
+            : remitentesState.pagination.currentPage;
 
         await loadPaginatedData(pageToLoad);
         setIsDeleteModalOpen(false);
-        setSelectedAmbito(undefined);
+        setSelectedRemitente(undefined);
         setDataVersion((prev) => prev + 1);
-        showSuccess("Ámbito eliminado correctamente");
+        showSuccess("Remitente eliminado correctamente");
       }
     } catch (error) {
-      if (error instanceof Error) {
-        showError(error.message);
-      } else {
-        showError("Error al eliminar el ámbito");
-      }
+      showError("Error al eliminar el remitente");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleModalSubmit = async (data: Ambito) => {
+  const handleModalSubmit = async (data: Remitente) => {
     try {
       setIsLoading(true);
       if (data.id) {
-        await updateAmbito(data.id, {
-          nombreAmbito: data.nombreAmbito,
+        await updateRemitente(data.id, {
+          dni: data.dni,
+          nombres: data.nombres,
+          apellidoPaterno: data.apellidoPaterno,
+          apellidoMaterno: data.apellidoMaterno,
+          genero: data.genero,
         });
-        await loadPaginatedData(1);
+        await loadPaginatedData(remitentesState.pagination.currentPage);
         setUpdateSuccessConfig({
           isOpen: true,
-          message: "Ámbito actualizado correctamente",
+          message: "Remitente actualizado correctamente",
         });
       } else {
-        await createAmbito({
-          nombreAmbito: data.nombreAmbito,
+        await createRemitente({
+          dni: data.dni,
+          nombres: data.nombres,
+          apellidoPaterno: data.apellidoPaterno,
+          apellidoMaterno: data.apellidoMaterno,
+          genero: data.genero,
         });
-        showSuccess("Ámbito creado correctamente");
-        const totalItems = ambitosState.pagination.totalItems + 1;
+        const totalItems = remitentesState.pagination.totalItems + 1;
         const newPage = Math.ceil(
-          totalItems / ambitosState.pagination.pageSize
+          totalItems / remitentesState.pagination.pageSize
         );
         await loadPaginatedData(newPage);
+        showSuccess("Remitente creado correctamente");
       }
-
       setIsModalOpen(false);
-      setSelectedAmbito(undefined);
+      setSelectedRemitente(undefined);
       setDataVersion((prev) => prev + 1);
     } catch (error) {
       if (error instanceof Error) {
         showError(error.message);
       } else {
-        showError(`Error al ${data.id ? "actualizar" : "crear"} el ámbito`);
+        showError(
+          `Error al ${data.id ? "actualizar" : "crear"} el centro poblado`
+        );
       }
     } finally {
       setIsLoading(false);
@@ -259,10 +255,10 @@ export const AmbitoContainer: React.FC = () => {
 
   return (
     <div className="pt-0.5 pr-0.5 pb-1 pl-0.5 sm:pt-2 sm:pr-2 sm:pb-4 sm:pl-2 bg-transparent">
-      <AmbitoHeader onAddClick={() => setIsModalOpen(true)} />
+      <RemitenteHeader onAddClick={() => setIsModalOpen(true)} />
 
       <div className="w-full overflow-hidden bg-white rounded-lg shadow-lg">
-        <AmbitoSearch
+        <RemitenteSearch
           searchTerm={searchTerm}
           onSearch={handleSearch}
           onClear={() => {
@@ -276,16 +272,16 @@ export const AmbitoContainer: React.FC = () => {
           <div className="w-full h-[400px] flex items-center justify-center">
             <LoadingSpinner
               size="lg"
-              message="Cargando ámbitos..."
+              message="Cargando remitentes..."
               color="#145A32"
               backgroundColor="rgba(20, 90, 50, 0.2)"
             />
           </div>
         ) : (
-          <AmbitoTable
-            ambitos={ambitosState.data}
+          <RemitenteTable
+            remitentes={remitentesState.data}
             dataVersion={dataVersion}
-            currentPage={ambitosState.pagination.currentPage}
+            currentPage={remitentesState.pagination.currentPage}
             searchTerm={searchTerm}
             onEdit={handleEdit}
             onDelete={handleDeleteClick}
@@ -295,8 +291,8 @@ export const AmbitoContainer: React.FC = () => {
         {!isSearchMode && (
           <div className="py-4 px-4 sm:px-6 border-t border-gray-200">
             <Pagination
-              currentPage={ambitosState.pagination.currentPage}
-              totalPages={ambitosState.pagination.totalPages}
+              currentPage={remitentesState.pagination.currentPage}
+              totalPages={remitentesState.pagination.totalPages}
               onPageChange={handlePageChange}
             />
           </div>
@@ -304,11 +300,11 @@ export const AmbitoContainer: React.FC = () => {
       </div>
 
       {isModalOpen && (
-        <AmbitoModal
+        <RemitenteModal
           isOpen={isModalOpen}
-          ambito={selectedAmbito}
+          remitente={selectedRemitente}
           onClose={() => {
-            setSelectedAmbito(undefined);
+            setSelectedRemitente(undefined);
             setIsModalOpen(false);
           }}
           onSubmit={handleModalSubmit}
@@ -320,9 +316,14 @@ export const AmbitoContainer: React.FC = () => {
           isOpen={isDeleteModalOpen}
           onClose={() => setIsDeleteModalOpen(false)}
           onConfirm={handleDeleteConfirm}
-          itemName={selectedAmbito?.nombreAmbito || ""}
+          itemName={
+            selectedRemitente
+              ? `${selectedRemitente.nombres} ${selectedRemitente.apellidoPaterno} ${selectedRemitente.apellidoMaterno}`
+              : ""
+          }
         />
       )}
+
       <SuccessModal
         isOpen={successModalConfig.isOpen}
         onClose={() =>
@@ -340,6 +341,7 @@ export const AmbitoContainer: React.FC = () => {
         title="Error"
         errorMessage={errorModalConfig.message}
       />
+
       <UpdateSuccessModal
         isOpen={updateSuccessConfig.isOpen}
         onClose={() =>
@@ -348,6 +350,7 @@ export const AmbitoContainer: React.FC = () => {
         title="Actualización Exitosa"
         message={updateSuccessConfig.message}
       />
+
       <NoResultsModal
         isOpen={showNoResults}
         onClose={() => setShowNoResults(false)}

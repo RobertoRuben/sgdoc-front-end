@@ -28,7 +28,7 @@ export const CaserioContainer: React.FC = () => {
     data: [],
     pagination: {
       currentPage: 1,
-      pageSize: 10, 
+      pageSize: 10,
       totalItems: 0,
       totalPages: 0,
     },
@@ -36,7 +36,9 @@ export const CaserioContainer: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedCaserio, setSelectedCaserio] = useState<CaserioDetails | undefined>();
+  const [selectedCaserio, setSelectedCaserio] = useState<
+    CaserioDetails | undefined
+  >();
   const [dataVersion, setDataVersion] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [isSearchMode, setIsSearchMode] = useState(false);
@@ -82,7 +84,10 @@ export const CaserioContainer: React.FC = () => {
   const loadPaginatedData = async (page: number) => {
     try {
       setIsLoading(true);
-      const response = await getCaseriosPaginated(page, caseriosState.pagination.pageSize);
+      const response = await getCaseriosPaginated(
+        page,
+        caseriosState.pagination.pageSize
+      );
       setCaseriosState(response);
     } catch (error) {
       showError("Error al cargar la lista de caseríos");
@@ -98,7 +103,9 @@ export const CaserioContainer: React.FC = () => {
         if (searchValue.trim()) {
           const searchResults = await findByString(searchValue);
           if (searchResults.length === 0) {
-            setNoResultsMessage("No se encontraron resultados para la búsqueda");
+            setNoResultsMessage(
+              "No se encontraron resultados para la búsqueda"
+            );
             setShowNoResults(true);
             setCaseriosState((prev) => ({
               ...prev,
@@ -183,7 +190,7 @@ export const CaserioContainer: React.FC = () => {
       }
     } catch (error) {
       showError("Error al cargar los datos del caserío");
-    } 
+    }
   };
 
   const handleDeleteClick = (id?: number) => {
@@ -203,7 +210,9 @@ export const CaserioContainer: React.FC = () => {
       await deleteCaserio(selectedCaserio.id);
 
       const newTotalItems = caseriosState.pagination.totalItems - 1;
-      const newTotalPages = Math.ceil(newTotalItems / caseriosState.pagination.pageSize);
+      const newTotalPages = Math.ceil(
+        newTotalItems / caseriosState.pagination.pageSize
+      );
       const pageToLoad =
         caseriosState.pagination.currentPage > newTotalPages
           ? newTotalPages
@@ -233,9 +242,10 @@ export const CaserioContainer: React.FC = () => {
       if (data.id) {
         await updateCaserio(data.id, {
           nombreCaserio: data.nombreCaserio,
-          centroPobladoId: typeof data.centroPobladoId === 'string' 
-            ? parseInt(data.centroPobladoId) 
-            : data.centroPobladoId ?? undefined
+          centroPobladoId:
+            typeof data.centroPobladoId === "string"
+              ? parseInt(data.centroPobladoId)
+              : data.centroPobladoId ?? undefined,
         });
         await loadPaginatedData(caseriosState.pagination.currentPage);
         setUpdateSuccessConfig({
@@ -243,10 +253,11 @@ export const CaserioContainer: React.FC = () => {
           message: "Caserío actualizado correctamente",
         });
       } else {
-
         await createCaserio(data);
         const totalItems = caseriosState.pagination.totalItems + 1;
-        const newPage = Math.ceil(totalItems / caseriosState.pagination.pageSize);
+        const newPage = Math.ceil(
+          totalItems / caseriosState.pagination.pageSize
+        );
         await loadPaginatedData(newPage);
         showSuccess("Caserío creado correctamente");
       }
@@ -281,7 +292,11 @@ export const CaserioContainer: React.FC = () => {
 
         {isLoading ? (
           <div className="w-full h-[300px] flex items-center justify-center">
-            <LoadingSpinner size="lg" message="Cargando caseríos..." color="#145A32" />
+            <LoadingSpinner
+              size="lg"
+              message="Cargando caseríos..."
+              color="#145A32"
+            />
           </div>
         ) : (
           <CaserioTable
@@ -306,16 +321,15 @@ export const CaserioContainer: React.FC = () => {
       </div>
 
       {isModalOpen && (
-<CaserioModal
-  isOpen={isModalOpen}
-  caserio={selectedCaserio}
-  // centrosPoblados={[]} <- Eliminar esta línea
-  onClose={() => {
-    setSelectedCaserio(undefined);
-    setIsModalOpen(false);
-  }}
-  onSubmit={handleModalSubmit}
-/>
+        <CaserioModal
+          isOpen={isModalOpen}
+          caserio={selectedCaserio}
+          onClose={() => {
+            setSelectedCaserio(undefined);
+            setIsModalOpen(false);
+          }}
+          onSubmit={handleModalSubmit}
+        />
       )}
 
       {isDeleteModalOpen && (
@@ -329,21 +343,27 @@ export const CaserioContainer: React.FC = () => {
 
       <SuccessModal
         isOpen={successModalConfig.isOpen}
-        onClose={() => setSuccessModalConfig((prev) => ({ ...prev, isOpen: false }))}
+        onClose={() =>
+          setSuccessModalConfig((prev) => ({ ...prev, isOpen: false }))
+        }
         title="Operación Exitosa"
         message={successModalConfig.message}
       />
 
       <ErrorModal
         isOpen={errorModalConfig.isOpen}
-        onClose={() => setErrorModalConfig((prev) => ({ ...prev, isOpen: false }))}
+        onClose={() =>
+          setErrorModalConfig((prev) => ({ ...prev, isOpen: false }))
+        }
         title="Error"
         errorMessage={errorModalConfig.message}
       />
 
       <UpdateSuccessModal
         isOpen={updateSuccessConfig.isOpen}
-        onClose={() => setUpdateSuccessConfig((prev) => ({ ...prev, isOpen: false }))}
+        onClose={() =>
+          setUpdateSuccessConfig((prev) => ({ ...prev, isOpen: false }))
+        }
         title="Actualización Exitosa"
         message={updateSuccessConfig.message}
       />
