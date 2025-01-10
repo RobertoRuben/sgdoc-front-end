@@ -15,6 +15,7 @@ interface RemitenteTableProps {
   remitentes: Remitente[];
   dataVersion: number;
   currentPage: number;
+  searchTerm: string;
   onEdit: (id?: number) => void;
   onDelete: (id?: number) => void;
 }
@@ -35,14 +36,23 @@ export const RemitenteTable: React.FC<RemitenteTableProps> = ({
   remitentes,
   dataVersion,
   currentPage,
+  searchTerm,
   onEdit,
   onDelete,
 }) => {
+  if (remitentes.length === 0) {
+    return (
+      <div className="w-full p-8 text-center">
+        <p className="text-gray-500">No se encontraron remitentes</p>
+      </div>
+    );
+  }
+
   return (
     <div className="overflow-x-auto">
       <AnimatePresence mode="wait">
         <motion.div
-          key={`${currentPage}-${dataVersion}`}
+          key={`${currentPage}-${dataVersion}-${searchTerm}`}
           variants={tableVariants}
           initial="initial"
           animate="animate"
@@ -50,9 +60,9 @@ export const RemitenteTable: React.FC<RemitenteTableProps> = ({
           transition={{ duration: 0.5 }}
           className="w-full"
         >
-          <Table>
+          <Table className="min-w-full divide-y divide-gray-200">
             <TableHeader>
-              <TableRow className="bg-[#145A32] hover:bg-[#0E3D22]">
+              <TableRow className="bg-[#145A32] border-b border-[#0E3D22] hover:bg-[#0E3D22]">
                 <TableHead className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                   Id
                 </TableHead>

@@ -8,7 +8,7 @@ interface RemitenteModalProps {
   isOpen: boolean;
   remitente?: Remitente;
   onClose: () => void;
-  onSubmit: (data: Remitente) => void;
+  onSubmit: (data: Remitente) => Promise<void>;
 }
 
 const fadeInVariants = {

@@ -25,13 +25,22 @@ const formSchema = z.object({
   dni: z.string().regex(/^\d{8}$/, { message: "DNI debe tener 8 dígitos" }),
   nombres: z
     .string()
-    .min(2, { message: "Nombres debe tener al menos 2 caracteres" }),
+    .min(2, { message: "Nombres debe tener al menos 2 caracteres" })
+    .regex(/^[A-Za-zÀ-ÿ\s]+$/, {
+      message: "Nombres debe contener solo letras",
+    }),
   apellidoPaterno: z
     .string()
-    .min(2, { message: "Apellido paterno debe tener al menos 2 caracteres" }),
+    .min(2, { message: "Apellido paterno debe tener al menos 2 caracteres" })
+    .regex(/^[A-Za-zÀ-ÿ\s]+$/, {
+      message: "Apellido paterno debe contener solo letras",
+    }),
   apellidoMaterno: z
     .string()
-    .min(2, { message: "Apellido materno debe tener al menos 2 caracteres" }),
+    .min(2, { message: "Apellido materno debe tener al menos 2 caracteres" })
+    .regex(/^[A-Za-zÀ-ÿ\s]+$/, {
+      message: "Apellido materno debe contener solo letras",
+    }),
   genero: z.enum(["Masculino", "Femenino", "Otro"], {
     required_error: "Debe seleccionar un género",
   }),
@@ -41,7 +50,8 @@ interface RemitenteModalFormProps {
   remitente?: Remitente;
   isEditing: boolean;
   onClose: () => void;
-  onSubmit: (data: Remitente) => void;
+  onSubmit: (data: Remitente) => Promise<void>;
+  isLoading?: boolean;
 }
 
 export const RemitenteModalForm: React.FC<RemitenteModalFormProps> = ({
@@ -49,6 +59,7 @@ export const RemitenteModalForm: React.FC<RemitenteModalFormProps> = ({
   isEditing,
   onClose,
   onSubmit,
+  isLoading = false,
 }) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -61,19 +72,29 @@ export const RemitenteModalForm: React.FC<RemitenteModalFormProps> = ({
     },
   });
 
+  const generoOptions = [
+    { value: "Masculino", label: "Masculino" },
+    { value: "Femenino", label: "Femenino" },
+  ] as const;
+
   useEffect(() => {
     if (remitente) {
+      const generoNormalizado = remitente.genero.trim(); // elimina espacios
+      const generoValue = generoOptions.find(
+        option => option.value === generoNormalizado
+      )?.value || undefined;
+  
       form.reset({
         dni: remitente.dni.toString(),
         nombres: remitente.nombres,
         apellidoPaterno: remitente.apellidoPaterno,
         apellidoMaterno: remitente.apellidoMaterno,
-        genero: remitente.genero as "Masculino" | "Femenino" | "Otro",
+        genero: generoValue,
       });
     }
   }, [remitente, form]);
 
-  const handleSubmit = (values: z.infer<typeof formSchema>) => {
+  const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     const data: Remitente = {
       id: remitente?.id || 0,
       dni: parseInt(values.dni, 10),
@@ -82,12 +103,15 @@ export const RemitenteModalForm: React.FC<RemitenteModalFormProps> = ({
       apellidoMaterno: values.apellidoMaterno,
       genero: values.genero,
     };
-    onSubmit(data);
+    await onSubmit(data);
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="p-6 space-y-6">
+      <form
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className="p-6 space-y-6"
+      >
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <FormField
             control={form.control}
@@ -96,7 +120,11 @@ export const RemitenteModalForm: React.FC<RemitenteModalFormProps> = ({
               <FormItem>
                 <FormLabel>DNI</FormLabel>
                 <FormControl>
-                  <Input placeholder="Ingrese DNI" {...field} />
+                  <Input
+                    placeholder="Ingrese DNI"
+                    disabled={isLoading}
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -109,7 +137,11 @@ export const RemitenteModalForm: React.FC<RemitenteModalFormProps> = ({
               <FormItem>
                 <FormLabel>Nombres</FormLabel>
                 <FormControl>
-                  <Input placeholder="Ingrese nombres" {...field} />
+                  <Input
+                    placeholder="Ingrese nombres"
+                    disabled={isLoading}
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -124,6 +156,7 @@ export const RemitenteModalForm: React.FC<RemitenteModalFormProps> = ({
                 <FormControl>
                   <Input
                     placeholder="Ingrese apellido paterno"
+                    disabled={isLoading}
                     {...field}
                   />
                 </FormControl>
@@ -140,6 +173,7 @@ export const RemitenteModalForm: React.FC<RemitenteModalFormProps> = ({
                 <FormControl>
                   <Input
                     placeholder="Ingrese apellido materno"
+                    disabled={isLoading}
                     {...field}
                   />
                 </FormControl>
@@ -155,8 +189,9 @@ export const RemitenteModalForm: React.FC<RemitenteModalFormProps> = ({
                 <FormLabel htmlFor="genero-select">Género</FormLabel>
                 <Select
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
+                  value={field.value }
                   name="genero"
+                  disabled={isLoading}
                 >
                   <FormControl>
                     <SelectTrigger id="genero-select">
@@ -166,7 +201,6 @@ export const RemitenteModalForm: React.FC<RemitenteModalFormProps> = ({
                   <SelectContent>
                     <SelectItem value="Masculino">Masculino</SelectItem>
                     <SelectItem value="Femenino">Femenino</SelectItem>
-                    <SelectItem value="Otro">Otro</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -178,6 +212,7 @@ export const RemitenteModalForm: React.FC<RemitenteModalFormProps> = ({
           isEditing={isEditing}
           onClose={onClose}
           onSubmit={form.handleSubmit(handleSubmit)}
+          isLoading={isLoading}
         />
       </form>
     </Form>

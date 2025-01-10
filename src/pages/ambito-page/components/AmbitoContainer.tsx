@@ -222,7 +222,6 @@ export const AmbitoContainer: React.FC = () => {
   const handleModalSubmit = async (data: Ambito) => {
     try {
       setIsLoading(true);
-
       if (data.id) {
         await updateAmbito(data.id, {
           nombreAmbito: data.nombreAmbito,
