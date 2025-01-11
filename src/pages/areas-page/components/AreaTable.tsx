@@ -15,6 +15,7 @@ interface AreaTableProps {
   areas: Area[];
   dataVersion: number;
   currentPage: number;
+  searchTerm: string; // Añadido searchTerm
   onEdit: (id?: number) => void;
   onDelete: (id?: number) => void;
 }
@@ -35,14 +36,23 @@ export const AreaTable: React.FC<AreaTableProps> = ({
   areas,
   dataVersion,
   currentPage,
+  searchTerm,
   onEdit,
   onDelete,
 }) => {
+  if (areas.length === 0) {
+    return (
+      <div className="w-full p-8 text-center">
+        <p className="text-gray-500">No se encontraron áreas</p>
+      </div>
+    );
+  }
+
   return (
     <div className="overflow-x-auto">
       <AnimatePresence mode="wait">
         <motion.div
-          key={`${currentPage}-${dataVersion}`}
+          key={`${currentPage}-${dataVersion}-${searchTerm}`}
           variants={tableVariants}
           initial="initial"
           animate="animate"
