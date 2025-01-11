@@ -87,6 +87,7 @@ export const CategoriaContainer: React.FC = () => {
         categoriasState.pagination.pageSize
       );
       setCategoriasState(response);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       showError("Error al cargar las categorías");
     } finally {
@@ -178,6 +179,7 @@ export const CategoriaContainer: React.FC = () => {
           setIsModalOpen(true);
         }
       }
+
     } catch (error) {
       showError("Error al cargar los datos de la categoría");
     } finally {
