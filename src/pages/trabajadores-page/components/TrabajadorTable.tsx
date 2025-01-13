@@ -34,6 +34,14 @@ const rowVariants = {
 };
 
 export const TrabajadorTable: React.FC<TrabajadorTableProps> = ({trabajadores, areas, dataVersion, currentPage, onEdit, onDelete,}) => {
+    if (trabajadores.length === 0) {
+        return (
+            <div className="w-full p-8 text-center">
+                <p className="text-gray-500">No se encontraron trabajadores</p>
+            </div>
+        );
+    }
+
     return (
         <div className="overflow-x-auto">
             <AnimatePresence mode="wait">

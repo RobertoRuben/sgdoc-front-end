@@ -4,7 +4,7 @@ import { Area } from "@/model/area";
 import { TrabajadorHeader } from "./TrabajadorHeader";
 import { TrabajadorSearch } from "./TrabajadorSearch";
 import { TrabajadorTable } from "./TrabajadorTable";
-import { TrabajadoresModal } from "@/components/modal/trabajador-modal/TrabajadorRegistration";
+import { TrabajadoresModal } from "@/components/modal/trabajador-modal/TrabajadorModal.tsx";
 import DeleteModal from "@/components/modal/alerts/delete-modal/DeleteModal";
 import { Pagination } from "@/components/ui/pagination";
 
