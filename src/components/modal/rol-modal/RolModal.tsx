@@ -1,4 +1,3 @@
-// rol-modal.tsx
 import {Dialog, DialogContent} from "@/components/ui/dialog";
 import {RolModalHeader} from "./components/RolModalHeader";
 import {RolModalForm} from "./components/RolModalForm";

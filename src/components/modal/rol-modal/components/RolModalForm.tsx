@@ -1,4 +1,3 @@
-// rol-modal-form.tsx
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -29,12 +28,7 @@ interface RolModalFormProps {
     onSubmit: (data: Rol) => void;
 }
 
-export const RolModalForm: React.FC<RolModalFormProps> = ({
-                                                              rol,
-                                                              isEditing,
-                                                              onClose,
-                                                              onSubmit,
-                                                          }) => {
+export const RolModalForm: React.FC<RolModalFormProps> = ({rol, isEditing, onClose, onSubmit,}) => {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {

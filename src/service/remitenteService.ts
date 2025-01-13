@@ -39,7 +39,6 @@ export const updateRemitente = async (
 ): Promise<Remitente | null> => {
   try {
     const payload = humps.decamelizeKeys(remitente);
-    console.log(payload);
     const response = await axiosInstance.put(`${API_BASE_URL}${id}/`, payload);
     return humps.camelizeKeys(response.data) as Remitente;
   } catch (error) {
@@ -67,7 +66,6 @@ export const getRemitenteById = async (
 ): Promise<Remitente | null> => {
   try {
     const response = await axiosInstance.get(`${API_BASE_URL}${id}/`);
-    console.log(response.data);
     if (!response.data) return null;
     return humps.camelizeKeys(response.data) as Remitente;
   } catch (error) {

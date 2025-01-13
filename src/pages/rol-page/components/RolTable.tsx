@@ -33,11 +33,19 @@ const rowVariants = {
 };
 
 export const RolTable: React.FC<RolTableProps> = ({roles, dataVersion, currentPage, searchTerm, onEdit, onDelete,}) => {
+    if (roles.length == 0){
+        return (
+            <div className="w-full p-8 text-center">
+                <p className="text-gray-500">No se encontraron roles</p>
+            </div>
+        );
+    }
+
     return (
         <div className="overflow-x-auto">
             <AnimatePresence mode="wait">
                 <motion.div
-                    key={`${currentPage}-${dataVersion}-${searchTerm}`} // Añadido searchTerm
+                    key={`${currentPage}-${dataVersion}-${searchTerm}`}
                     variants={tableVariants}
                     initial="initial"
                     animate="animate"

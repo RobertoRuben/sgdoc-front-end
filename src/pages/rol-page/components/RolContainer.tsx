@@ -1,55 +1,197 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
+import debounce from "lodash/debounce";
 import { Rol } from "@/model/rol";
+import { RolPaginatedResponse } from "@/model/rolPaginatedResponse";
 import { RolHeader } from "./RolHeader";
 import { RolSearch } from "./RolSearch";
 import { RolTable } from "./RolTable";
 import { RolModal } from "@/components/modal/rol-modal/RolModal";
 import DeleteModal from "@/components/modal/alerts/delete-modal/DeleteModal";
+import NoResultsModal from "@/components/modal/alerts/no-results-modal/NoResultsModal";
+import ErrorModal from "@/components/modal/alerts/error-modal/ErrorModal";
+import SuccessModal from "@/components/modal/alerts/success-modal/SuccessModal";
+import UpdateSuccessModal from "@/components/modal/alerts/update-modal/UpdateSuccessModal";
+import LoadingSpinner from "@/components/layout/LoadingSpinner";
 import { Pagination } from "@/components/ui/pagination";
-
-const roles: Rol[] = [
-    { id: 1, nombreRol: "Administrador" },
-    { id: 2, nombreRol: "Editor" },
-    { id: 3, nombreRol: "Visualizador" },
-    { id: 4, nombreRol: "Moderador" },
-    { id: 5, nombreRol: "Invitado" },
-];
+import {
+    getRolesPaginated,
+    createRol,
+    updateRol,
+    deleteRol,
+    getRolById,
+    findByString,
+} from "@/service/rolService";
 
 export const RolContainer: React.FC = () => {
-    const [currentPage, setCurrentPage] = useState<number>(1);
+    const [rolState, setRolState] = useState<RolPaginatedResponse>({
+        data: [],
+        pagination: {
+            currentPage: 1,
+            pageSize: 10,
+            totalItems: 0,
+            totalPages: 0,
+        },
+    });
+
+    const [isLoading, setIsLoading] = useState<boolean>(false);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
-    const [selectedRol, setSelectedRol] = useState<Rol | undefined>(undefined);
+    const [selectedRol, setSelectedRol] = useState<Rol | undefined>();
     const [dataVersion, setDataVersion] = useState<number>(0);
     const [searchTerm, setSearchTerm] = useState<string>("");
-    const pageSize = 4;
+    const [isSearchMode, setIsSearchMode] = useState<boolean>(false);
+    const [showNoResults, setShowNoResults] = useState<boolean>(false);
+    const [noResultsMessage, setNoResultsMessage] = useState<string>("");
 
-    const filteredRoles = useMemo(() => {
-        return roles.filter((rol) =>
-            rol.nombreRol.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-    }, [searchTerm]);
+    const [errorModalConfig, setErrorModalConfig] = useState<{
+        isOpen: boolean;
+        message: string;
+    }>({
+        isOpen: false,
+        message: "",
+    });
 
-    const totalPages = Math.ceil(filteredRoles.length / pageSize);
+    const [successModalConfig, setSuccessModalConfig] = useState<{
+        isOpen: boolean;
+        message: string;
+    }>({
+        isOpen: false,
+        message: "",
+    });
 
-    const currentRoles = useMemo(() => {
-        const startIndex = (currentPage - 1) * pageSize;
-        return filteredRoles.slice(startIndex, startIndex + pageSize);
-    }, [currentPage, filteredRoles]);
+    const [updateSuccessConfig, setUpdateSuccessConfig] = useState<{
+        isOpen: boolean;
+        message: string;
+    }>({
+        isOpen: false,
+        message: "",
+    });
 
-    const handleEdit = (id?: number) => {
-        if (id !== undefined) {
-            const rol = roles.find((r) => r.id === id);
-            if (rol) {
-                setSelectedRol(rol);
-                setIsModalOpen(true);
+    const showError = (message: string) => {
+        setErrorModalConfig({
+            isOpen: true,
+            message,
+        });
+    };
+
+    const showSuccess = (message: string) => {
+        setSuccessModalConfig({
+            isOpen: true,
+            message,
+        });
+    };
+
+    const loadPaginatedData = async (page: number) => {
+        try {
+            setIsLoading(true);
+            const response = await getRolesPaginated(page, rolState.pagination.pageSize);
+            setRolState(response);
+        } catch {
+            showError("Error al cargar la lista de roles");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const debouncedSearch = useCallback(
+        debounce(async (searchValue: string) => {
+            try {
+                setIsLoading(true);
+                if (searchValue.trim()) {
+                    const searchResults = await findByString(searchValue);
+                    if (searchResults.length === 0) {
+                        setNoResultsMessage("No se encontraron resultados para la búsqueda");
+                        setShowNoResults(true);
+                        setRolState((prev) => ({
+                            ...prev,
+                            data: [],
+                            pagination: {
+                                ...prev.pagination,
+                                totalItems: 0,
+                                totalPages: 0,
+                            },
+                        }));
+                    } else {
+                        setRolState((prev) => ({
+                            ...prev,
+                            data: searchResults,
+                            pagination: {
+                                currentPage: 1,
+                                pageSize: prev.pagination.pageSize,
+                                totalItems: searchResults.length,
+                                totalPages: 1,
+                            },
+                        }));
+                    }
+                    setIsSearchMode(true);
+                } else {
+                    setIsSearchMode(false);
+                    loadPaginatedData(1);
+                }
+            } catch (error: unknown) {
+                if (error instanceof Error && error.name === "NotFoundError") {
+                    setNoResultsMessage(error.message);
+                    setShowNoResults(true);
+                    setRolState((prev) => ({
+                        ...prev,
+                        data: [],
+                        pagination: {
+                            ...prev.pagination,
+                            totalItems: 0,
+                            totalPages: 0,
+                        },
+                    }));
+                } else if (error instanceof Error) {
+                    showError(error.message);
+                } else {
+                    showError("Ocurrió un error en el servidor");
+                }
+            } finally {
+                setIsLoading(false);
             }
+        }, 500),
+        []
+    );
+
+    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setSearchTerm(value);
+        if (value.trim() === "") {
+            setIsSearchMode(false);
+            loadPaginatedData(1);
+        } else {
+            debouncedSearch(value);
+        }
+    };
+
+    useEffect(() => {
+        loadPaginatedData(1);
+    }, []);
+
+    // Cambio de página
+    const handlePageChange = (page: number) => {
+        if (isSearchMode) return;
+        if (page < 1 || page > rolState.pagination.totalPages) return;
+        loadPaginatedData(page);
+    };
+
+    const handleEdit = async (id?: number) => {
+        try {
+            if (id !== undefined) {
+                const data = await getRolById(id);
+                if (data) {
+                    setSelectedRol(data);
+                    setIsModalOpen(true);
+                }
+            }
+        } catch{
+            showError("Error al cargar los datos del rol");
         }
     };
 
     const handleDeleteClick = (id?: number) => {
         if (id !== undefined) {
-            const rol = roles.find((r) => r.id === id);
+            const rol = rolState.data.find((r) => r.id === id);
             if (rol) {
                 setSelectedRol(rol);
                 setIsDeleteModalOpen(true);
@@ -58,28 +200,69 @@ export const RolContainer: React.FC = () => {
     };
 
     const handleDeleteConfirm = async () => {
-        if (selectedRol) {
-            console.log(`Eliminar rol con ID: ${selectedRol.id}`);
+        if (!selectedRol?.id) return;
+        try {
+            setIsLoading(true);
+            await deleteRol(selectedRol.id);
+
+            const newTotalItems = rolState.pagination.totalItems - 1;
+            const newTotalPages = Math.ceil(
+                newTotalItems / rolState.pagination.pageSize
+            );
+            const pageToLoad =
+                rolState.pagination.currentPage > newTotalPages
+                    ? newTotalPages
+                    : rolState.pagination.currentPage;
+
+            await loadPaginatedData(pageToLoad > 0 ? pageToLoad : 1);
+            setShowNoResults(false);
             setIsDeleteModalOpen(false);
             setSelectedRol(undefined);
             setDataVersion((prev) => prev + 1);
+            showSuccess("Rol eliminado correctamente");
+        } catch (error) {
+            if (error instanceof Error) {
+                showError(error.message);
+            } else {
+                showError("Error al eliminar el rol");
+            }
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    const handlePageChange = (page: number) => {
-        if (page < 1 || page > totalPages) return;
-        setCurrentPage(page);
-    };
+    const handleModalSubmit = async (data: Rol) => {
+        try {
+            setIsLoading(true);
 
-    const handleModalSubmit = (data: Rol) => {
-        if (data.id) {
-            console.log("Actualizar rol:", data);
-        } else {
-            console.log("Nuevo rol registrado:", data);
+            if (data.id) {
+                await updateRol(data.id, {
+                    nombreRol: data.nombreRol,
+                });
+                await loadPaginatedData(rolState.pagination.currentPage);
+                setUpdateSuccessConfig({
+                    isOpen: true,
+                    message: "Rol actualizado correctamente",
+                });
+            } else {
+                await createRol(data);
+                const totalItems = rolState.pagination.totalItems + 1;
+                const newPage = Math.ceil(totalItems / rolState.pagination.pageSize);
+                await loadPaginatedData(newPage);
+                showSuccess("Rol creado correctamente");
+            }
+            setIsModalOpen(false);
+            setSelectedRol(undefined);
+            setDataVersion((prev) => prev + 1);
+        } catch (error) {
+            if (error instanceof Error) {
+                showError(error.message);
+            } else {
+                showError(`Error al ${data.id ? "actualizar" : "crear"} el rol`);
+            }
+        } finally {
+            setIsLoading(false);
         }
-        setIsModalOpen(false);
-        setSelectedRol(undefined);
-        setDataVersion((prev) => prev + 1);
     };
 
     return (
@@ -89,24 +272,42 @@ export const RolContainer: React.FC = () => {
             <div className="w-full overflow-hidden bg-white rounded-lg shadow-lg">
                 <RolSearch
                     searchTerm={searchTerm}
-                    onSearch={(e) => setSearchTerm(e.target.value)}
+                    onSearch={handleSearch}
+                    onClear={() => {
+                        setSearchTerm("");
+                        setIsSearchMode(false);
+                        loadPaginatedData(1);
+                    }}
                 />
 
-                <RolTable
-                    roles={currentRoles}
-                    dataVersion={dataVersion}
-                    currentPage={currentPage}
-                    onEdit={handleEdit}
-                    onDelete={handleDeleteClick}
-                />
-
-                <div className="py-4 px-4 sm:px-6 border-t border-gray-200">
-                    <Pagination
-                        currentPage={currentPage}
-                        totalPages={totalPages}
-                        onPageChange={handlePageChange}
+                {isLoading ? (
+                    <div className="w-full h-[300px] flex items-center justify-center">
+                        <LoadingSpinner
+                            size="lg"
+                            message="Cargando roles..."
+                            color="#145A32"
+                        />
+                    </div>
+                ) : (
+                    <RolTable
+                        roles={rolState.data}
+                        dataVersion={dataVersion}
+                        currentPage={rolState.pagination.currentPage}
+                        searchTerm={searchTerm}
+                        onEdit={handleEdit}
+                        onDelete={handleDeleteClick}
                     />
-                </div>
+                )}
+
+                {!isSearchMode && (
+                    <div className="py-4 px-4 sm:px-6 border-t border-gray-200">
+                        <Pagination
+                            currentPage={rolState.pagination.currentPage}
+                            totalPages={rolState.pagination.totalPages}
+                            onPageChange={handlePageChange}
+                        />
+                    </div>
+                )}
             </div>
 
             {isModalOpen && (
@@ -129,6 +330,39 @@ export const RolContainer: React.FC = () => {
                     itemName={selectedRol?.nombreRol || ""}
                 />
             )}
+
+            <SuccessModal
+                isOpen={successModalConfig.isOpen}
+                onClose={() =>
+                    setSuccessModalConfig((prev) => ({ ...prev, isOpen: false }))
+                }
+                title="Operación Exitosa"
+                message={successModalConfig.message}
+            />
+
+            <ErrorModal
+                isOpen={errorModalConfig.isOpen}
+                onClose={() =>
+                    setErrorModalConfig((prev) => ({ ...prev, isOpen: false }))
+                }
+                title="Error"
+                errorMessage={errorModalConfig.message}
+            />
+
+            <UpdateSuccessModal
+                isOpen={updateSuccessConfig.isOpen}
+                onClose={() =>
+                    setUpdateSuccessConfig((prev) => ({ ...prev, isOpen: false }))
+                }
+                title="Actualización Exitosa"
+                message={updateSuccessConfig.message}
+            />
+
+            <NoResultsModal
+                isOpen={showNoResults}
+                onClose={() => setShowNoResults(false)}
+                message={noResultsMessage}
+            />
         </div>
     );
 };
