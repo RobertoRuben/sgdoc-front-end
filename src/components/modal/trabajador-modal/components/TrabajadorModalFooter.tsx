@@ -10,7 +10,7 @@ interface TrabajadoresModalFooterProps {
 
 export const TrabajadorModalFooter: React.FC<TrabajadoresModalFooterProps> = ({isEditing, onClose, onSubmit,}) => {
     return (
-        <DialogFooter className="p-6 flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
+        <DialogFooter className="pt-6 flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
             <Button
                 type="button"
                 onClick={onClose}

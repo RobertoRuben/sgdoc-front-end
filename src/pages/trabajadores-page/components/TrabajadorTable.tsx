@@ -9,14 +9,13 @@ import {
     TableHead,
     TableRow,
 } from "@/components/ui/table";
-import { Trabajador } from "@/model/trabajador";
-import { Area } from "@/model/area";
+import { TrabajadorDetails } from "@/model/trabajadorDetails";
 
 interface TrabajadorTableProps {
-    trabajadores: Trabajador[];
-    areas: Area[];
+    trabajadores: TrabajadorDetails[];
     dataVersion: number;
     currentPage: number;
+    searchTerm: string;
     onEdit: (id?: number) => void;
     onDelete: (id?: number) => void;
 }
@@ -33,7 +32,7 @@ const rowVariants = {
     exit: { opacity: 0 },
 };
 
-export const TrabajadorTable: React.FC<TrabajadorTableProps> = ({trabajadores, areas, dataVersion, currentPage, onEdit, onDelete,}) => {
+export const TrabajadorTable: React.FC<TrabajadorTableProps> = ({trabajadores, dataVersion, currentPage, searchTerm, onEdit, onDelete,}) => {
     if (trabajadores.length === 0) {
         return (
             <div className="w-full p-8 text-center">
@@ -46,7 +45,7 @@ export const TrabajadorTable: React.FC<TrabajadorTableProps> = ({trabajadores, a
         <div className="overflow-x-auto">
             <AnimatePresence mode="wait">
                 <motion.div
-                    key={`${currentPage}-${dataVersion}`}
+                    key={`${currentPage}-${dataVersion}-${searchTerm}`}
                     variants={tableVariants}
                     initial="initial"
                     animate="animate"
@@ -94,7 +93,7 @@ export const TrabajadorTable: React.FC<TrabajadorTableProps> = ({trabajadores, a
                                     transition={{ duration: 0.3, delay: index * 0.05 }}
                                     className={`${
                                         index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                                    } hover:bg-gray-100`}
+                                    } hover:bg-gray-100 transition-colors duration-150 ease-in-out`}
                                 >
                                     <TableCell className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                         {trabajador.id}
@@ -115,8 +114,7 @@ export const TrabajadorTable: React.FC<TrabajadorTableProps> = ({trabajadores, a
                                         {trabajador.genero}
                                     </TableCell>
                                     <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
-                                        {areas.find((area) => area.id === trabajador.areaId)
-                                            ?.nombreArea || "Área No Asignada"}
+                                        {trabajador.nombreArea || "Área no asignada"}
                                     </TableCell>
                                     <TableCell className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <Button

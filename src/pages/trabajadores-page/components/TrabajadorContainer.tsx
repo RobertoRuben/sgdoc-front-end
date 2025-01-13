@@ -1,95 +1,204 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
+import debounce from "lodash/debounce";
+import { TrabajadorPaginatedResponse } from "@/model/trabajadorPaginatedResponse";
+import { TrabajadorDetails } from "@/model/trabajadorDetails";
 import { Trabajador } from "@/model/trabajador";
-import { Area } from "@/model/area";
 import { TrabajadorHeader } from "./TrabajadorHeader";
 import { TrabajadorSearch } from "./TrabajadorSearch";
 import { TrabajadorTable } from "./TrabajadorTable";
-import { TrabajadoresModal } from "@/components/modal/trabajador-modal/TrabajadorModal.tsx";
+import { TrabajadorModal } from "@/components/modal/trabajador-modal/TrabajadorModal";
 import DeleteModal from "@/components/modal/alerts/delete-modal/DeleteModal";
+import NoResultsModal from "@/components/modal/alerts/no-results-modal/NoResultsModal";
+import ErrorModal from "@/components/modal/alerts/error-modal/ErrorModal";
+import SuccessModal from "@/components/modal/alerts/success-modal/SuccessModal";
+import UpdateSuccessModal from "@/components/modal/alerts/update-modal/UpdateSuccessModal";
+import LoadingSpinner from "@/components/layout/LoadingSpinner";
 import { Pagination } from "@/components/ui/pagination";
-
-const areas: Area[] = [
-    { id: 1, nombreArea: "Recursos Humanos" },
-    { id: 2, nombreArea: "Contabilidad" },
-    { id: 3, nombreArea: "Ventas" },
-    { id: 4, nombreArea: "Tecnología" },
-    { id: 5, nombreArea: "Logística" },
-    { id: 6, nombreArea: "Marketing" },
-    { id: 7, nombreArea: "Administración" },
-    { id: 8, nombreArea: "Compras" },
-    { id: 9, nombreArea: "Producción" },
-    { id: 10, nombreArea: "Calidad" },
-];
-
-const initialTrabajadores: Trabajador[] = [
-    {
-        id: 1,
-        dni: 12345678,
-        nombres: "Juan",
-        apellidoPaterno: "Pérez",
-        apellidoMaterno: "García",
-        genero: "Masculino",
-        areaId: 1,
-    },
-    {
-        id: 2,
-        dni: 87654321,
-        nombres: "María",
-        apellidoPaterno: "López",
-        apellidoMaterno: "Martínez",
-        genero: "Femenino",
-        areaId: 2,
-    },
-    {
-        id: 3,
-        dni: 23456789,
-        nombres: "Carlos",
-        apellidoPaterno: "Rodríguez",
-        apellidoMaterno: "Sánchez",
-        genero: "Masculino",
-        areaId: 3,
-    },
-];
-
+import {
+    getTrabajadoresPaginated,
+    createTrabajador,
+    updateTrabajador,
+    deleteTrabajador,
+    getTrabajadorById,
+    findByString,
+} from "@/service/trabajadorService";
 export const TrabajadorContainer: React.FC = () => {
-    const [trabajadores, setTrabajadores] = useState<Trabajador[]>(initialTrabajadores);
-    const [currentPage, setCurrentPage] = useState<number>(1);
+    const [trabajadoresState, setTrabajadoresState] =
+        useState<TrabajadorPaginatedResponse>({
+            data: [],
+            pagination: {
+                currentPage: 1,
+                pageSize: 5,
+                totalItems: 0,
+                totalPages: 0,
+            },
+        });
+
+    const [isLoading, setIsLoading] = useState<boolean>(false);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
-    const [selectedTrabajador, setSelectedTrabajador] = useState<Trabajador | undefined>(undefined);
+    const [selectedTrabajador, setSelectedTrabajador] = useState<
+        TrabajadorDetails | undefined
+    >();
+
     const [dataVersion, setDataVersion] = useState<number>(0);
     const [searchTerm, setSearchTerm] = useState<string>("");
-    const pageSize = 4;
+    const [isSearchMode, setIsSearchMode] = useState<boolean>(false);
+    const [showNoResults, setShowNoResults] = useState<boolean>(false);
+    const [noResultsMessage, setNoResultsMessage] = useState<string>("");
+    const [errorModalConfig, setErrorModalConfig] = useState<{
+        isOpen: boolean;
+        message: string;
+    }>({
+        isOpen: false,
+        message: "",
+    });
 
-    const filteredTrabajadores = useMemo(() => {
-        return trabajadores.filter((trabajador) =>
-            Object.values(trabajador)
-                .join(" ")
-                .toLowerCase()
-                .includes(searchTerm.toLowerCase())
-        );
-    }, [trabajadores, searchTerm]);
+    const [successModalConfig, setSuccessModalConfig] = useState<{
+        isOpen: boolean;
+        message: string;
+    }>({
+        isOpen: false,
+        message: "",
+    });
 
-    const totalPages = Math.ceil(filteredTrabajadores.length / pageSize);
+    const [updateSuccessConfig, setUpdateSuccessConfig] = useState<{
+        isOpen: boolean;
+        message: string;
+    }>({
+        isOpen: false,
+        message: "",
+    });
 
-    const currentTrabajadores = useMemo(() => {
-        const startIndex = (currentPage - 1) * pageSize;
-        return filteredTrabajadores.slice(startIndex, startIndex + pageSize);
-    }, [currentPage, filteredTrabajadores]);
+    const showError = (message: string) => {
+        setErrorModalConfig({
+            isOpen: true,
+            message,
+        });
+    };
 
-    const handleEdit = (id?: number) => {
-        if (id !== undefined) {
-            const trabajador = trabajadores.find((t) => t.id === id);
-            if (trabajador) {
-                setSelectedTrabajador(trabajador);
-                setIsModalOpen(true);
+    const showSuccess = (message: string) => {
+        setSuccessModalConfig({
+            isOpen: true,
+            message,
+        });
+    };
+
+    const loadPaginatedData = async (page: number) => {
+        try {
+            setIsLoading(true);
+            const response = await getTrabajadoresPaginated(
+                page,
+                trabajadoresState.pagination.pageSize
+            );
+            setTrabajadoresState(response);
+        } catch  {
+            showError("Error al cargar la lista de trabajadores");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const debouncedSearch = useCallback(
+        debounce(async (searchValue: string) => {
+            try {
+                setIsLoading(true);
+                if (searchValue.trim()) {
+                    const searchResults = await findByString(searchValue);
+                    if (searchResults.length === 0) {
+                        setNoResultsMessage(
+                            "No se encontraron resultados para la búsqueda"
+                        );
+                        setShowNoResults(true);
+                        setTrabajadoresState((prev) => ({
+                            ...prev,
+                            data: [],
+                            pagination: {
+                                ...prev.pagination,
+                                totalItems: 0,
+                                totalPages: 0,
+                            },
+                        }));
+                    } else {
+                        setTrabajadoresState((prev) => ({
+                            ...prev,
+                            data: searchResults,
+                            pagination: {
+                                currentPage: 1,
+                                pageSize: prev.pagination.pageSize,
+                                totalItems: searchResults.length,
+                                totalPages: 1,
+                            },
+                        }));
+                    }
+                    setIsSearchMode(true);
+                } else {
+                    setIsSearchMode(false);
+                    loadPaginatedData(1);
+                }
+            } catch (error: unknown) {
+                if (error instanceof Error && error.name === "NotFoundError") {
+                    setNoResultsMessage(error.message);
+                    setShowNoResults(true);
+                    setTrabajadoresState((prev) => ({
+                        ...prev,
+                        data: [],
+                        pagination: {
+                            ...prev.pagination,
+                            totalItems: 0,
+                            totalPages: 0,
+                        },
+                    }));
+                } else if (error instanceof Error) {
+                    showError(error.message);
+                } else {
+                    showError("Ocurrió un error en el servidor");
+                }
+            } finally {
+                setIsLoading(false);
             }
+        }, 500),
+        []
+    );
+
+    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setSearchTerm(value);
+        if (value.trim() === "") {
+            setIsSearchMode(false);
+            loadPaginatedData(1);
+        } else {
+            debouncedSearch(value);
+        }
+    };
+
+    useEffect(() => {
+        loadPaginatedData(1);
+    }, []);
+
+    const handlePageChange = (page: number) => {
+        if (isSearchMode) return;
+        if (page < 1 || page > trabajadoresState.pagination.totalPages) return;
+        loadPaginatedData(page);
+    };
+
+    const handleEdit = async (id?: number) => {
+        try {
+            if (id !== undefined) {
+                const data = await getTrabajadorById(id);
+                if (data) {
+                    setSelectedTrabajador(data);
+                    setIsModalOpen(true);
+                }
+            }
+        } catch {
+            showError("Error al cargar los datos del caserío");
         }
     };
 
     const handleDeleteClick = (id?: number) => {
         if (id !== undefined) {
-            const trabajador = trabajadores.find((t) => t.id === id);
+            const trabajador = trabajadoresState.data.find((t) => t.id === id);
             if (trabajador) {
                 setSelectedTrabajador(trabajador);
                 setIsDeleteModalOpen(true);
@@ -98,29 +207,78 @@ export const TrabajadorContainer: React.FC = () => {
     };
 
     const handleDeleteConfirm = async () => {
-        if (selectedTrabajador) {
-            setTrabajadores(trabajadores.filter((t) => t.id !== selectedTrabajador.id));
+        if (!selectedTrabajador?.id) return;
+        try {
+            setIsLoading(true);
+            await deleteTrabajador(selectedTrabajador.id);
+
+            const newTotalItems = trabajadoresState.pagination.totalItems - 1;
+            const newTotalPages = Math.ceil(
+                newTotalItems / trabajadoresState.pagination.pageSize
+            );
+            const pageToLoad =
+                trabajadoresState.pagination.currentPage > newTotalPages
+                    ? newTotalPages
+                    : trabajadoresState.pagination.currentPage;
+
+            await loadPaginatedData(pageToLoad > 0 ? pageToLoad : 1);
+            setShowNoResults(false);
             setIsDeleteModalOpen(false);
             setSelectedTrabajador(undefined);
             setDataVersion((prev) => prev + 1);
+            showSuccess("Trabajador eliminado correctamente");
+        } catch (error) {
+            if (error instanceof Error) {
+                showError(error.message);
+            } else {
+                showError("Error al eliminar el trabajador");
+            }
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    const handlePageChange = (page: number) => {
-        if (page < 1 || page > totalPages) return;
-        setCurrentPage(page);
-    };
+    const handleModalSubmit = async (data: Trabajador) => {
+        try {
+            setIsLoading(true);
 
-    const handleModalSubmit = (data: Trabajador) => {
-        if (data.id) {
-            setTrabajadores(trabajadores.map((t) => (t.id === data.id ? data : t)));
-        } else {
-            const newId = Math.max(...trabajadores.map((t) => t.id || 0)) + 1;
-            setTrabajadores([...trabajadores, { ...data, id: newId }]);
+            if (data.id) {
+                await updateTrabajador(data.id, {
+                    dni: data.dni,
+                    nombres: data.nombres,
+                    apellidoPaterno: data.apellidoPaterno,
+                    apellidoMaterno: data.apellidoMaterno,
+                    genero: data.genero,
+                    areaId: data.areaId,
+                });
+                await loadPaginatedData(trabajadoresState.pagination.currentPage);
+                setUpdateSuccessConfig({
+                    isOpen: true,
+                    message: "Trabajador actualizado correctamente",
+                });
+            } else {
+                await createTrabajador(data);
+                const totalItems = trabajadoresState.pagination.totalItems + 1;
+                const newPage = Math.ceil(
+                    totalItems / trabajadoresState.pagination.pageSize
+                );
+                await loadPaginatedData(newPage);
+                showSuccess("Trabajador creado correctamente");
+            }
+            setIsModalOpen(false);
+            setSelectedTrabajador(undefined);
+            setDataVersion((prev) => prev + 1);
+        } catch (error) {
+            if (error instanceof Error) {
+                showError(error.message);
+            } else {
+                showError(
+                    `Error al ${data.id ? "actualizar" : "crear"} el trabajador`
+                );
+            }
+        } finally {
+            setIsLoading(false);
         }
-        setIsModalOpen(false);
-        setSelectedTrabajador(undefined);
-        setDataVersion((prev) => prev + 1);
     };
 
     return (
@@ -130,29 +288,46 @@ export const TrabajadorContainer: React.FC = () => {
             <div className="w-full overflow-hidden bg-white rounded-lg shadow-lg">
                 <TrabajadorSearch
                     searchTerm={searchTerm}
-                    onSearch={(e) => setSearchTerm(e.target.value)}
+                    onSearch={handleSearch}
+                    onClear={() => {
+                        setSearchTerm("");
+                        setIsSearchMode(false);
+                        loadPaginatedData(1);
+                    }}
                 />
 
-                <TrabajadorTable
-                    trabajadores={currentTrabajadores}
-                    areas={areas}
-                    dataVersion={dataVersion}
-                    currentPage={currentPage}
-                    onEdit={handleEdit}
-                    onDelete={handleDeleteClick}
-                />
-
-                <div className="py-4 px-4 sm:px-6 border-t border-gray-200">
-                    <Pagination
-                        currentPage={currentPage}
-                        totalPages={totalPages}
-                        onPageChange={handlePageChange}
+                {isLoading ? (
+                    <div className="w-full h-[300px] flex items-center justify-center">
+                        <LoadingSpinner
+                            size="lg"
+                            message="Cargando trabajadores..."
+                            color="#145A32"
+                        />
+                    </div>
+                ) : (
+                    <TrabajadorTable
+                        trabajadores={trabajadoresState.data}
+                        dataVersion={dataVersion}
+                        currentPage={trabajadoresState.pagination.currentPage}
+                        searchTerm={searchTerm}
+                        onEdit={handleEdit}
+                        onDelete={handleDeleteClick}
                     />
-                </div>
+                )}
+
+                {!isSearchMode && (
+                    <div className="py-4 px-4 sm:px-6 border-t border-gray-200">
+                        <Pagination
+                            currentPage={trabajadoresState.pagination.currentPage}
+                            totalPages={trabajadoresState.pagination.totalPages}
+                            onPageChange={handlePageChange}
+                        />
+                    </div>
+                )}
             </div>
 
             {isModalOpen && (
-                <TrabajadoresModal
+                <TrabajadorModal
                     isOpen={isModalOpen}
                     trabajador={selectedTrabajador}
                     onClose={() => {
@@ -160,7 +335,6 @@ export const TrabajadorContainer: React.FC = () => {
                         setIsModalOpen(false);
                     }}
                     onSubmit={handleModalSubmit}
-                    areas={areas}
                 />
             )}
 
@@ -174,6 +348,39 @@ export const TrabajadorContainer: React.FC = () => {
                     } ${selectedTrabajador?.apellidoMaterno || ""}`}
                 />
             )}
+
+            <SuccessModal
+                isOpen={successModalConfig.isOpen}
+                onClose={() =>
+                    setSuccessModalConfig((prev) => ({ ...prev, isOpen: false }))
+                }
+                title="Operación Exitosa"
+                message={successModalConfig.message}
+            />
+
+            <ErrorModal
+                isOpen={errorModalConfig.isOpen}
+                onClose={() =>
+                    setErrorModalConfig((prev) => ({ ...prev, isOpen: false }))
+                }
+                title="Error"
+                errorMessage={errorModalConfig.message}
+            />
+
+            <UpdateSuccessModal
+                isOpen={updateSuccessConfig.isOpen}
+                onClose={() =>
+                    setUpdateSuccessConfig((prev) => ({ ...prev, isOpen: false }))
+                }
+                title="Actualización Exitosa"
+                message={updateSuccessConfig.message}
+            />
+
+            <NoResultsModal
+                isOpen={showNoResults}
+                onClose={() => setShowNoResults(false)}
+                message={noResultsMessage}
+            />
         </div>
     );
 };
