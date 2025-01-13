@@ -89,7 +89,7 @@ export const CaserioContainer: React.FC = () => {
         caseriosState.pagination.pageSize
       );
       setCaseriosState(response);
-    } catch (error) {
+    } catch {
       showError("Error al cargar la lista de caseríos");
     } finally {
       setIsLoading(false);
@@ -188,7 +188,7 @@ export const CaserioContainer: React.FC = () => {
           setIsModalOpen(true);
         }
       }
-    } catch (error) {
+    } catch {
       showError("Error al cargar los datos del caserío");
     }
   };
