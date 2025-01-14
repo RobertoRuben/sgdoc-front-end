@@ -5,7 +5,7 @@ import { Usuario } from "@/model/usuario";
 import { UsuarioHeader } from "./UsuarioHeader";
 import { UsuarioSearch } from "./UsuarioSearch";
 import { UsuarioTable } from "./UsuarioTable";
-import { RegistroUsuarioModal } from "@/components/modal/usuario-modal/UsuarioModal";
+import { RegistroUsuarioModal } from "@/components/modal/usuario-modal/usuario-form-modal/UsuarioModal.tsx";
 import DeleteModal from "@/components/modal/alerts/delete-modal/DeleteModal";
 import DeactivateModal from "@/components/modal/alerts/deactivate-modal/DeactivateModal";
 import { Pagination } from "@/components/ui/pagination";
