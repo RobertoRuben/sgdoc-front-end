@@ -1,21 +1,22 @@
 import {AxiosError} from "axios";
 import humps from "humps";
 import {Trabajador} from "@/model/trabajador";
+import {TrabajadorNombresDetails} from "@/model/trabajadorNombresDetails";
 import {TrabajadorDetails} from "@/model/trabajadorDetails";
 import {TrabajadorPaginatedResponse} from "@/model/trabajadorPaginatedResponse";
 import axiosInstance from "./axiosConfig";
 
 const API_BASE_URL = `/trabajadores/`;
 
-export const getTrabajadores = async (): Promise<TrabajadorDetails[]> => {
-    try{
-        const response = await axiosInstance.get(API_BASE_URL);
-        return humps.camelizeKeys(response.data) as TrabajadorDetails[];
-    }catch(error){
-        if(error instanceof AxiosError && error.response?.data?.detail){
+export const getTrabajadoresNames = async (): Promise<TrabajadorNombresDetails[]> => {
+    try {
+        const response = await axiosInstance.get(`${API_BASE_URL}/names`);
+        return humps.camelizeKeys(response.data) as TrabajadorNombresDetails[];
+    } catch (error) {
+        if (error instanceof AxiosError && error.response?.data?.detail) {
             throw new Error(error.response.data.detail);
         }
-        throw new Error("Error al obtener los trabajadores");
+        throw new Error("Error al obtener los nombres de los trabajadores");
     }
 }
 
