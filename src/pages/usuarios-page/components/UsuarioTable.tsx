@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Pencil, Trash2, UserX } from "lucide-react";
+import { Pencil, UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Table,
@@ -15,8 +15,8 @@ interface UsuarioTableProps {
     usuarios: UsuarioDetails[];
     dataVersion: number;
     currentPage: number;
+    searchTerm: string;
     onEdit: (id?: number) => void;
-    onDelete: (id?: number) => void;
     onDeactivate: (id?: number) => void;
 }
 
@@ -36,15 +36,24 @@ export const UsuarioTable: React.FC<UsuarioTableProps> = ({
                                                               usuarios,
                                                               dataVersion,
                                                               currentPage,
+                                                              searchTerm,
                                                               onEdit,
-                                                              onDelete,
                                                               onDeactivate,
                                                           }) => {
+    // Added empty state check
+    if (usuarios.length === 0) {
+        return (
+            <div className="w-full p-8 text-center">
+                <p className="text-gray-500">No se encontraron usuarios</p>
+            </div>
+        );
+    }
+
     return (
         <div className="overflow-x-auto">
             <AnimatePresence mode="wait">
                 <motion.div
-                    key={`${currentPage}-${dataVersion}`}
+                    key={`${currentPage}-${dataVersion}-${searchTerm}`} // Added searchTerm to key
                     variants={tableVariants}
                     initial="initial"
                     animate="animate"
@@ -61,17 +70,17 @@ export const UsuarioTable: React.FC<UsuarioTableProps> = ({
                                 <TableHead className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                                     Usuario
                                 </TableHead>
-                                <TableHead className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider hidden sm:table-cell">
+                                <TableHead className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                                     Fecha de Creación
                                 </TableHead>
                                 <TableHead className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                                     Activo
                                 </TableHead>
-                                <TableHead className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider hidden sm:table-cell">
+                                <TableHead className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                                     Rol
                                 </TableHead>
-                                <TableHead className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider hidden sm:table-cell">
-                                    Trabajador
+                                <TableHead className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
+                                    Trabajador Vinculado
                                 </TableHead>
                                 <TableHead className="px-4 py-3 text-right text-xs font-bold text-white uppercase tracking-wider">
                                     Acciones
@@ -97,24 +106,24 @@ export const UsuarioTable: React.FC<UsuarioTableProps> = ({
                                     <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
                                         {usuario.nombreUsuario}
                                     </TableCell>
-                                    <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 hidden sm:table-cell">
+                                    <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
                                         {usuario.fechaCreacion.toLocaleDateString()}
                                     </TableCell>
                                     <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
-                    <span
-                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            usuario.is_active
-                                ? "bg-green-100 text-green-800"
-                                : "bg-red-100 text-red-800"
-                        }`}
-                    >
-                      {usuario.is_active ? "Activo" : "Inactivo"}
-                    </span>
+                                        <span
+                                            className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                                usuario.is_active
+                                                    ? "bg-green-100 text-green-800"
+                                                    : "bg-red-100 text-red-800"
+                                            }`}
+                                        >
+                                            {usuario.is_active ? "Activo" : "Inactivo"}
+                                        </span>
                                     </TableCell>
-                                    <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 hidden sm:table-cell">
+                                    <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
                                         {usuario.rol_nombre}
                                     </TableCell>
-                                    <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 hidden sm:table-cell">
+                                    <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
                                         {usuario.trabajador_nombre}
                                     </TableCell>
                                     <TableCell className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -123,12 +132,6 @@ export const UsuarioTable: React.FC<UsuarioTableProps> = ({
                                             className="bg-amber-500 text-white hover:bg-amber-600 mr-2"
                                         >
                                             <Pencil className="w-5 h-5" />
-                                        </Button>
-                                        <Button
-                                            onClick={() => onDelete(usuario.id)}
-                                            className="bg-red-500 text-white hover:bg-red-600 mr-2"
-                                        >
-                                            <Trash2 className="w-5 h-5" />
                                         </Button>
                                         <Button
                                             onClick={() => onDeactivate(usuario.id)}
