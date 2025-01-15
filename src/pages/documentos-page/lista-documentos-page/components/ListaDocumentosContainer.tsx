@@ -1,21 +1,24 @@
-import React, { useState, useMemo } from "react";
+// ListaDocumentosContainer.tsx
+import React, { useState, useMemo, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Pagination } from "@/components/ui/pagination";
 import { DocumentoDetails } from "@/model/documentoDetails";
-import { PaginatedDocumentoResponse } from "@/model/paginatedDocumentoResponse";
+import { DocumentoPaginatedResponse } from "@/model/documentoPaginatedResponse";
 import { Documento } from "@/model/documento";
 import DeleteModal from "@/components/modal/alerts/delete-modal/DeleteModal";
 import { ActualizacionDocumentoModal } from "@/components/modal/documento-modal/actualizacion-documento-modal/ActualizacionDocumentoModal";
 import DownloadModal from "@/components/modal/alerts/download-modal/DownloadModal";
-
 import { ListaDocumentosHeader } from "./ListaDocumentosHeader";
 import { ListaDocumentosSearch } from "./ListaDocumentosSearch";
 import { ListaDocumentosTable } from "./ListaDocumentosTable";
+import { Ambito } from "@/model/ambito";
+import { CentroPoblado } from "@/model/centroPoblado";
+import { Caserio } from "@/model/caserio";
+import { getAmbitos } from "@/service/ambitoService";
+import { getCentrosPoblados } from "@/service/centroPobladoService";
+import { getCaseriosByCentroPobladoId } from "@/service/caserioService";
 
-// ==========================================
-// Estado inicial de ejemplo
-// ==========================================
-const initialDocumentos: PaginatedDocumentoResponse = {
+const initialDocumentos: DocumentoPaginatedResponse = {
   data: [
     {
       id: 1,
@@ -46,7 +49,6 @@ const initialDocumentos: PaginatedDocumentoResponse = {
   },
 };
 
-// Variantes de animación para la tabla
 const tableVariants = {
   initial: { opacity: 0, scale: 0.95 },
   animate: { opacity: 1, scale: 1 },
@@ -54,49 +56,41 @@ const tableVariants = {
 };
 
 export const ListaDocumentosContainer: React.FC = () => {
-  // ================================
-  // ESTADOS PRINCIPALES
-  // ================================
+  // Estado para documentos
   const [documentosState, setDocumentos] =
-    useState<PaginatedDocumentoResponse>(initialDocumentos);
-
+    useState<DocumentoPaginatedResponse>(initialDocumentos);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
-  const [selectedDocumento, setSelectedDocumento] = useState<
-    DocumentoDetails | undefined
-  >(undefined);
   const [dataVersion, setDataVersion] = useState<number>(0);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
-  // ================================
-  // FILTROS
-  // ================================
-  const [selectedCaserio, setSelectedCaserio] = useState<string | undefined>();
-  const [selectedCentroPoblado, setSelectedCentroPoblado] =
-    useState<string | undefined>();
-  const [selectedAmbito, setSelectedAmbito] = useState<string | undefined>();
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-
-  // ================================
-  // MODAL DE DESCARGA
-  // ================================
+  // Estados para modales y selección
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
+  const [selectedDocumento, setSelectedDocumento] = useState<DocumentoDetails | undefined>(undefined);
   const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
-  const [selectedDocument, setSelectedDocument] = useState<{
+  const [selectedDocumentDownload, setSelectedDocumentDownload] = useState<{
     id: number;
     nombreDocumento: string;
     fileSize: string;
     fileType: string;
   } | null>(null);
 
-  // ================================
-  // PAGINACIÓN
-  // ================================
+  // Estados para filtros y selects
+  const [ambitos, setAmbitos] = useState<Ambito[]>([]);
+  const [centrosPoblados, setCentrosPoblados] = useState<CentroPoblado[]>([]);
+  const [caserios, setCaserios] = useState<Caserio[]>([]);
+
+  const [selectedCaserio, setSelectedCaserio] = useState<string | undefined>(); 
+  const [selectedCentroPoblado, setSelectedCentroPoblado] = useState<string | undefined>();
+  const [selectedAmbito, setSelectedAmbito] = useState<string | undefined>();
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+
+  // Estado de carga (para feedback, aunque no se renderiza directamente)
+  const [, setIsLoading] = useState(false);
+
   const totalPages = documentosState.pagination.totalPages;
 
-  // ================================
-  // FILTRADO
-  // ================================
+  // Filtrado de documentos según búsqueda y filtros
   const filteredDocumentos = useMemo(() => {
     return documentosState.data.filter((documento) => {
       const matchesSearch = documento.nombreDocumento
@@ -111,17 +105,16 @@ export const ListaDocumentosContainer: React.FC = () => {
       const centroPobladoFilter =
         !selectedCentroPoblado || selectedCentroPoblado === "all"
           ? true
-          : documento.nombreCentroPoblado === selectedCentroPoblado;
+          : documento.nombreCentroPoblado === centrosPoblados.find(c => String(c.id) === selectedCentroPoblado)?.nombreCentroPoblado;
 
       const ambitoFilter =
         !selectedAmbito || selectedAmbito === "all"
           ? true
-          : documento.nombreAmbito === selectedAmbito;
+          : documento.nombreAmbito === ambitos.find(a => String(a.id) === selectedAmbito)?.nombreAmbito;
 
       const dateFilter = !selectedDate
         ? true
-        : new Date(documento.fechaIngreso).toDateString() ===
-          selectedDate.toDateString();
+        : new Date(documento.fechaIngreso).toDateString() === selectedDate.toDateString();
 
       return (
         matchesSearch &&
@@ -138,11 +131,10 @@ export const ListaDocumentosContainer: React.FC = () => {
     selectedCentroPoblado,
     selectedAmbito,
     selectedDate,
+    ambitos,
+    centrosPoblados,
   ]);
 
-  // ================================
-  // DOCUMENTOS DE LA PÁGINA ACTUAL
-  // ================================
   const currentDocumentos = useMemo(() => {
     const startIndex = (currentPage - 1) * documentosState.pagination.pageSize;
     return filteredDocumentos.slice(
@@ -156,9 +148,51 @@ export const ListaDocumentosContainer: React.FC = () => {
     documentosState.pagination.pageSize,
   ]);
 
-  // ================================
-  // HANDLERS PARA EDICIÓN / ELIMINACIÓN
-  // ================================
+  // Cargar Ambitos y Centros Poblados (y Caseríos por defecto) al montar el componente
+  useEffect(() => {
+    const loadData = async () => {
+      setIsLoading(true);
+      try {
+        const [ambitosData, centrosPobladosData] = await Promise.all([
+          getAmbitos(),
+          getCentrosPoblados(),
+        ]);
+        setAmbitos(ambitosData);
+        setCentrosPoblados(centrosPobladosData);
+        // Si no hay un centro poblado seleccionado, cargar los caseríos del primer centro obtenido
+        if (!selectedCentroPoblado && centrosPobladosData.length > 0) {
+          const defaultCentro = centrosPobladosData[0];
+          const caseriosData = await getCaseriosByCentroPobladoId(Number(defaultCentro.id));
+          setCaserios(caseriosData || []);
+        }
+      } catch (error) {
+        console.error("Error al cargar datos:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadData();
+  }, []);
+
+  // Cuando se selecciona un centro poblado, cargar sus caseríos
+  useEffect(() => {
+    if (selectedCentroPoblado) {
+      const loadCaseriosData = async () => {
+        try {
+          const caseriosData = await getCaseriosByCentroPobladoId(Number(selectedCentroPoblado));
+          setCaserios(caseriosData || []);
+        } catch (error) {
+          console.error("Error al cargar caseríos:", error);
+        }
+      };
+      loadCaseriosData();
+    } else {
+      // Si no hay centro poblado seleccionado, vaciar los caseríos
+      setCaserios([]);
+    }
+  }, [selectedCentroPoblado]);
+
+  // Handlers para edición, eliminación y descarga
   const handleEdit = (id?: number) => {
     if (id !== undefined) {
       const documento = documentosState.data.find((d) => d.id === id);
@@ -197,25 +231,23 @@ export const ListaDocumentosContainer: React.FC = () => {
       setSelectedDocumento(undefined);
       setDataVersion((prev) => prev + 1);
 
-      // Ajustar la página si nos quedamos sin elementos
+      // Ajustar la página si se quedó sin elementos en la página actual
       if (currentDocumentos.length <= 1 && currentPage > 1) {
         setCurrentPage(currentPage - 1);
       }
     }
   };
 
-  // ================================
-  // HANDLERS PARA DESCARGA
-  // ================================
+  // Handlers para descarga
   const handleDownload = (id?: number) => {
     if (id !== undefined) {
       const document = documentosState.data.find((doc) => doc.id === id);
       if (document) {
-        setSelectedDocument({
+        setSelectedDocumentDownload({
           id: document.id,
           nombreDocumento: document.nombreDocumento,
-          fileSize: "2.5 MB", // Reemplazar con datos reales
-          fileType: "PDF",    // Reemplazar con datos reales
+          fileSize: "2.5 MB", // Reemplazar con datos reales si es necesario
+          fileType: "PDF",    // Reemplazar con datos reales si es necesario
         });
         setIsDownloadModalOpen(true);
       }
@@ -223,11 +255,10 @@ export const ListaDocumentosContainer: React.FC = () => {
   };
 
   const handleConfirmDownload = async () => {
-    if (selectedDocument) {
+    if (selectedDocumentDownload) {
       try {
-        // Lógica real de descarga
-        console.log(`Descargando documento ${selectedDocument.id}`);
-        await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulación
+        console.log(`Descargando documento ${selectedDocumentDownload.id}`);
+        await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulación de descarga
         setIsDownloadModalOpen(false);
       } catch (error) {
         console.error("Error en la descarga:", error);
@@ -235,9 +266,7 @@ export const ListaDocumentosContainer: React.FC = () => {
     }
   };
 
-  // ================================
-  // HANDLER PARA ACTUALIZACIÓN
-  // ================================
+  // Handler para actualizar documento (modal de edición)
   const handleUpdateDocumento = async (data: Documento) => {
     setDocumentos((prevState) => ({
       ...prevState,
@@ -250,17 +279,12 @@ export const ListaDocumentosContainer: React.FC = () => {
     setDataVersion((prev) => prev + 1);
   };
 
-  // ================================
-  // PAGINACIÓN
-  // ================================
+  // Handler para paginación
   const handlePageChange = (page: number) => {
     if (page < 1 || page > totalPages) return;
     setCurrentPage(page);
   };
 
-  // ================================
-  // RENDER
-  // ================================
   return (
     <div className="pt-0.5 pr-0.5 pb-1 pl-0.5 sm:pt-2 sm:pr-2 sm:pb-4 sm:pl-2 bg-transparent">
       {/* Header */}
@@ -279,9 +303,12 @@ export const ListaDocumentosContainer: React.FC = () => {
           setSelectedAmbito={setSelectedAmbito}
           selectedDate={selectedDate}
           setSelectedDate={setSelectedDate}
+          ambitos={ambitos}
+          centrosPoblados={centrosPoblados}
+          caserios={caserios}
         />
 
-        {/* Tabla */}
+        {/* Tabla de documentos */}
         <div className="overflow-x-auto">
           <AnimatePresence mode="wait">
             <motion.div
@@ -344,14 +371,14 @@ export const ListaDocumentosContainer: React.FC = () => {
       )}
 
       {/* Modal de descarga */}
-      {selectedDocument && (
+      {selectedDocumentDownload && (
         <DownloadModal
           isOpen={isDownloadModalOpen}
           onClose={() => setIsDownloadModalOpen(false)}
           onConfirm={handleConfirmDownload}
-          fileName={selectedDocument.nombreDocumento}
-          fileSize={selectedDocument.fileSize}
-          fileType={selectedDocument.fileType}
+          fileName={selectedDocumentDownload.nombreDocumento}
+          fileSize={selectedDocumentDownload.fileSize}
+          fileType={selectedDocumentDownload.fileType}
         />
       )}
     </div>

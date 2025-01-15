@@ -8,7 +8,7 @@ import axiosInstance from "./axiosConfig";
 const API_BASE_URL = `/caserios/`;
 
 export const getCaseriosByCentroPobladoId = async (
-  id: number
+  id?: number
 ): Promise<Caserio[] | null> => {
   try {
     const response = await axiosInstance.get(

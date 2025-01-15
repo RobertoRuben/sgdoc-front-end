@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { AnimatePresence } from "framer-motion";
 import { Pagination } from "@/components/ui/pagination";
-import { PaginatedDocumentoResponse } from "@/model/paginatedDocumentoResponse";
+import { DocumentoPaginatedResponse } from "@/model/documentoPaginatedResponse.ts";
 import RegistroDocumentoModal from "@/components/modal/documento-modal/registro-documento-modal/RegistroDocumentoModal";
 import DownloadModal from "@/components/modal/alerts/download-modal/DownloadModal";
 import { IngresoDocumentosHeader } from "./IngresoDocumentosHeader";
@@ -9,7 +9,7 @@ import { IngresoDocumentosSearch } from "./IngresoDocumentosSearch";
 import { IngresoDocumentosTable } from "./IngresoDocumentosTable";
 
 // Estado inicial de ejemplo
-const initialDocumentos: PaginatedDocumentoResponse = {
+const initialDocumentos: DocumentoPaginatedResponse = {
   data: [
     {
       id: 1,
@@ -41,7 +41,7 @@ const initialDocumentos: PaginatedDocumentoResponse = {
 };
 
 export const IngresoDocumentosContainer: React.FC = () => {
-  const [documentosState] = useState<PaginatedDocumentoResponse>(
+  const [documentosState] = useState<DocumentoPaginatedResponse>(
     initialDocumentos
   );
   const [currentPage, setCurrentPage] = useState<number>(1);
