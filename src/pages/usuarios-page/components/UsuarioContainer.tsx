@@ -1,124 +1,220 @@
-import { useState, useMemo, useCallback } from "react";
-import { PaginatedUsuarioResponse } from "@/model/paginatedUsuarioResponse";
-import { UsuarioDetails } from "@/model/usuarioDetails";
-import { Usuario } from "@/model/usuario";
-import { UsuarioHeader } from "./UsuarioHeader";
-import { UsuarioSearch } from "./UsuarioSearch";
-import { UsuarioTable } from "./UsuarioTable";
-import { RegistroUsuarioModal } from "@/components/modal/usuario-modal/usuario-form-modal/UsuarioModal.tsx";
-import DeleteModal from "@/components/modal/alerts/delete-modal/DeleteModal";
+import {useState, useEffect, useCallback} from "react";
+import debounce from "lodash/debounce";
+import {PaginatedUsuarioResponse} from "@/model/paginatedUsuarioResponse";
+import {UsuarioDetails} from "@/model/usuarioDetails";
+import {Usuario} from "@/model/usuario";
+import {UsuarioHeader} from "@/pages/usuarios-page/components/UsuarioHeader";
+import {UsuarioSearch} from "@/pages/usuarios-page/components/UsuarioSearch";
+import {UsuarioTable} from "@/pages/usuarios-page/components/UsuarioTable";
+import {RegistroUsuarioModal} from "@/components/modal/usuario-modal/usuario-form-modal/UsuarioModal";
+import ActivateModal from "@/components/modal/alerts/activate-modal/ActivateModal";
 import DeactivateModal from "@/components/modal/alerts/deactivate-modal/DeactivateModal";
-import { Pagination } from "@/components/ui/pagination";
+import NoResultsModal from "@/components/modal/alerts/no-results-modal/NoResultsModal";
+import ErrorModal from "@/components/modal/alerts/error-modal/ErrorModal";
+import SuccessModal from "@/components/modal/alerts/success-modal/SuccessModal";
+import UpdateSuccessModal from "@/components/modal/alerts/update-modal/UpdateSuccessModal";
+import LoadingSpinner from "@/components/layout/LoadingSpinner";
+import {Pagination} from "@/components/ui/pagination";
 
-const trabajadores = [
-    { value: 1, label: "Juan Pérez" },
-    { value: 2, label: "María García" },
-    { value: 3, label: "Carlos López" },
-    { value: 4, label: "Ana Martínez" },
-    { value: 5, label: "Luis Rodríguez" },
-];
-
-const initialUsuarios: PaginatedUsuarioResponse = {
-    data: [
-        {
-            id: 1,
-            nombreUsuario: "admin",
-            fechaCreacion: new Date(),
-            is_active: true,
-            rol_nombre: "Administrador",
-            trabajador_nombre: "Juan Pérez",
-        },
-    ],
-    pagination: {
-        currentPage: 1,
-        pageSize: 2,
-        totalItems: 8,
-        totalPages: 4,
-    },
-};
+import {
+    getUsuariosPaginated,
+    createUsuario,
+    updateUsuario,
+    getUsuarioById,
+    findByString,
+    updateUsuarioStatus,
+} from "@/service/usuarioService";
 
 export const UsuarioContainer: React.FC = () => {
-    const [usuariosState, setUsuarios] = useState<PaginatedUsuarioResponse>(initialUsuarios);
-    const [currentPage, setCurrentPage] = useState<number>(1);
+    // Estado principal para la paginación y los datos del usuario
+    const [usuariosState, setUsuariosState] = useState<PaginatedUsuarioResponse>({
+        data: [],
+        pagination: {
+            currentPage: 1,
+            pageSize: 5,
+            totalItems: 0,
+            totalPages: 0,
+        },
+    });
+
+    const [isActive, setIsActive] = useState<boolean>(true);
+    const [isActivateModalOpen, setIsActivateModalOpen] =
+        useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
-    const [isDeactivateModalOpen, setIsDeactivateModalOpen] = useState<boolean>(false);
-    const [selectedUsuario, setSelectedUsuario] = useState<Usuario | undefined>(undefined);
+    const [isDeactivateModalOpen, setIsDeactivateModalOpen] =
+        useState<boolean>(false);
+    const [selectedUsuario, setSelectedUsuario] = useState<
+        UsuarioDetails | undefined
+    >(undefined);
+
     const [dataVersion, setDataVersion] = useState<number>(0);
     const [searchTerm, setSearchTerm] = useState<string>("");
-    const [statusFilter, setStatusFilter] = useState<string>("all");
+    const [showNoResults, setShowNoResults] = useState<boolean>(false);
+    const [noResultsMessage, setNoResultsMessage] = useState<string>("");
 
-    const usuarioDetailsToUsuario = useCallback((ud: UsuarioDetails): Usuario => {
-        const rolId = ud.rol_nombre === "Administrador" ? 1 : ud.rol_nombre === "Usuario" ? 2 : 3;
-        const trabajador = trabajadores.find((t) => t.label === ud.trabajador_nombre);
-        const trabajadorId = trabajador ? trabajador.value : 1;
-        return {
-            id: ud.id,
-            nombreUsuario: ud.nombreUsuario,
-            contrasena: "",
-            rolId,
-            trabajadorId,
-        };
-    }, []);
+    const [errorModalConfig, setErrorModalConfig] = useState<{
+        isOpen: boolean;
+        message: string;
+    }>({
+        isOpen: false,
+        message: "",
+    });
 
-    const usuarioToUsuarioDetails = useCallback((u: Usuario): UsuarioDetails => {
-        const rol_nombre = u.rolId === 1 ? "Administrador" : u.rolId === 2 ? "Usuario" : "Invitado";
-        const trabajador = trabajadores.find((t) => t.value === u.trabajadorId);
-        const trabajador_nombre = trabajador ? trabajador.label : "Desconocido";
+    const [successModalConfig, setSuccessModalConfig] = useState<{
+        isOpen: boolean;
+        message: string;
+    }>({
+        isOpen: false,
+        message: "",
+    });
 
-        const newId = u.id
-            ? u.id
-            : usuariosState.data.length > 0
-                ? Math.max(...usuariosState.data.map((x) => x.id)) + 1
-                : 1;
+    const [updateSuccessConfig, setUpdateSuccessConfig] = useState<{
+        isOpen: boolean;
+        message: string;
+    }>({
+        isOpen: false,
+        message: "",
+    });
 
-        return {
-            id: newId,
-            nombreUsuario: u.nombreUsuario,
-            fechaCreacion: new Date(),
-            is_active: true,
-            rol_nombre,
-            trabajador_nombre,
-        };
-    }, [usuariosState.data]);
+    const showError = (message: string) => {
+        setErrorModalConfig({isOpen: true, message});
+    };
 
-    const filteredUsuarios = useMemo(() => {
-        return usuariosState.data.filter((usuario) => {
-            const matchesSearch =
-                usuario.nombreUsuario.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                usuario.rol_nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                usuario.trabajador_nombre.toLowerCase().includes(searchTerm.toLowerCase());
-            const matchesStatus =
-                statusFilter === "all" ||
-                (statusFilter === "active" && usuario.is_active) ||
-                (statusFilter === "inactive" && !usuario.is_active);
-            return matchesSearch && matchesStatus;
-        });
-    }, [usuariosState.data, searchTerm, statusFilter]);
+    const showSuccess = (message: string) => {
+        setSuccessModalConfig({isOpen: true, message});
+    };
 
-    const currentUsuarios = useMemo(() => {
-        const startIndex = (currentPage - 1) * usuariosState.pagination.pageSize;
-        return filteredUsuarios.slice(startIndex, startIndex + usuariosState.pagination.pageSize);
-    }, [currentPage, filteredUsuarios, usuariosState.pagination.pageSize]);
+    const handleStatusFilterChange = (value: string) => {
+        const isActiveValue = value === "true";
+        setIsActive(isActiveValue);
+    };
 
-    const handleEdit = (id?: number) => {
-        if (id !== undefined) {
-            const usuarioDetails = usuariosState.data.find((u) => u.id === id);
-            if (usuarioDetails) {
-                const u = usuarioDetailsToUsuario(usuarioDetails);
-                setSelectedUsuario(u);
-                setIsModalOpen(true);
-            }
+    const loadPaginatedData = async (page: number) => {
+        try {
+            setIsLoading(true);
+            const response = await getUsuariosPaginated(
+                page,
+                usuariosState.pagination.pageSize,
+                isActive
+            );
+
+            const formattedData = response.data.map((usuario) => ({
+                ...usuario,
+                fechaCreacion: new Date(usuario.fechaCreacion).toLocaleDateString(),
+                fechaActualizacion: usuario.fechaActualizacion
+                    ? new Date(usuario.fechaActualizacion).toLocaleDateString()
+                    : undefined,
+            }));
+
+            setUsuariosState({
+                ...response,
+                data: formattedData,
+            });
+        } catch {
+            showError("Error al cargar la lista de usuarios");
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    const handleDeleteClick = (id?: number) => {
-        if (id !== undefined) {
-            const usuario = usuariosState.data.find((u) => u.id === id);
-            if (usuario) {
-                setSelectedUsuario(usuarioDetailsToUsuario(usuario));
-                setIsDeleteModalOpen(true);
+    const debouncedSearch = useCallback(
+        debounce(async (searchValue: string) => {
+            try {
+                setIsLoading(true);
+                if (searchValue.trim()) {
+                    const searchResults = await findByString(searchValue);
+
+                    const formattedResults = searchResults.map((usuario) => ({
+                        ...usuario,
+                        fechaCreacion: new Date(usuario.fechaCreacion).toLocaleDateString(),
+                        fechaActualizacion: usuario.fechaActualizacion
+                            ? new Date(usuario.fechaActualizacion).toLocaleDateString()
+                            : undefined,
+                    }));
+
+                    if (formattedResults.length === 0) {
+                        setNoResultsMessage(
+                            "No se encontraron resultados para la búsqueda"
+                        );
+                        setShowNoResults(true);
+                        setUsuariosState((prev) => ({
+                            ...prev,
+                            data: [],
+                            pagination: {
+                                ...prev.pagination,
+                                totalItems: 0,
+                                totalPages: 0,
+                            },
+                        }));
+                    } else {
+                        setUsuariosState((prev) => ({
+                            ...prev,
+                            data: formattedResults,
+                            pagination: {
+                                currentPage: 1,
+                                pageSize: prev.pagination.pageSize,
+                                totalItems: formattedResults.length,
+                                totalPages: 1,
+                            },
+                        }));
+                    }
+                } else {
+                    setShowNoResults(false);
+                    await loadPaginatedData(1);
+                }
+            } catch (error) {
+                if (error instanceof Error && error.name === "NotFoundError") {
+                    setNoResultsMessage(error.message);
+                    setShowNoResults(true);
+                    setUsuariosState((prev) => ({
+                        ...prev,
+                        data: [],
+                        pagination: {
+                            ...prev.pagination,
+                            totalItems: 0,
+                            totalPages: 0,
+                        },
+                    }));
+                } else if (error instanceof Error) {
+                    showError(error.message);
+                } else {
+                    showError("Ocurrió un error en el servidor");
+                }
+            } finally {
+                setIsLoading(false);
             }
+        }, 500),
+        [isActive]
+    );
+
+    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setSearchTerm(value);
+        debouncedSearch(value);
+    };
+
+    useEffect(() => {
+        loadPaginatedData(1);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isActive]);
+
+    const handlePageChange = (page: number) => {
+        if (page < 1 || page > usuariosState.pagination.totalPages) return;
+        loadPaginatedData(page);
+    };
+
+    const handleEdit = async (id?: number) => {
+        try {
+            if (id !== undefined) {
+                const data = await getUsuarioById(id);
+                if (data) {
+                    setSelectedUsuario(data);
+                    setIsModalOpen(true);
+                }
+            }
+        } catch {
+            showError("Error al cargar los datos del usuario");
         }
     };
 
@@ -126,89 +222,150 @@ export const UsuarioContainer: React.FC = () => {
         if (id !== undefined) {
             const usuario = usuariosState.data.find((u) => u.id === id);
             if (usuario) {
-                setSelectedUsuario(usuarioDetailsToUsuario(usuario));
+                setSelectedUsuario(usuario);
                 setIsDeactivateModalOpen(true);
             }
         }
     };
 
-    const handleDeleteConfirm = async () => {
-        if (selectedUsuario?.id) {
-            setUsuarios({
-                ...usuariosState,
-                data: usuariosState.data.filter((u) => u.id !== selectedUsuario.id),
-                pagination: {
-                    ...usuariosState.pagination,
-                    totalItems: usuariosState.pagination.totalItems - 1,
-                    totalPages: Math.ceil(
-                        (usuariosState.pagination.totalItems - 1) / usuariosState.pagination.pageSize
-                    ),
-                },
-            });
-            setIsDeleteModalOpen(false);
+    const handleDeactivateConfirm = async () => {
+        if (!selectedUsuario?.id) return;
+        try {
+            setIsLoading(true);
+            await updateUsuarioStatus(selectedUsuario.id, false);
+
+            await loadPaginatedData(usuariosState.pagination.currentPage);
+            setShowNoResults(false);
+            setIsDeactivateModalOpen(false);
             setSelectedUsuario(undefined);
             setDataVersion((prev) => prev + 1);
+            showSuccess("Usuario desactivado correctamente");
+        } catch (error) {
+            if (error instanceof Error) {
+                showError(error.message);
+            } else {
+                showError("Error al desactivar el usuario");
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
-            if (currentUsuarios.length <= 1 && currentPage > 1) {
-                setCurrentPage(currentPage - 1);
+    const handleActivateClick = (id?: number) => {
+        if (id !== undefined) {
+            const usuario = usuariosState.data.find((u) => u.id === id);
+            if (usuario) {
+                setSelectedUsuario(usuario);
+                setIsActivateModalOpen(true);
             }
         }
     };
 
-    const handleModalSubmit = (data: Usuario) => {
-        const ud = usuarioToUsuarioDetails(data);
+    const handleActivateConfirm = async () => {
+        if (!selectedUsuario?.id) return;
+        try {
+            setIsLoading(true);
+            await updateUsuarioStatus(selectedUsuario.id, true);
 
-        if (data.id) {
-            setUsuarios({
-                ...usuariosState,
-                data: usuariosState.data.map((u) => (u.id === data.id ? ud : u)),
-            });
-        } else {
-            setUsuarios({
-                ...usuariosState,
-                data: [...usuariosState.data, ud],
-                pagination: {
-                    ...usuariosState.pagination,
-                    totalItems: usuariosState.pagination.totalItems + 1,
-                    totalPages: Math.ceil(
-                        (usuariosState.pagination.totalItems + 1) / usuariosState.pagination.pageSize
-                    ),
-                },
-            });
+            await loadPaginatedData(usuariosState.pagination.currentPage);
+            setShowNoResults(false);
+            setIsActivateModalOpen(false);
+            setSelectedUsuario(undefined);
+            setDataVersion((prev) => prev + 1);
+            showSuccess("Usuario activado correctamente");
+        } catch (error) {
+            if (error instanceof Error) {
+                showError(error.message);
+            } else {
+                showError("Error al activar el usuario");
+            }
+        } finally {
+            setIsLoading(false);
         }
-        setIsModalOpen(false);
-        setSelectedUsuario(undefined);
-        setDataVersion((prev) => prev + 1);
+    };
+
+    const handleModalSubmit = async (data: Usuario) => {
+        try {
+            setIsLoading(true);
+
+            if (data.id) {
+                await updateUsuario(data.id, data);
+                await loadPaginatedData(usuariosState.pagination.currentPage);
+                setUpdateSuccessConfig({
+                    isOpen: true,
+                    message: "Usuario actualizado correctamente",
+                });
+            } else {
+                await createUsuario(data);
+                const totalItems = usuariosState.pagination.totalItems + 1;
+                const newPage = Math.ceil(
+                    totalItems / usuariosState.pagination.pageSize
+                );
+                await loadPaginatedData(newPage);
+                showSuccess("Usuario creado correctamente");
+            }
+
+            setIsModalOpen(false);
+            setSelectedUsuario(undefined);
+            setDataVersion((prev) => prev + 1);
+        } catch (error) {
+            if (error instanceof Error) {
+                showError(error.message);
+            } else {
+                showError(`Error al ${data.id ? "actualizar" : "crear"} el usuario`);
+            }
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
         <div className="pt-0.5 pr-0.5 pb-1 pl-0.5 sm:pt-2 sm:pr-2 sm:pb-4 sm:pl-2 bg-transparent">
-            <UsuarioHeader onAddClick={() => setIsModalOpen(true)} />
+            <UsuarioHeader onAddClick={() => setIsModalOpen(true)}/>
 
             <div className="w-full overflow-hidden bg-white rounded-lg shadow-lg">
                 <UsuarioSearch
                     searchTerm={searchTerm}
-                    statusFilter={statusFilter}
-                    onSearch={(e) => setSearchTerm(e.target.value)}
-                    onStatusFilterChange={setStatusFilter}
+                    statusFilter={isActive.toString()}
+                    onStatusFilterChange={handleStatusFilterChange}
+                    onSearch={handleSearch}
+                    onClear={() => {
+                        setSearchTerm("");
+                        debouncedSearch.cancel();
+                        loadPaginatedData(1);
+                    }}
                 />
 
-                <UsuarioTable
-                    usuarios={currentUsuarios}
-                    dataVersion={dataVersion}
-                    currentPage={currentPage}
-                    onEdit={handleEdit}
-                    onDelete={handleDeleteClick}
-                    onDeactivate={handleDeactivateClick}
-                />
-
-                <div className="py-4 px-4 sm:px-6 border-t border-gray-200">
-                    <Pagination
-                        currentPage={currentPage}
-                        totalPages={usuariosState.pagination.totalPages}
-                        onPageChange={(page) => setCurrentPage(page)}
+                {isLoading ? (
+                    <div className="w-full h-[300px] flex items-center justify-center">
+                        <LoadingSpinner
+                            size="lg"
+                            message="Cargando usuarios..."
+                            color="#145A32"
+                        />
+                    </div>
+                ) : (
+                    <UsuarioTable
+                        usuarios={usuariosState.data}
+                        dataVersion={dataVersion}
+                        currentPage={usuariosState.pagination.currentPage}
+                        searchTerm={searchTerm}
+                        onEdit={handleEdit}
+                        onDeactivate={handleDeactivateClick}
+                        onActivate={handleActivateClick}
+                        statusFilter={isActive.toString()}
                     />
-                </div>
+                )}
+
+                {usuariosState.pagination.totalPages > 1 && (
+                    <div className="py-4 px-4 sm:px-6 border-t border-gray-200">
+                        <Pagination
+                            currentPage={usuariosState.pagination.currentPage}
+                            totalPages={usuariosState.pagination.totalPages}
+                            onPageChange={handlePageChange}
+                        />
+                    </div>
+                )}
             </div>
 
             {isModalOpen && (
@@ -223,23 +380,54 @@ export const UsuarioContainer: React.FC = () => {
                 />
             )}
 
-            {isDeleteModalOpen && (
-                <DeleteModal
-                    isOpen={isDeleteModalOpen}
-                    onClose={() => setIsDeleteModalOpen(false)}
-                    onConfirm={handleDeleteConfirm}
-                    itemName={selectedUsuario?.nombreUsuario || ""}
-                />
-            )}
-
             {isDeactivateModalOpen && (
                 <DeactivateModal
                     isOpen={isDeactivateModalOpen}
                     onClose={() => setIsDeactivateModalOpen(false)}
-                    onConfirm={handleDeleteConfirm}
+                    onConfirm={handleDeactivateConfirm}
                     userName={selectedUsuario?.nombreUsuario || ""}
                 />
             )}
+
+            <SuccessModal
+                isOpen={successModalConfig.isOpen}
+                onClose={() =>
+                    setSuccessModalConfig((prev) => ({...prev, isOpen: false}))
+                }
+                title="Operación Exitosa"
+                message={successModalConfig.message}
+            />
+
+            <ErrorModal
+                isOpen={errorModalConfig.isOpen}
+                onClose={() =>
+                    setErrorModalConfig((prev) => ({...prev, isOpen: false}))
+                }
+                title="Error"
+                errorMessage={errorModalConfig.message}
+            />
+
+            <UpdateSuccessModal
+                isOpen={updateSuccessConfig.isOpen}
+                onClose={() =>
+                    setUpdateSuccessConfig((prev) => ({...prev, isOpen: false}))
+                }
+                title="Actualización Exitosa"
+                message={updateSuccessConfig.message}
+            />
+
+            <ActivateModal
+                isOpen={isActivateModalOpen}
+                onClose={() => setIsActivateModalOpen(false)}
+                onConfirm={handleActivateConfirm}
+                userName={selectedUsuario?.nombreUsuario || ""}
+            />
+
+            <NoResultsModal
+                isOpen={showNoResults}
+                onClose={() => setShowNoResults(false)}
+                message={noResultsMessage}
+            />
         </div>
     );
 };

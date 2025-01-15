@@ -1,12 +1,17 @@
-import * as React from "react";
-import { useForm, Controller, SubmitHandler } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import {useEffect} from "react";
+import {useForm} from "react-hook-form";
+import {zodResolver} from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Check, ChevronsUpDown } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form";
+import {Input} from "@/components/ui/input";
 import {
     Select,
     SelectContent,
@@ -14,195 +19,231 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-} from "@/components/ui/command";
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover";
-import { Usuario } from "@/model/usuario";
+import {Usuario} from "@/model/usuario";
+import {Rol} from "@/model/rol";
+import {TrabajadorNombresDetails} from "@/model/trabajadorNombresDetails";
+import ReactSelect from "react-select";
+import {UsuarioModalFooter} from "./UsuarioModalFooter";
 
-const schema = z.object({
+const formSchema = z.object({
     nombreUsuario: z
         .string()
-        .min(3, {
-            message: "El nombre de usuario debe tener al menos 3 caracteres",
-        }),
+        .min(3, "El nombre de usuario debe tener al menos 3 caracteres")
+        .regex(
+            /^[a-zA-Z0-9._]+$/,
+            "Solo se permiten letras, números, puntos y guiones bajos"
+        ),
     contrasena: z
         .string()
-        .min(6, { message: "La contraseña debe tener al menos 6 caracteres" }),
-    rolId: z
-        .number()
-        .int()
-        .positive({ message: "Debe seleccionar un rol válido" }),
-    trabajadorId: z
-        .number()
-        .int()
-        .positive({ message: "Debe seleccionar un trabajador válido" }),
+        .min(6, "La contraseña debe tener al menos 6 caracteres"),
+    rolId: z.string({required_error: "Por favor seleccione un rol"}),
+    trabajadorId: z.number({
+        required_error: "Por favor seleccione un trabajador",
+    }),
 });
-
-const trabajadores = [
-    { value: 1, label: "Juan Pérez" },
-    { value: 2, label: "María García" },
-    { value: 3, label: "Carlos López" },
-    { value: 4, label: "Ana Martínez" },
-    { value: 5, label: "Luis Rodríguez" },
-];
 
 interface UsuarioModalFormProps {
     usuario?: Usuario;
-    onSubmit: (data: Usuario) => void;
+    isEditing: boolean;
+    onClose: () => void;
+    onSubmit: (data: Usuario) => Promise<void>;
+    roles: Rol[];
+    trabajadores: TrabajadorNombresDetails[];
+    isLoading?: boolean;
 }
 
 export const UsuarioModalForm: React.FC<UsuarioModalFormProps> = ({
                                                                       usuario,
+                                                                      isEditing,
+                                                                      onClose,
                                                                       onSubmit,
+                                                                      roles,
+                                                                      trabajadores,
+                                                                      isLoading = false,
                                                                   }) => {
-    const [popoverOpen, setPopoverOpen] = React.useState(false);
-
-    const {
-        control,
-        register,
-        handleSubmit,
-        formState: { errors },
-        setValue,
-    } = useForm<Usuario>({
-        resolver: zodResolver(schema),
-        defaultValues: usuario
-            ? usuario
-            : {
-                nombreUsuario: "",
-                contrasena: "",
-                rolId: 1,
-                trabajadorId: 1,
-            },
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            nombreUsuario: "",
+            contrasena: "",
+            rolId: "",
+            trabajadorId: undefined,
+        },
     });
 
-    const handleFormSubmit: SubmitHandler<Usuario> = (data) => {
-        onSubmit(data);
+    useEffect(() => {
+        if (!usuario) return;
+        if (!roles || roles.length === 0 || isLoading) return;
+        form.reset({
+            nombreUsuario: usuario.nombreUsuario,
+            contrasena: "",
+            rolId: usuario.rolId?.toString() || "",
+            trabajadorId: usuario.trabajadorId,
+        });
+        form.setFocus(isEditing ? "contrasena" : "nombreUsuario");
+    }, [usuario, roles, isLoading, form, isEditing]);
+
+    const trabajadoresOptions = trabajadores.map((trabajador) => ({
+        value: trabajador.id,
+        label: trabajador.nombres,
+    }));
+
+    const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+        const data: Usuario = {
+            id: usuario?.id,
+            nombreUsuario: values.nombreUsuario,
+            contrasena: values.contrasena,
+            rolId: parseInt(values.rolId, 10),
+            trabajadorId: values.trabajadorId,
+        };
+        await onSubmit(data);
+        onClose();
     };
 
     return (
-        <form onSubmit={handleSubmit(handleFormSubmit)} className="p-6 space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div className="grid gap-2">
-                    <Label htmlFor="nombreUsuario">Nombre de Usuario</Label>
-                    <Input
-                        id="nombreUsuario"
-                        {...register("nombreUsuario")}
-                        className="w-full"
-                        aria-invalid={errors.nombreUsuario ? "true" : "false"}
-                    />
-                    {errors.nombreUsuario && (
-                        <p className="text-sm text-red-500">
-                            {errors.nombreUsuario.message}
-                        </p>
-                    )}
-                </div>
-
-                <div className="grid gap-2">
-                    <Label htmlFor="contrasena">Contraseña</Label>
-                    <Input
-                        id="contrasena"
-                        type="password"
-                        {...register("contrasena")}
-                        className="w-full"
-                        aria-invalid={errors.contrasena ? "true" : "false"}
-                    />
-                    {errors.contrasena && (
-                        <p className="text-sm text-red-500">{errors.contrasena.message}</p>
-                    )}
-                </div>
-
-                <div className="grid gap-2">
-                    <Label htmlFor="rol-select">Rol</Label>
-                    <Select
-                        onValueChange={(value) => setValue("rolId", parseInt(value))}
-                        defaultValue={String(usuario?.rolId ?? 1)}
-                        name="rolId"
-                    >
-                        <SelectTrigger className="w-full" id="rol-select">
-                            <SelectValue placeholder="Seleccione un rol" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="1">Administrador</SelectItem>
-                            <SelectItem value="2">Usuario</SelectItem>
-                            <SelectItem value="3">Invitado</SelectItem>
-                        </SelectContent>
-                    </Select>
-                    {errors.rolId && (
-                        <p className="text-sm text-red-500">{errors.rolId.message}</p>
-                    )}
-                </div>
-
-                <div className="grid gap-2">
-                    <Label htmlFor="trabajador-select">Trabajador</Label>
-                    <Controller
-                        name="trabajadorId"
-                        control={control}
-                        render={({ field }) => (
-                            <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-                                <PopoverTrigger asChild>
-                                    <Button
-                                        id="trabajador-select"
-                                        variant="outline"
-                                        role="combobox"
-                                        aria-expanded={popoverOpen}
-                                        className="w-full justify-between"
-                                    >
-                                        {field.value
-                                            ? trabajadores.find((t) => t.value === field.value)?.label
-                                            : "Seleccione un trabajador"}
-                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-[300px] p-0">
-                                    <Command>
-                                        <CommandInput placeholder="Buscar trabajador..." />
-                                        <CommandList>
-                                            <CommandEmpty>
-                                                No se encontró ningún trabajador.
-                                            </CommandEmpty>
-                                            <CommandGroup>
-                                                {trabajadores.map((trabajador) => (
-                                                    <CommandItem
-                                                        key={trabajador.value}
-                                                        value={String(trabajador.value)}
-                                                        onSelect={(currentValue) => {
-                                                            field.onChange(parseInt(currentValue, 10));
-                                                            setPopoverOpen(false);
-                                                        }}
-                                                    >
-                                                        {trabajador.label}
-                                                        <Check
-                                                            className={cn(
-                                                                "ml-auto h-4 w-4",
-                                                                field.value === trabajador.value
-                                                                    ? "opacity-100"
-                                                                    : "opacity-0"
-                                                            )}
-                                                        />
-                                                    </CommandItem>
-                                                ))}
-                                            </CommandGroup>
-                                        </CommandList>
-                                    </Command>
-                                </PopoverContent>
-                            </Popover>
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+                <div className="grid gap-4 sm:gap-6">
+                    <FormField
+                        control={form.control}
+                        name="nombreUsuario"
+                        render={({field}) => (
+                            <FormItem>
+                                <FormLabel className="text-sm sm:text-base">Nombre de Usuario</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        {...field}
+                                        disabled={isLoading}
+                                        placeholder="Ingrese nombre de usuario"
+                                        className="text-sm sm:text-base"
+                                    />
+                                </FormControl>
+                                <FormMessage className="text-xs sm:text-sm"/>
+                            </FormItem>
                         )}
                     />
-                    {errors.trabajadorId && (
-                        <p className="text-sm text-red-500">{errors.trabajadorId.message}</p>
-                    )}
+
+                    <FormField
+                        control={form.control}
+                        name="contrasena"
+                        render={({field}) => (
+                            <FormItem>
+                                <FormLabel className="text-sm sm:text-base">Contraseña</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        type="password"
+                                        {...field}
+                                        disabled={isLoading}
+                                        placeholder="Ingrese contraseña"
+                                        className="text-sm sm:text-base"
+                                    />
+                                </FormControl>
+                                <FormMessage className="text-xs sm:text-sm"/>
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="rolId"
+                        render={({field}) => (
+                            <FormItem>
+                                <FormLabel className="text-sm sm:text-base">Rol</FormLabel>
+                                <Select
+                                    onValueChange={field.onChange}
+                                    value={field.value}
+                                    disabled={isLoading}
+                                >
+                                    <FormControl>
+                                        <SelectTrigger className="w-full text-sm sm:text-sm">
+                                            <SelectValue placeholder="Seleccione rol"/>
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        {roles.map((rol) => (
+                                            <SelectItem
+                                                key={rol.id ?? 0}
+                                                value={(rol.id ?? 0).toString()}
+                                            >
+                                                {rol.nombreRol}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage className="text-xs sm:text-sm"/>
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="trabajadorId"
+                        render={({field}) => (
+                            <FormItem>
+                                <FormLabel className="text-sm sm:text-base">Trabajador</FormLabel>
+                                <FormControl>
+                                    <ReactSelect
+                                        inputId="trabajador"
+                                        options={trabajadoresOptions}
+                                        value={trabajadoresOptions.find(
+                                            (option) => option.value === field.value
+                                        )}
+                                        onChange={(option) => field.onChange(option?.value)}
+                                        isDisabled={isLoading}
+                                        isClearable
+                                        isSearchable
+                                        placeholder="Seleccione un trabajador"
+                                        className="basic-single text-sm"
+                                        classNamePrefix="select"
+                                        styles={{
+                                            control: (baseStyles, state) => ({
+                                                ...baseStyles,
+                                                borderWidth: "0.5px",
+                                                borderColor: state.isFocused ? "black" : "#e2e8f0",
+                                                boxShadow: "none",
+                                                fontSize: "0.875rem",
+                                                "&:hover": {
+                                                    borderColor: "black",
+                                                    borderWidth: "0.5px",
+                                                },
+                                            }),
+                                            option: (baseStyles, state) => ({
+                                                ...baseStyles,
+                                                fontSize: "0.875rem",
+                                                backgroundColor: state.isSelected
+                                                    ? "#f3f4f6"
+                                                    : state.isFocused
+                                                        ? "#f9fafb"
+                                                        : "white",
+                                                "&:hover": {
+                                                    backgroundColor: "#f3f4f6",
+                                                },
+                                            }),
+                                            placeholder: (baseStyles) => ({
+                                                ...baseStyles,
+                                                fontSize: "0.875rem",
+                                                color: "black",
+                                            }),
+                                            singleValue: (baseStyles) => ({
+                                                ...baseStyles,
+                                                fontSize: "0.875rem",
+                                                color: "black",
+                                            }),
+                                        }}
+                                    />
+                                </FormControl>
+                                <FormMessage className="text-xs sm:text-sm"/>
+                            </FormItem>
+                        )}
+                    />
                 </div>
-            </div>
-        </form>
+
+                <UsuarioModalFooter
+                    isEditing={isEditing}
+                    onClose={onClose}
+                    onSubmit={form.handleSubmit(handleSubmit)}
+                />
+            </form>
+        </Form>
     );
 };

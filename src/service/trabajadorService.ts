@@ -10,7 +10,7 @@ const API_BASE_URL = `/trabajadores/`;
 
 export const getTrabajadoresNames = async (): Promise<TrabajadorNombresDetails[]> => {
     try {
-        const response = await axiosInstance.get(`${API_BASE_URL}/names`);
+        const response = await axiosInstance.get(`${API_BASE_URL}names`);
         return humps.camelizeKeys(response.data) as TrabajadorNombresDetails[];
     } catch (error) {
         if (error instanceof AxiosError && error.response?.data?.detail) {

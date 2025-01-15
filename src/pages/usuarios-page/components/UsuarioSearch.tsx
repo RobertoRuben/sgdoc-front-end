@@ -1,7 +1,7 @@
-import { Search } from "lucide-react";
-import { PiBroom } from "react-icons/pi";
-import { Input } from "@/components/ui/input";
-import { useState, useEffect } from "react";
+import {Search} from "lucide-react";
+import {PiBroom} from "react-icons/pi";
+import {Input} from "@/components/ui/input";
+import {useState, useEffect} from "react";
 import {
     Select,
     SelectContent,
@@ -61,7 +61,7 @@ export const UsuarioSearch: React.FC<UsuarioSearchProps> = ({
         <div className="relative mb-4 p-4 border-b border-gray-200">
             <div className="flex flex-col sm:flex-row gap-4">
                 <div className="relative flex-grow">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"/>
                     <Input
                         type="text"
                         id="search"
@@ -81,18 +81,17 @@ export const UsuarioSearch: React.FC<UsuarioSearchProps> = ({
                             onClick={onClear}
                             aria-label="Limpiar búsqueda"
                         >
-                            <PiBroom className="w-5 h-5" />
+                            <PiBroom className="w-5 h-5"/>
                         </button>
                     )}
                 </div>
                 <Select value={statusFilter} onValueChange={onStatusFilterChange}>
                     <SelectTrigger className="w-full sm:w-[180px]">
-                        <SelectValue placeholder="Filtrar por estado" />
+                        <SelectValue placeholder="Filtrar por estado"/>
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="all">Todos</SelectItem>
-                        <SelectItem value="active">Activo</SelectItem>
-                        <SelectItem value="inactive">Inactivo</SelectItem>
+                        <SelectItem value="true">Activo</SelectItem>
+                        <SelectItem value="false">Inactivo</SelectItem>
                     </SelectContent>
                 </Select>
             </div>
