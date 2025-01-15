@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Pagination } from "@/components/ui/pagination";
 import { DocumentoDetails } from "@/model/documentoDetails";
 import { PaginatedDocumentoResponse } from "@/model/paginatedDocumentoResponse";
-import { DocumentoRequest } from "@/model/documento";
+import { Documento } from "@/model/documento";
 import DeleteModal from "@/components/modal/alerts/delete-modal/DeleteModal";
 import { ActualizacionDocumentoModal } from "@/components/modal/documento-modal/actualizacion-documento-modal/ActualizacionDocumentoModal";
 import DownloadModal from "@/components/modal/alerts/download-modal/DownloadModal";
@@ -238,7 +238,7 @@ export const ListaDocumentosContainer: React.FC = () => {
   // ================================
   // HANDLER PARA ACTUALIZACIÓN
   // ================================
-  const handleUpdateDocumento = async (data: DocumentoRequest) => {
+  const handleUpdateDocumento = async (data: Documento) => {
     setDocumentos((prevState) => ({
       ...prevState,
       data: prevState.data.map((doc) =>

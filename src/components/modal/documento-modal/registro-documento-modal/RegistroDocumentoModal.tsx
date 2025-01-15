@@ -7,17 +7,17 @@ import {
   DialogDescription 
 } from '@/components/ui/dialog';
 import { Remitente } from '@/model/remitente';
-import { DocumentoRequest } from '@/model/documento';
-import ProgressBar from './ProgressBar';
-import DatosRemitenteForm from './DatosRemitenteForm';
-import DatosDocumentoForm from './DatosDocumentoForm';
+import { Documento } from '@/model/documento';
+import ProgressBar from './components/ProgressBar';
+import DatosRemitenteForm from './components/datos-remitente-form/DatosRemitenteForm';
+import DatosDocumentoForm from './components/datos-documento-form/DatosDocumentoForm';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, FileText } from 'lucide-react';
 import LoadingSpinner from '@/components/layout/LoadingSpinner';
 
 interface FormData {
   remitente?: Remitente;
-  documento?: DocumentoRequest;
+  documento?: Documento;
 }
 
 interface RegistroDocumentoModalProps {

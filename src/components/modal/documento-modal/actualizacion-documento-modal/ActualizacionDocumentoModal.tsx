@@ -23,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { DocumentoRequest } from "@/model/documento";
+import { Documento } from "@/model/documento";
 
 const formSchema = z.object({
   id: z.number().optional(),
@@ -71,9 +71,9 @@ const centrosPoblados = [
 
 interface ActualizacionDocumentoModalProps {
   isOpen: boolean;
-  documento?: DocumentoRequest;
+  documento?: Documento;
   onClose: () => void;
-  onSubmit: (data: DocumentoRequest) => Promise<void>;
+  onSubmit: (data: Documento) => Promise<void>;
 }
 
 export function ActualizacionDocumentoModal({
@@ -92,7 +92,7 @@ export function ActualizacionDocumentoModal({
     formState: { errors },
     reset,
     setValue,
-  } = useForm<DocumentoRequest>({
+  } = useForm<Documento>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       id: documento?.id,
@@ -129,10 +129,10 @@ export function ActualizacionDocumentoModal({
   }, [documento, reset]);
 
   // 4. Convertir datos a DocumentoRequest en el envío
-  const handleFormSubmit: SubmitHandler<DocumentoRequest> = async (values) => {
+  const handleFormSubmit: SubmitHandler<Documento> = async (values) => {
     setIsSubmitting(true);
     try {
-      const documentoRequest: DocumentoRequest = {
+      const documentoRequest: Documento = {
         id: values.id,
         nombre: values.nombre,
         folios: values.folios,

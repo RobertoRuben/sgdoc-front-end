@@ -1,4 +1,4 @@
-export interface DocumentoRequest {
+export interface Documento {
     id?: number;
     documentoBytes: File | null
     nombre: string;
