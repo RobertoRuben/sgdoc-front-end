@@ -1,4 +1,3 @@
-// RegistroDocumentoModal.tsx
 import { useState, useEffect } from 'react';
 import { 
   Dialog, 

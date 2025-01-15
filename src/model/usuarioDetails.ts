@@ -1,9 +1,9 @@
 export interface UsuarioDetails{
     id: number;
     nombreUsuario: string;
-    fechaCreacion: Date;
-    fechaActualizacion?: Date;
-    is_active: boolean;
-    rol_nombre: string;
-    trabajador_nombre: string;
+    fechaCreacion: string;
+    fechaActualizacion?: string;
+    isActive: boolean;
+    rolNombre: string;
+    trabajadorNombre: string;
 }
