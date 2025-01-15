@@ -1,4 +1,3 @@
-// DatosRemitenteForm.tsx
 import { useForm, Controller } from 'react-hook-form';
 import { Remitente } from '@/model/remitente';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
