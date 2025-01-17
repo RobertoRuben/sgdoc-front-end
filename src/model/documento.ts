@@ -1,6 +1,6 @@
 export interface Documento {
     id?: number;
-    documentoBytes: File | null
+    documentoBytes: Blob | File | null;
     nombre: string;
     folios: number;
     asunto: string;

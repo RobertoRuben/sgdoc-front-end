@@ -1,6 +1,7 @@
 import { AxiosError } from "axios";
 import humps from "humps";
 import { Caserio } from "@/model/caserio";
+import { CaserioSimpleResponse } from "@/model/caserioSimpleResponse";
 import { CaserioDetails } from "@/model/caserioDetails";
 import { CaserioPaginatedResponse } from "@/model/caserioPaginatedResponse";
 import axiosInstance from "./axiosConfig";
@@ -29,6 +30,23 @@ export const getCaseriosByCentroPobladoId = async (
     );
   }
 };
+
+export const getAllCaserios = async (): Promise<CaserioSimpleResponse[]> => {
+  try {
+    const response = await axiosInstance.get(`${API_BASE_URL}names`);
+    return humps.camelizeKeys(response.data) as CaserioSimpleResponse[];
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      if (error.response?.status === 404) {
+        return [];
+      }
+      if (error.response?.data?.detail) {
+        throw new Error(error.response.data.detail);
+      }
+    }
+    throw new Error("Error al obtener los caserios");
+  }
+}
 
 
 export const createCaserio = async (

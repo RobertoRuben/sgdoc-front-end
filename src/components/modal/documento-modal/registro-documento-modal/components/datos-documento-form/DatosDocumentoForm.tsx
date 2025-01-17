@@ -82,6 +82,9 @@ const DatosDocumentoForm: React.FC<DatosDocumentoFormProps> = ({
       const documentoRequest: Documento = {
         ...data,
         documentoBytes: file,
+        nombre: data.nombre.trim(),
+        asunto: data.asunto.trim(),
+        folios: Number(data.folios),
         ambitoId: Number(data.ambitoId),
         categoriaId: Number(data.categoriaId),
         caserioId: Number(data.caserioId),

@@ -1,6 +1,7 @@
 // ListaDocumentosSearch.tsx
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Search } from "lucide-react";
+import { PiBroom } from "react-icons/pi";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -19,19 +20,14 @@ import { Caserio } from "@/model/caserio";
 interface ListaDocumentosSearchProps {
   searchTerm: string;
   setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
-
   selectedCaserio: string | undefined;
   setSelectedCaserio: React.Dispatch<React.SetStateAction<string | undefined>>;
-
   selectedCentroPoblado: string | undefined;
   setSelectedCentroPoblado: React.Dispatch<React.SetStateAction<string | undefined>>;
-
   selectedAmbito: string | undefined;
   setSelectedAmbito: React.Dispatch<React.SetStateAction<string | undefined>>;
-
   selectedDate: Date | undefined;
   setSelectedDate: React.Dispatch<React.SetStateAction<Date | undefined>>;
-
   ambitos: Ambito[];
   centrosPoblados: CentroPoblado[];
   caserios: Caserio[];
@@ -52,6 +48,40 @@ export const ListaDocumentosSearch: React.FC<ListaDocumentosSearchProps> = ({
   centrosPoblados,
   caserios,
 }) => {
+  const [isBackspaceHeld, setIsBackspaceHeld] = useState(false);
+  const [deferredValue, setDeferredValue] = useState(searchTerm);
+
+  useEffect(() => {
+    setDeferredValue(searchTerm);
+  }, [searchTerm]);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Backspace") {
+      setIsBackspaceHeld(true);
+    }
+  };
+
+  const handleKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Backspace") {
+      setIsBackspaceHeld(false);
+      const syntheticEvent = { target: e.currentTarget } as React.ChangeEvent<HTMLInputElement>;
+      setSearchTerm(syntheticEvent.target.value);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setDeferredValue(newValue);
+    if (!isBackspaceHeld) {
+      setSearchTerm(newValue);
+    }
+  };
+
+  const handleClear = () => {
+    setDeferredValue("");
+    setSearchTerm("");
+  };
+
   return (
     <div className="mb-4 p-4 border-b border-gray-200 flex flex-wrap gap-4 items-center justify-between">
       {/* Campo de búsqueda */}
@@ -61,26 +91,33 @@ export const ListaDocumentosSearch: React.FC<ListaDocumentosSearchProps> = ({
           type="text"
           id="search"
           placeholder="Buscar documentos..."
-          className="pl-10 w-full border-gray-300 focus:border-[#03A64A] focus:ring focus:ring-[#03A64A] focus:ring-opacity-50 rounded-md shadow-sm"
+          className="pl-10 pr-10 w-full border-gray-300 focus:border-[#03A64A] focus:ring focus:ring-[#03A64A] focus:ring-opacity-50 rounded-md shadow-sm"
           aria-label="Buscar documentos"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          value={deferredValue}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
+          onKeyUp={handleKeyUp}
         />
+        {deferredValue && (
+          <button
+            type="button"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none transition-colors duration-200"
+            onClick={handleClear}
+            aria-label="Limpiar búsqueda"
+          >
+            <PiBroom className="w-5 h-5" />
+          </button>
+        )}
       </div>
 
       {/* Select de Centro Poblado */}
-      <Select
-        onValueChange={(val) =>
-          setSelectedCentroPoblado(val === "all" ? undefined : val)
-        }
-      >
+      <Select onValueChange={(val) => setSelectedCentroPoblado(val === "all" ? undefined : val)}>
         <SelectTrigger className="w-full sm:w-[180px]">
           <SelectValue placeholder={selectedCentroPoblado || "Centro Poblado"} />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">Todos</SelectItem>
           {centrosPoblados.map((centroPoblado) => (
-            // Usamos el id como valor (convertido a string)
             <SelectItem key={centroPoblado.id} value={String(centroPoblado.id)}>
               {centroPoblado.nombreCentroPoblado}
             </SelectItem>
@@ -89,18 +126,13 @@ export const ListaDocumentosSearch: React.FC<ListaDocumentosSearchProps> = ({
       </Select>
 
       {/* Select de Caserío */}
-      <Select
-        onValueChange={(val) =>
-          setSelectedCaserio(val === "all" ? undefined : val)
-        }
-      >
+      <Select onValueChange={(val) => setSelectedCaserio(val === "all" ? undefined : val)}>
         <SelectTrigger className="w-full sm:w-[180px]">
           <SelectValue placeholder={selectedCaserio || "Caserío"} />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">Todos</SelectItem>
           {caserios.map((caserio) => (
-            // Aquí se muestran solo los nombres, tal como se requiere
             <SelectItem key={caserio.id} value={caserio.nombreCaserio}>
               {caserio.nombreCaserio}
             </SelectItem>
@@ -109,18 +141,13 @@ export const ListaDocumentosSearch: React.FC<ListaDocumentosSearchProps> = ({
       </Select>
 
       {/* Select de Ámbito */}
-      <Select
-        onValueChange={(val) =>
-          setSelectedAmbito(val === "all" ? undefined : val)
-        }
-      >
+      <Select onValueChange={(val) => setSelectedAmbito(val === "all" ? undefined : val)}>
         <SelectTrigger className="w-full sm:w-[180px]">
           <SelectValue placeholder={selectedAmbito || "Ámbito"} />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">Todos</SelectItem>
           {ambitos.map((ambito) => (
-            // Si necesitas enviar el id, usa String(ambito.id), sino, si el valor se muestra con el nombre, ajústalo
             <SelectItem key={ambito.id} value={String(ambito.id)}>
               {ambito.nombreAmbito}
             </SelectItem>

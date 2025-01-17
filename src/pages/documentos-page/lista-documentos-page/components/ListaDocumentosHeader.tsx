@@ -12,10 +12,6 @@ export const ListaDocumentosHeader: React.FC<ListaDocumentosHeaderProps> = ({
       <h2 className="text-2xl font-bold text-gray-800 mb-2 sm:mb-0">
         {title}
       </h2>
-      {/* 
-        Si en el futuro quieres un botón "Agregar" u otras acciones, 
-        puedes añadirlo aquí, similar al ejemplo anterior. 
-      */}
     </div>
   );
 };
