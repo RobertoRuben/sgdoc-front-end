@@ -1,4 +1,4 @@
-import { Documentos, Remitentes, Derivaciones, CaseriosData } from '@/model/inicio';
+import { Documentos, Remitentes, Derivaciones, CaseriosData } from '@/model/dashboardMesaPartes';
 
 export const datosIniciales: {
   documentos: Documentos;

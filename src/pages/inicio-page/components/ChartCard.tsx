@@ -4,7 +4,7 @@ import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGri
 import { ChevronUp, ChevronDown } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
-import { CaseriosData } from '@/model/inicio';
+import { CaseriosData } from '@/model/dashboardMesaPartes';
 
 interface DocumentosChartProps {
   data: CaseriosData['documentosPorCaserio'];
