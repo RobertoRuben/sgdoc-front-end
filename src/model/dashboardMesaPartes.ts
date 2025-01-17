@@ -11,6 +11,6 @@ export interface TotalPendingDerivedDocumentsToday{
 }
 
 export interface TotalDocumentsByCaserioToday{
-  caserio: string;
+  nombreCaserio: string;
   totalDocuments: number;
 }
