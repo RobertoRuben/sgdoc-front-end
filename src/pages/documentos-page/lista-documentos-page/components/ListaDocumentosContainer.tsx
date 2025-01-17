@@ -1,0 +1,527 @@
+import React, { useState, useEffect, useCallback } from "react";
+import debounce from "lodash/debounce";
+import { AnimatePresence, motion } from "framer-motion";
+import { Pagination } from "@/components/ui/pagination";
+import { Documento } from "@/model/documento";
+import { DocumentoPaginatedResponse } from "@/model/documentoPaginatedResponse";
+import DeleteModal from "@/components/modal/alerts/delete-modal/DeleteModal";
+import { ActualizacionDocumentoModal } from "@/components/modal/documento-modal/actualizacion-documento-modal/ActualizacionDocumentoModal";
+import DownloadModal from "@/components/modal/alerts/download-modal/DownloadModal";
+import { ListaDocumentosHeader } from "./ListaDocumentosHeader";
+import { ListaDocumentosSearch } from "./ListaDocumentosSearch";
+import { ListaDocumentosTable } from "./ListaDocumentosTable";
+import { Ambito } from "@/model/ambito";
+import { CentroPoblado } from "@/model/centroPoblado";
+import { Caserio } from "@/model/caserio";
+import { getAmbitos } from "@/service/ambitoService";
+import { getCentrosPoblados } from "@/service/centroPobladoService";
+import { getCaseriosByCentroPobladoId } from "@/service/caserioService";
+import {
+  searchDocumentos,
+  downloadDocumento,
+  deleteDocumento,
+  getDocumentoById,
+  updateDocumento,
+} from "@/service/documentoService";
+import NoResultsModal from "@/components/modal/alerts/no-results-modal/NoResultsModal";
+import ErrorModal from "@/components/modal/alerts/error-modal/ErrorModal";
+import SuccessModal from "@/components/modal/alerts/success-modal/SuccessModal";
+import UpdateSuccessModal from "@/components/modal/alerts/update-modal/UpdateSuccessModal";
+import LoadingSpinner from "@/components/layout/LoadingSpinner";
+
+const tableVariants = {
+  initial: { opacity: 0, scale: 0.95 },
+  animate: { opacity: 1, scale: 1 },
+  exit: { opacity: 0, scale: 0.95 },
+};
+
+export const ListaDocumentosContainer: React.FC = () => {
+  const [documentosState, setDocumentosState] =
+    useState<DocumentoPaginatedResponse>({
+      data: [],
+      pagination: { currentPage: 1, pageSize: 4, totalItems: 0, totalPages: 0 },
+    });
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [dataVersion, setDataVersion] = useState<number>(0);
+  const [hasFetched, setHasFetched] = useState<boolean>(false);
+
+  // Estados para búsqueda y filtros
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [selectedCaserio, setSelectedCaserio] = useState<string | undefined>();
+  const [selectedCentroPoblado, setSelectedCentroPoblado] = useState<
+    string | undefined
+  >();
+  const [selectedAmbito, setSelectedAmbito] = useState<string | undefined>();
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+
+  // Catálogos
+  const [ambitos, setAmbitos] = useState<Ambito[]>([]);
+  const [centrosPoblados, setCentrosPoblados] = useState<CentroPoblado[]>([]);
+  const [caserios, setCaserios] = useState<Caserio[]>([]);
+
+  // Estados para modales
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
+  const [isDownloadModalOpen, setIsDownloadModalOpen] =
+    useState<boolean>(false);
+  const [selectedDocumento, setSelectedDocumento] =
+    useState<Documento | undefined>(undefined);
+  const [selectedDocumentDownload, setSelectedDocumentDownload] = useState<{
+    id: number;
+    nombreDocumento: string;
+    fileSize: string;
+    fileType: string;
+  } | null>(null);
+
+  // Manejo de estados para "no results" y mensajes
+  const [showNoResults, setShowNoResults] = useState<boolean>(false);
+  const [noResultsMessage, setNoResultsMessage] = useState<string>("");
+
+  // Estados de modales globales
+  const [errorModalConfig, setErrorModalConfig] = useState<{
+    isOpen: boolean;
+    message: string;
+  }>({
+    isOpen: false,
+    message: "",
+  });
+  const [successModalConfig, setSuccessModalConfig] = useState<{
+    isOpen: boolean;
+    message: string;
+  }>({
+    isOpen: false,
+    message: "",
+  });
+  const [updateSuccessConfig, setUpdateSuccessConfig] = useState<{
+    isOpen: boolean;
+    message: string;
+  }>({
+    isOpen: false,
+    message: "",
+  });
+
+  // Utilidad para mostrar errores
+  const showError = (message: string) => {
+    setErrorModalConfig({ isOpen: true, message });
+  };
+
+  // Utilidad para mostrar mensajes de éxito
+  const showSuccess = (message: string) => {
+    setSuccessModalConfig({ isOpen: true, message });
+  };
+
+  // Función para cargar catálogos y filtros iniciales
+  const loadFilters = async () => {
+    setIsLoading(true);
+    try {
+      const [ambitosData, centrosPobladosData] = await Promise.all([
+        getAmbitos(),
+        getCentrosPoblados(),
+      ]);
+      setAmbitos(ambitosData);
+      setCentrosPoblados(centrosPobladosData);
+
+      if (centrosPobladosData.length > 0) {
+        const caseriosData = await getCaseriosByCentroPobladoId(
+          centrosPobladosData[0].id
+        );
+        setCaserios(caseriosData || []);
+      }
+    } catch (error) {
+      console.error(error);
+      showError("Error al cargar los catálogos");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Función para cargar caseríos en base al centro poblado seleccionado
+  const loadCaserios = async (centroPobladoId: string) => {
+    try {
+      const caseriosData = await getCaseriosByCentroPobladoId(
+        Number(centroPobladoId)
+      );
+      setCaserios(caseriosData || []);
+    } catch (error) {
+      console.error(error);
+      showError("Error al cargar los caseríos");
+    }
+  };
+
+  // Hook para cargar catálogos al iniciar
+  useEffect(() => {
+    loadFilters();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Cada vez que cambie el centro poblado seleccionado, se cargan los caseríos correspondientes
+  useEffect(() => {
+    if (selectedCentroPoblado) {
+      loadCaserios(selectedCentroPoblado);
+    } else {
+      setCaserios([]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCentroPoblado]);
+
+  // Función para cargar documentos con paginación y filtros
+  const loadDocumentos = async ({
+    page,
+    searchValue,
+    ambito,
+    centroPoblado,
+    caserio,
+    date,
+  }: {
+    page: number;
+    searchValue: string;
+    ambito?: string;
+    centroPoblado?: string;
+    caserio?: string;
+    date?: Date;
+  }) => {
+    try {
+      setIsLoading(true);
+      // Reiniciamos el mensaje de no resultados por cada búsqueda
+      setShowNoResults(false);
+
+      // Convertir valor de búsqueda a número si corresponde (para posibles DNIs)
+      const numericValue = parseInt(searchValue, 10);
+      const p_dni = !isNaN(numericValue) ? numericValue : undefined;
+      const p_fecha_ingreso = date
+        ? date.toISOString().split("T")[0]
+        : undefined;
+
+      const response = await searchDocumentos({
+        p_page: page,
+        p_page_size: 4,
+        p_dni,
+        p_nombre_caserio:
+          caserio && caserio !== "all" ? caserio : undefined,
+        p_nombre_centro_poblado:
+          centroPoblado && centroPoblado !== "all" ? centroPoblado : undefined,
+        p_nombre_ambito: ambito && ambito !== "all" ? ambito : undefined,
+        p_fecha_ingreso,
+      });
+
+      // Se determina si se aplicó al menos un filtro (no solo paginación)
+      const anyFilterApplied =
+        searchValue.trim() !== "" ||
+        !!ambito ||
+        !!centroPoblado ||
+        !!caserio ||
+        !!date;
+
+      // Solo si se aplicó algún filtro y la respuesta está vacía, se activa el modal de "no results"
+      if (response.data.length === 0 && anyFilterApplied) {
+        setShowNoResults(true);
+        setNoResultsMessage("No se encontraron resultados para la búsqueda.");
+      } else {
+        setShowNoResults(false);
+      }
+
+      setDocumentosState(response);
+    } catch (error) {
+      console.error(error);
+      showError("Error al buscar documentos");
+    } finally {
+      setIsLoading(false);
+      setHasFetched(true); // Indica que ya se realizó al menos una carga
+    }
+  };
+
+  // Se define un debounce para la búsqueda
+  const debouncedSearch = useCallback(
+    debounce(
+      (
+        page: number,
+        searchValue: string,
+        ambito?: string,
+        centroPoblado?: string,
+        caserio?: string,
+        date?: Date
+      ) => {
+        loadDocumentos({
+          page,
+          searchValue,
+          ambito,
+          centroPoblado,
+          caserio,
+          date,
+        });
+      },
+      500
+    ),
+    []
+  );
+
+  // Cada vez que cambien los parámetros de búsqueda/paginación, se dispara la función loadDocumentos con debounce
+  useEffect(() => {
+    debouncedSearch(
+      currentPage,
+      searchTerm,
+      selectedAmbito,
+      selectedCentroPoblado,
+      selectedCaserio,
+      selectedDate
+    );
+  }, [
+    currentPage,
+    searchTerm,
+    selectedAmbito,
+    selectedCentroPoblado,
+    selectedCaserio,
+    selectedDate,
+    debouncedSearch,
+  ]);
+
+  // Manejo de cambio de página
+  const handlePageChange = (page: number) => {
+    if (page < 1 || page > documentosState.pagination.totalPages) return;
+    setCurrentPage(page);
+  };
+
+  // Manejo de la acción de editar
+  const handleEdit = async (id?: number) => {
+    try {
+      if (id !== undefined) {
+        const documentoData = await getDocumentoById(id);
+        if (documentoData) {
+          setSelectedDocumento(documentoData);
+          setIsModalOpen(true);
+        }
+      }
+    } catch (error) {
+      console.error("Error al cargar los datos del documento:", error);
+      showError("Error al cargar los datos del documento");
+    }
+  };
+
+  // Manejo para el botón de eliminar
+  const handleDeleteClick = (id?: number) => {
+    if (!id) return;
+    const documento = documentosState.data.find((d) => d.id === id);
+    if (documento) {
+      setSelectedDocumento({
+        id: documento.id,
+        nombre: documento.nombreDocumento || "",
+      } as Documento);
+      setIsDeleteModalOpen(true);
+    }
+  };
+
+  // Confirmación de eliminación
+  const handleDeleteConfirm = async () => {
+    try {
+      if (selectedDocumento?.id) {
+        await deleteDocumento(selectedDocumento.id);
+        setDocumentosState((prev) => ({
+          ...prev,
+          data: prev.data.filter((d) => d.id !== selectedDocumento.id),
+        }));
+        showSuccess("Documento eliminado correctamente.");
+        setIsDeleteModalOpen(false);
+      }
+    } catch (error) {
+      console.error(error);
+      showError("Error al eliminar el documento.");
+    }
+  };
+
+  // Manejo de descarga
+  const handleDownload = (id?: number) => {
+    if (id !== undefined) {
+      const documento = documentosState.data.find((d) => d.id === id);
+      if (documento) {
+        setSelectedDocumentDownload({
+          id: documento.id,
+          nombreDocumento: documento.nombreDocumento,
+          fileSize: "2.5 MB",
+          fileType: "PDF",
+        });
+        setIsDownloadModalOpen(true);
+      }
+    }
+  };
+
+  const handleConfirmDownload = async () => {
+    try {
+      if (selectedDocumentDownload?.id) {
+        const fileData = await downloadDocumento(selectedDocumentDownload.id);
+        const blob = new Blob([fileData], { type: "application/pdf" });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `${selectedDocumentDownload.nombreDocumento}.pdf`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+        setIsDownloadModalOpen(false);
+      }
+    } catch (error) {
+      console.error(error);
+      showError("Error al descargar el documento.");
+    }
+  };
+
+  // Manejo de la actualización del documento con refresco de datos y modal de éxito
+  const handleUpdateDocumento = async (data: Documento): Promise<void> => {
+    try {
+      setIsLoading(true);
+      await updateDocumento(data.id!, data);
+      console.log("Documento actualizado correctamente");
+
+      // Refrescar la lista de documentos con los filtros actuales
+      await loadDocumentos({
+        page: currentPage,
+        searchValue: searchTerm,
+        ambito: selectedAmbito,
+        centroPoblado: selectedCentroPoblado,
+        caserio: selectedCaserio,
+        date: selectedDate,
+      });
+
+      setUpdateSuccessConfig({
+        isOpen: true,
+        message: "Documento actualizado correctamente",
+      });
+      setIsModalOpen(false);
+      setDataVersion((prev) => prev + 1);
+    } catch (error) {
+      console.error("Error en handleUpdateDocumento:", error);
+      showError("Error al actualizar el documento");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="pt-2 px-2 bg-transparent">
+      <ListaDocumentosHeader title="Documentos Ingresados" />
+
+      <div className="w-full overflow-hidden bg-white rounded-lg shadow-lg">
+        <ListaDocumentosSearch
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          selectedCaserio={selectedCaserio}
+          setSelectedCaserio={setSelectedCaserio}
+          selectedCentroPoblado={selectedCentroPoblado}
+          setSelectedCentroPoblado={setSelectedCentroPoblado}
+          selectedAmbito={selectedAmbito}
+          setSelectedAmbito={setSelectedAmbito}
+          selectedDate={selectedDate}
+          setSelectedDate={setSelectedDate}
+          ambitos={ambitos}
+          centrosPoblados={centrosPoblados}
+          caserios={caserios}
+        />
+
+        {isLoading ? (
+          <div className="w-full h-[300px] flex items-center justify-center">
+            <LoadingSpinner
+              size="lg"
+              message="Cargando documentos..."
+              color="#145A32"
+              backgroundColor="rgba(20, 90, 50, 0.2)"
+            />
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={`${currentPage}-${dataVersion}`}
+                variants={tableVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ duration: 0.5 }}
+                className="w-full"
+              >
+                <ListaDocumentosTable
+                  currentDocumentos={documentosState.data}
+                  onEdit={handleEdit}
+                  onDelete={handleDeleteClick}
+                  onDownload={handleDownload}
+                  // Si no se ha aplicado ningún filtro (y la primera carga terminó), no se muestra el mensaje vacío
+                  showEmpty={hasFetched && documentosState.data.length === 0}
+                />
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        )}
+
+        {documentosState.pagination.totalPages > 0 && (
+          <div className="py-4 px-4 sm:px-6 border-t border-gray-200">
+            <Pagination
+              currentPage={documentosState.pagination.currentPage}
+              totalPages={documentosState.pagination.totalPages}
+              onPageChange={handlePageChange}
+            />
+          </div>
+        )}
+      </div>
+
+      {isModalOpen && selectedDocumento && (
+        <ActualizacionDocumentoModal
+          isOpen={isModalOpen}
+          documento={selectedDocumento}
+          onClose={() => setIsModalOpen(false)}
+          onSubmit={handleUpdateDocumento}
+        />
+      )}
+
+      {isDeleteModalOpen && (
+        <DeleteModal
+          isOpen={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
+          onConfirm={handleDeleteConfirm}
+          itemName={selectedDocumento?.nombre || ""}
+        />
+      )}
+
+      {selectedDocumentDownload && (
+        <DownloadModal
+          isOpen={isDownloadModalOpen}
+          onClose={() => setIsDownloadModalOpen(false)}
+          onConfirm={handleConfirmDownload}
+          fileName={selectedDocumentDownload.nombreDocumento}
+          fileSize={selectedDocumentDownload.fileSize}
+          fileType={selectedDocumentDownload.fileType}
+        />
+      )}
+
+      <NoResultsModal
+        isOpen={showNoResults}
+        onClose={() => setShowNoResults(false)}
+        message={noResultsMessage}
+      />
+
+      <ErrorModal
+        isOpen={errorModalConfig.isOpen}
+        onClose={() =>
+          setErrorModalConfig((prev) => ({ ...prev, isOpen: false }))
+        }
+        title="Error"
+        errorMessage={errorModalConfig.message}
+      />
+
+      <SuccessModal
+        isOpen={successModalConfig.isOpen}
+        onClose={() =>
+          setSuccessModalConfig((prev) => ({ ...prev, isOpen: false }))
+        }
+        title="Operación Exitosa"
+        message={successModalConfig.message}
+      />
+
+      <UpdateSuccessModal
+        isOpen={updateSuccessConfig.isOpen}
+        onClose={() =>
+          setUpdateSuccessConfig((prev) => ({ ...prev, isOpen: false }))
+        }
+        title="Actualización Exitosa"
+        message={updateSuccessConfig.message}
+      />
+    </div>
+  );
+};

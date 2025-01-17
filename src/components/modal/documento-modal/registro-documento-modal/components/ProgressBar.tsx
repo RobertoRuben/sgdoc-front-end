@@ -1,4 +1,3 @@
-// ProgressBar.tsx
 import React from 'react'
 import { CheckIcon } from '@radix-ui/react-icons'
 

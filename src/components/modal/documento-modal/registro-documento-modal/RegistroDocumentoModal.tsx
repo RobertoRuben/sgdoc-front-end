@@ -1,84 +1,136 @@
-import { useState, useEffect } from 'react';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
+import { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
   DialogTitle,
-  DialogDescription 
-} from '@/components/ui/dialog';
-import { Remitente } from '@/model/remitente';
-import { DocumentoRequest } from '@/model/documento';
-import ProgressBar from './ProgressBar';
-import DatosRemitenteForm from './DatosRemitenteForm';
-import DatosDocumentoForm from './DatosDocumentoForm';
-import { motion, AnimatePresence } from 'framer-motion';
-import { User, FileText } from 'lucide-react';
-import LoadingSpinner from '@/components/layout/LoadingSpinner';
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Remitente } from "@/model/remitente";
+import { DocumentoPayload } from "@/model/documentoPayload";
+import { Documento } from "@/model/documento";
+import ProgressBar from "./components/ProgressBar";
+import DatosRemitenteForm from "./components/datos-remitente-form/DatosRemitenteForm";
+import DatosDocumentoForm from "./components/datos-documento-form/DatosDocumentoForm";
+import { motion, AnimatePresence } from "framer-motion";
+import { User, FileText } from "lucide-react";
+import { createDocumento } from "@/service/documentoService";
+import LoadingSpinner from "@/components/layout/LoadingSpinner";
 
+/**
+ * Interfaz que representa el estado de los datos del formulario.
+ */
 interface FormData {
   remitente?: Remitente;
-  documento?: DocumentoRequest;
+  documento?: Documento;
 }
 
+/**
+ * Propiedades que recibe el modal para registrar documentos.
+ */
 interface RegistroDocumentoModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
+  // Callback opcional para notificar al padre que se guardó el documento
+  onDocumentoSaved?: () => void;
 }
 
 const steps = ["Datos del Remitente", "Datos del Documento"];
 
-const RegistroDocumentoModal = ({ isOpen, onOpenChange }: RegistroDocumentoModalProps) => {
+const RegistroDocumentoModal = ({
+  isOpen,
+  onOpenChange,
+  onDocumentoSaved,
+}: RegistroDocumentoModalProps) => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<FormData>({
     remitente: undefined,
-    documento: undefined
+    documento: undefined,
   });
   const [isStepComplete, setIsStepComplete] = useState([false, false]);
   const [isSaving, setIsSaving] = useState(false);
 
+  /**
+   * Maneja el avance de un paso en el formulario.
+   */
   const handleNext = (data: Partial<FormData>) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      ...data
+      ...data,
     }));
-    setIsStepComplete(prev => {
+    setIsStepComplete((prev) => {
       const newState = [...prev];
       newState[step - 1] = true;
       return newState;
     });
-    setStep(prev => prev + 1);
+    setStep((prev) => prev + 1);
   };
 
+  /**
+   * Retrocede al paso anterior en el formulario.
+   */
   const handlePrevious = () => {
-    setStep(prev => prev - 1);
+    setStep((prev) => prev - 1);
   };
 
-  const handleSubmit = async () => {
-    setIsStepComplete(prev => {
-      const newState = [...prev];
-      newState[1] = true;
-      return newState;
-    });
-    setStep(2);
+  /**
+   * Maneja la acción de guardar el documento.
+   * Combina la información del remitente con la del documento
+   * y hace la petición al servicio de creación.
+   */
+  const handleSubmit = async ({ documento }: { documento: Documento }) => {
     setIsSaving(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      console.log('Datos del formulario:', formData);
+      // Validaciones y acomodar data a enviar
+      const dataToSubmit: DocumentoPayload = {
+        ...documento,
+        documentoBytes:
+          documento.documentoBytes instanceof Blob
+            ? documento.documentoBytes
+            : (() => {
+                throw new Error("El archivo del documento no es válido.");
+              })(),
+        dni: formData.remitente?.dni || 0,
+        nombres: formData.remitente?.nombres || "",
+        apellidoPaterno: formData.remitente?.apellidoPaterno || "",
+        apellidoMaterno: formData.remitente?.apellidoMaterno || "",
+        genero: formData.remitente?.genero || "Masculino",
+      };
+
+      console.log("Datos combinados a enviar:", dataToSubmit);
+
+      // Llamada al servicio que crea el documento
+      const response = await createDocumento(dataToSubmit);
+
+      console.log("Documento creado:", response);
       setIsSaving(false);
+
+      // Cierra el modal actual
       onOpenChange(false);
+
+      // Notifica al contenedor/parent que se ha guardado el documento
+      if (onDocumentoSaved) {
+        onDocumentoSaved();
+      }
     } catch (error) {
-      console.error('Error al guardar el documento:', error);
+      console.error(
+        "Error al guardar:",
+        error instanceof Error ? error.message : "Error desconocido"
+      );
       setIsSaving(false);
     }
   };
 
+  /**
+   * Cuando el modal se cierra, resetea el estado del formulario.
+   */
   useEffect(() => {
     if (!isOpen) {
       setStep(1);
       setFormData({
         remitente: undefined,
-        documento: undefined
+        documento: undefined,
       });
       setIsStepComplete([false, false]);
       setIsSaving(false);
@@ -94,19 +146,20 @@ const RegistroDocumentoModal = ({ isOpen, onOpenChange }: RegistroDocumentoModal
             {steps[step - 1]}
           </DialogTitle>
           <DialogDescription className="text-sm text-[#e6f4e9]">
-            {step === 1 
-              ? "Ingrese los datos del remitente del documento" 
+            {step === 1
+              ? "Ingrese los datos del remitente del documento"
               : "Ingrese los detalles del documento a registrar"}
           </DialogDescription>
         </DialogHeader>
 
         <div className="p-4 sm:p-6">
-          <ProgressBar 
-            currentStep={step} 
-            totalSteps={2} 
-            steps={steps} 
-            isStepComplete={isStepComplete} 
+          <ProgressBar
+            currentStep={step}
+            totalSteps={2}
+            steps={steps}
+            isStepComplete={isStepComplete}
           />
+
           <AnimatePresence mode="wait">
             {step === 1 && (
               <motion.div
@@ -116,7 +169,7 @@ const RegistroDocumentoModal = ({ isOpen, onOpenChange }: RegistroDocumentoModal
                 exit={{ opacity: 0, x: 50 }}
                 transition={{ duration: 0.3 }}
               >
-                <DatosRemitenteForm 
+                <DatosRemitenteForm
                   onNext={handleNext}
                   onCancel={() => onOpenChange(false)}
                   initialData={formData.remitente}
@@ -131,7 +184,7 @@ const RegistroDocumentoModal = ({ isOpen, onOpenChange }: RegistroDocumentoModal
                 exit={{ opacity: 0, x: -50 }}
                 transition={{ duration: 0.3 }}
               >
-                <DatosDocumentoForm 
+                <DatosDocumentoForm
                   onPrevious={handlePrevious}
                   onSubmit={handleSubmit}
                   onCancel={() => onOpenChange(false)}
@@ -140,11 +193,13 @@ const RegistroDocumentoModal = ({ isOpen, onOpenChange }: RegistroDocumentoModal
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* Spinner que aparece mientras se está guardando */}
           {isSaving && (
-            <LoadingSpinner 
-              size="md" 
-              message="Guardando documento..." 
-              className="mt-4" 
+            <LoadingSpinner
+              size="md"
+              message="Guardando documento..."
+              className="mt-4"
             />
           )}
         </div>
