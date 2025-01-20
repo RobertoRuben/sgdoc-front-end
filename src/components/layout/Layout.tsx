@@ -56,13 +56,12 @@ export function Layout() {
             <div className="flex-1 flex flex-col min-w-0">
                 <Header
                     onOpenSidebar={() => {
-                        console.log("Depuración: Abriendo Sidebar.");
                         setSidebarOpen(true);
                     }}
                     title={headerTitle}
                     notificationCount={notificationCount}
                     onViewNotifications={handleViewNotifications}
-                    onModalStateChange={setModalOpen} // Pasamos el estado del modal al Header
+                    onModalStateChange={setModalOpen} 
                 />
 
                 <MainContent>

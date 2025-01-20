@@ -1,4 +1,3 @@
-// src/components/layout/SidebarConfig.tsx
 import {
     Home,
     Users,
@@ -26,18 +25,18 @@ export const navItems: NavItem[] = [
         name: "Inicio",
         icon: Home,
         path: "/inicio",
-        allowedRoles: ['Administrador', 'Director', 'Auxiliar', 'Psicologo'],
+        allowedRoles: ['Admin', 'Mesa de Partes'],
     },
     {
         name: "Dashboard",
         icon: ChartColumnIcon,
         path: "/dashboard",
-        allowedRoles: ['Administrador', 'Director', 'Auxiliar', 'Psicologo'],
+        allowedRoles: ['Admin'],
     },
     {
         name: "Mesa de Partes",
         icon: InboxIcon,
-        allowedRoles: ['Administrador', 'Director', 'Auxiliar'],
+        allowedRoles: ['Admin', 'Mesa de Partes'],
         subItems: [
             { name: "Ingreso de Documentos", path: "/mesa-partes/ingreso" }
         ],
@@ -46,7 +45,7 @@ export const navItems: NavItem[] = [
         name: "Documentos",
         path: "/documentos",
         icon: FileText,
-        allowedRoles: ['Administrador', 'Director', 'Auxiliar'],
+        allowedRoles: ['Admin', 'Mesa de Partes'],
         subItems: [
             { name: "Lista de Documentos", path: "/documentos/lista" },
             { name: "Seguimiento", path: "/documentos/seguimiento/lista" },
@@ -58,12 +57,12 @@ export const navItems: NavItem[] = [
         name: "Remitentes",
         icon: UserPlus,
         path: "/remitentes/lista",
-        allowedRoles: ['Administrador', 'Director', 'Auxiliar'],
+        allowedRoles: ['Admin'],
     },
     {
         name: "Distrito",
         icon: MapPin,
-        allowedRoles: ['Administrador', 'Director'],
+        allowedRoles: ['Admin'],
         subItems: [
             { name: "Centros Poblados", path: "/distrito/centros-poblados/lista" },
             { name: "Caseríos", path: "/distrito/caserios/lista" },
@@ -72,7 +71,7 @@ export const navItems: NavItem[] = [
     {
         name: "Áreas",
         icon: Briefcase,
-        allowedRoles: ['Administrador', 'Director'],
+        allowedRoles: ['Admin'],
         subItems: [
             { name: "Lista de Áreas", path: "/areas/lista" },
             { name: "Comunicaciones", path: "/areas/comunicaciones/lista" },
@@ -82,12 +81,12 @@ export const navItems: NavItem[] = [
         name: "Trabajadores",
         icon: UserCheck,
         path: "/trabajadores/lista",
-        allowedRoles: ['Administrador', 'Director'],
+        allowedRoles: ['Admin'],
     },
     {
         name: "Usuarios",
         icon: Users,
-        allowedRoles: ['Administrador'],
+        allowedRoles: ['Admin'],
         subItems: [
             { name: "Lista de Usuarios", path: "/usuarios/lista" },
             { name: "Roles", path: "/usuarios/roles/lista" },
@@ -97,6 +96,6 @@ export const navItems: NavItem[] = [
         name: "Configuración",
         icon: Settings,
         path: "/configuracion",
-        allowedRoles: ['Administrador'],
+        allowedRoles: ['Admin'],
     },
 ];

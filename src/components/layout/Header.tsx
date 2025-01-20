@@ -3,6 +3,7 @@
 import { ReactNode, useState } from 'react';
 import { Bell, LogOut, Menu, User, UserCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
 import { UsuarioProfileModal } from '../modal/usuario-modal/usuario-perfil-modal/UsuarioPerfilModal';
 import LogoutModal from '../modal/alerts/logout-modal/LogoutModal';
 import {
@@ -36,6 +37,7 @@ export function Header({
     onViewNotifications,
     onModalStateChange,
 }: HeaderProps) {
+    const { logout } = useAuth();
     const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
@@ -56,12 +58,12 @@ export function Header({
     };
 
     const handleLogout = async () => {
-        return new Promise<void>((resolve) => {
-            setTimeout(() => {
-                console.log('Cerrando sesión...');
-                resolve();
-            }, 1000);
-        });
+        try {
+            await logout();
+            handleLogoutModalClose();
+        } catch (error) {
+            console.error('Error al cerrar sesión:', error);
+        }
     };
 
     const handleLogoutModalClose = () => {

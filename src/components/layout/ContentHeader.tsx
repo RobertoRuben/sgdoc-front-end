@@ -8,8 +8,7 @@ type ContentHeaderProps = {
 
 const ContentHeader: React.FC<ContentHeaderProps> = ({ breadcrumb }) => {
     return (
-        <div className="p-2 bg-transparent"> {/* Fondo transparente y sin borde */}
-            {/* Breadcrumb */}
+        <div className="p-2 bg-transparent"> 
             <nav className="text-sm text-gray-600" aria-label="Breadcrumb">
                 <ol className="flex">
                     {breadcrumb.map((crumb, index) => (
