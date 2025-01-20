@@ -14,11 +14,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     const [openMenus, setOpenMenus] = useState<{ [key: string]: boolean }>({});
 
     const toggleMenu = (name: string) => {
-        console.log(`Depuración: Alternando menú ${name}. Estado previo:`, openMenus[name]);
         setOpenMenus((prev) => ({ ...prev, [name]: !prev[name] }));
     };
-
-    console.log('Depuración: Renderizando Sidebar con isOpen =', isOpen);
 
     return (
         <>

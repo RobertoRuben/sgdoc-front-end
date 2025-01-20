@@ -1,10 +1,10 @@
-import { ReactNode, useState, useEffect } from "react"
-import { AuthContext } from "@/context/AuthContext"
-import { AuthContextType } from "@/context/AuthContext"
-
+import { ReactNode, useState, useEffect, useCallback } from "react"
+import { AuthContext, AuthContextType } from "@/context/AuthContext"
 import { AuthResponse } from "@/model/authResponse"
 import { UserInfoResponse } from "@/model/userInforResponse"
 import { loginForAccessToken, readUsersMe } from "@/service/authService"
+
+import { setupRefreshTokenInterceptor } from "@/interceptors/refreshInterceptor"
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserInfoResponse | null>(null)
@@ -17,6 +17,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const isAuthenticated = !!accessToken
 
+  const logout = useCallback(() => {
+    setUser(null)
+    setAccessToken(null)
+    setRefreshToken(null)
+    sessionStorage.removeItem("accessToken")
+    sessionStorage.removeItem("refreshToken")
+  }, [])
+
+  useEffect(() => {
+    setupRefreshTokenInterceptor(logout, (newAccess, newRefresh) => {
+      setAccessToken(newAccess)
+      setRefreshToken(newRefresh)
+    })
+  }, [logout])
+
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -28,11 +43,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       } catch (error) {
         console.error("Error al obtener información del usuario:", error)
-        logout() 
+        logout()
       }
     }
     fetchUser()
-  }, [accessToken])
+  }, [accessToken, logout])
 
   const login = async (username: string, password: string) => {
     try {
@@ -41,26 +56,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         password: password,
       })
 
+      const finalRefreshToken =
+        authResponse.refreshToken && authResponse.refreshToken.trim() !== ""
+          ? authResponse.refreshToken
+          : sessionStorage.getItem("refreshToken") 
+
       setAccessToken(authResponse.accessToken)
-      setRefreshToken(authResponse.refreshToken)
+      setRefreshToken(finalRefreshToken)
       sessionStorage.setItem("accessToken", authResponse.accessToken)
-      sessionStorage.setItem("refreshToken", authResponse.refreshToken)
+      sessionStorage.setItem("refreshToken", finalRefreshToken || "")
 
       const userInfo = await readUsersMe()
       setUser(userInfo)
-
     } catch (err) {
       console.error("Error al iniciar sesión:", err)
-      throw err 
+      throw err
     }
-  }
-
-  const logout = () => {
-    setUser(null)
-    setAccessToken(null)
-    setRefreshToken(null)
-    sessionStorage.removeItem("accessToken")
-    sessionStorage.removeItem("refreshToken")
   }
 
   const value: AuthContextType = {
