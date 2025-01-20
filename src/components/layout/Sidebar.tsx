@@ -1,4 +1,3 @@
-'use client';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronDown, ChevronRight, X } from 'lucide-react';
@@ -12,20 +11,29 @@ type SidebarProps = {
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
     const [openMenus, setOpenMenus] = useState<{ [key: string]: boolean }>({});
+    
+    // 1. Obtener el rol del usuario desde sessionStorage (o AuthContext si prefieres).
+    const userRole = sessionStorage.getItem('rolName') || '';
 
     const toggleMenu = (name: string) => {
         setOpenMenus((prev) => ({ ...prev, [name]: !prev[name] }));
     };
+
+    // 2. Filtrar los navItems según los roles permitidos
+    //    Si un item no tiene "allowedRoles", asúmelo siempre visible. O puedes ignorarlo.
+    const filteredNavItems = navItems.filter((item) => {
+        // Si no hay allowedRoles definidos, se muestra por defecto
+        if (!item.allowedRoles) return true; 
+        // Si sí hay allowedRoles, mostramos sólo si incluye el rol del usuario
+        return item.allowedRoles.includes(userRole);
+    });
 
     return (
         <>
             {isOpen && (
                 <div
                     className="fixed inset-0 bg-black opacity-50 z-40 lg:hidden"
-                    onClick={() => {
-                        console.log('Depuración: Haciendo clic en Overlay para cerrar Sidebar.');
-                        onClose();
-                    }}
+                    onClick={onClose}
                     aria-hidden="true"
                 ></div>
             )}
@@ -41,20 +49,18 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                         <img src={logo} alt="Logo" className="w-40 h-40 object-contain" />
                     </div>
                     <button
-                        onClick={() => {
-                            onClose();
-                        }}
+                        onClick={onClose}
                         className="lg:hidden"
                         aria-label="Cerrar menú"
                     >
-                        <X className="h-6 w-6"  strokeWidth={3}/>
+                        <X className="h-6 w-6" strokeWidth={3} />
                     </button>
                 </div>
 
                 <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-rounded scrollbar-track-rounded scrollbar-thumb-gray-400 scrollbar-track-transparent">
                     <nav>
                         <ul className="space-y-2">
-                            {navItems.map((item: NavItem, index: number) => (
+                            {filteredNavItems.map((item: NavItem, index: number) => (
                                 <li key={index}>
                                     {item.subItems ? (
                                         <div>
@@ -64,7 +70,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                                                 aria-expanded={openMenus[item.name] || false}
                                             >
                                                 <span className="flex items-center">
-                                                    <item.icon className="w-5 h-5 mr-2" strokeWidth={3}/>
+                                                    <item.icon className="w-5 h-5 mr-2" strokeWidth={3} />
                                                     {item.name}
                                                 </span>
                                                 {openMenus[item.name] ? (
@@ -86,9 +92,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                                                         <Link
                                                             to={subItem.path}
                                                             className="block p-2 hover:bg-[#028a3b] rounded"
-                                                            onClick={() => {
-                                                                onClose();
-                                                            }}
+                                                            onClick={onClose}
                                                         >
                                                             {subItem.name}
                                                         </Link>
@@ -100,9 +104,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                                         <Link
                                             to={item.path || '#'}
                                             className="flex items-center p-2 hover:bg-[#028a3b] rounded font-semibold"
-                                            onClick={() => {
-                                                onClose();
-                                            }}
+                                            onClick={onClose}
                                         >
                                             <item.icon className="w-5 h-5 mr-2" strokeWidth={3} />
                                             {item.name}

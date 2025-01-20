@@ -3,10 +3,11 @@ import { AuthContext, AuthContextType } from "@/context/AuthContext"
 import { AuthResponse } from "@/model/authResponse"
 import { UserInfoResponse } from "@/model/userInforResponse"
 import { loginForAccessToken, readUsersMe } from "@/service/authService"
-
+import { useNavigate } from "react-router-dom"
 import { setupRefreshTokenInterceptor } from "@/interceptors/refreshInterceptor"
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const navigate = useNavigate()
   const [user, setUser] = useState<UserInfoResponse | null>(null)
   const [accessToken, setAccessToken] = useState<string | null>(() =>
     sessionStorage.getItem("accessToken")
@@ -23,7 +24,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setRefreshToken(null)
     sessionStorage.removeItem("accessToken")
     sessionStorage.removeItem("refreshToken")
-  }, [])
+
+    sessionStorage.removeItem("rolName")
+    sessionStorage.removeItem("userId")
+    sessionStorage.removeItem("areaId")
+
+    navigate('/login')
+    window.location.reload()
+  }, [navigate])
 
   useEffect(() => {
     setupRefreshTokenInterceptor(logout, (newAccess, newRefresh) => {
@@ -65,6 +73,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setRefreshToken(finalRefreshToken)
       sessionStorage.setItem("accessToken", authResponse.accessToken)
       sessionStorage.setItem("refreshToken", finalRefreshToken || "")
+
+      // Guardar información adicional
+      sessionStorage.setItem("rolName", authResponse.rolName)
+      sessionStorage.setItem("userId", authResponse.userId.toString())
+      sessionStorage.setItem("areaId", authResponse.areaId.toString())
 
       const userInfo = await readUsersMe()
       setUser(userInfo)
