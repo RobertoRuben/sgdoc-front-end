@@ -1,4 +1,3 @@
-// src/components/layout/SidebarConfig.tsx
 import {
     Home,
     Users,

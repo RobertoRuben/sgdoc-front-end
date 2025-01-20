@@ -62,7 +62,7 @@ export function Layout() {
                     title={headerTitle}
                     notificationCount={notificationCount}
                     onViewNotifications={handleViewNotifications}
-                    onModalStateChange={setModalOpen} // Pasamos el estado del modal al Header
+                    onModalStateChange={setModalOpen} 
                 />
 
                 <MainContent>

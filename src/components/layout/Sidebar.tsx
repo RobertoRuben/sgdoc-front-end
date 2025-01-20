@@ -1,6 +1,4 @@
-// src/components/layout/Sidebar.tsx
 'use client';
-
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronDown, ChevronRight, X } from 'lucide-react';
@@ -24,7 +22,6 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
     return (
         <>
-            {/* Overlay para pantallas pequeñas */}
             {isOpen && (
                 <div
                     className="fixed inset-0 bg-black opacity-50 z-40 lg:hidden"
@@ -42,14 +39,12 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 lg:translate-x-0 lg:static lg:inset-auto flex-shrink-0 flex flex-col h-full`}
                 aria-label="Sidebar de navegación"
             >
-                {/* Encabezado del Sidebar */}
                 <div className="flex justify-between items-center mb-8">
                     <div className="flex justify-center items-center w-full">
                         <img src={logo} alt="Logo" className="w-40 h-40 object-contain" />
                     </div>
                     <button
                         onClick={() => {
-                            console.log('Depuración: Haciendo clic en el botón de cerrar Sidebar.');
                             onClose();
                         }}
                         className="lg:hidden"
@@ -59,7 +54,6 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                     </button>
                 </div>
 
-                {/* Contenido scrollable con barra de desplazamiento personalizada */}
                 <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-rounded scrollbar-track-rounded scrollbar-thumb-gray-400 scrollbar-track-transparent">
                     <nav>
                         <ul className="space-y-2">
@@ -82,7 +76,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                                                     <ChevronRight className="h-4 w-4" />
                                                 )}
                                             </button>
-                                            {/* Submenú con animación */}
+
                                             <ul
                                                 className={`ml-4 mt-2 space-y-1 overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out ${
                                                     openMenus[item.name]
@@ -96,7 +90,6 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                                                             to={subItem.path}
                                                             className="block p-2 hover:bg-[#028a3b] rounded"
                                                             onClick={() => {
-                                                                console.log(`Depuración: Seleccionando subItem '${subItem.name}'.`);
                                                                 onClose();
                                                             }}
                                                         >
@@ -111,7 +104,6 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                                             to={item.path || '#'}
                                             className="flex items-center p-2 hover:bg-[#028a3b] rounded font-semibold"
                                             onClick={() => {
-                                                console.log(`Depuración: Seleccionando Item '${item.name}'.`);
                                                 onClose();
                                             }}
                                         >
