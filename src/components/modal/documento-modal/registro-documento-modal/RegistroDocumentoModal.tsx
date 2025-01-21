@@ -17,24 +17,16 @@ import { User, FileText } from "lucide-react";
 import { createDocumento } from "@/service/documentoService";
 import LoadingSpinner from "@/components/layout/LoadingSpinner";
 
-/**
- * Interfaz que representa el estado de los datos del formulario.
- */
 interface FormData {
   remitente?: Remitente;
   documento?: Documento;
 }
 
-/**
- * Propiedades que recibe el modal para registrar documentos.
- */
 interface RegistroDocumentoModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  // Callback opcional para notificar al padre que se guardó el documento
   onDocumentoSaved?: () => void;
 }
-
 const steps = ["Datos del Remitente", "Datos del Documento"];
 
 const RegistroDocumentoModal = ({
@@ -50,9 +42,6 @@ const RegistroDocumentoModal = ({
   const [isStepComplete, setIsStepComplete] = useState([false, false]);
   const [isSaving, setIsSaving] = useState(false);
 
-  /**
-   * Maneja el avance de un paso en el formulario.
-   */
   const handleNext = (data: Partial<FormData>) => {
     setFormData((prev) => ({
       ...prev,
@@ -66,23 +55,14 @@ const RegistroDocumentoModal = ({
     setStep((prev) => prev + 1);
   };
 
-  /**
-   * Retrocede al paso anterior en el formulario.
-   */
   const handlePrevious = () => {
     setStep((prev) => prev - 1);
   };
 
-  /**
-   * Maneja la acción de guardar el documento.
-   * Combina la información del remitente con la del documento
-   * y hace la petición al servicio de creación.
-   */
   const handleSubmit = async ({ documento }: { documento: Documento }) => {
     setIsSaving(true);
 
     try {
-      // Validaciones y acomodar data a enviar
       const dataToSubmit: DocumentoPayload = {
         ...documento,
         documentoBytes:
@@ -100,16 +80,13 @@ const RegistroDocumentoModal = ({
 
       console.log("Datos combinados a enviar:", dataToSubmit);
 
-      // Llamada al servicio que crea el documento
       const response = await createDocumento(dataToSubmit);
 
       console.log("Documento creado:", response);
       setIsSaving(false);
 
-      // Cierra el modal actual
       onOpenChange(false);
 
-      // Notifica al contenedor/parent que se ha guardado el documento
       if (onDocumentoSaved) {
         onDocumentoSaved();
       }
@@ -122,9 +99,6 @@ const RegistroDocumentoModal = ({
     }
   };
 
-  /**
-   * Cuando el modal se cierra, resetea el estado del formulario.
-   */
   useEffect(() => {
     if (!isOpen) {
       setStep(1);
