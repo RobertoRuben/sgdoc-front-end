@@ -74,7 +74,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       sessionStorage.setItem("accessToken", authResponse.accessToken)
       sessionStorage.setItem("refreshToken", finalRefreshToken || "")
 
-      // Guardar información adicional
       sessionStorage.setItem("rolName", authResponse.rolName)
       sessionStorage.setItem("userId", authResponse.userId.toString())
       sessionStorage.setItem("areaId", authResponse.areaId.toString())

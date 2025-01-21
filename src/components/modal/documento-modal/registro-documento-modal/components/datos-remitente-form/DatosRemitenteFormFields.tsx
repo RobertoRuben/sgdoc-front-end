@@ -9,7 +9,6 @@ interface DatosRemitenteFormFieldsProps {
   errors: FieldErrorsImpl<Remitente>;
 }
 
-
 const DatosRemitenteFormFields: React.FC<DatosRemitenteFormFieldsProps> = ({
   register,
   errors,
@@ -20,19 +19,23 @@ const DatosRemitenteFormFields: React.FC<DatosRemitenteFormFieldsProps> = ({
         <Label htmlFor="dni">DNI</Label>
         <Input
           id="dni"
-          type="number"
           {...register("dni", {
             required: "DNI es requerido",
+            pattern: {
+              value: /^\d+$/, 
+              message: "DNI no debe contener letras",
+            },
             setValueAs: (v: string) => parseInt(v, 10),
             validate: {
               positive: (v: number) => v > 0 || "DNI debe ser positivo",
               eightDigits: (v: number) =>
-                (v >= 10000000 && v <= 99999999) ||
-                "DNI debe tener 8 dígitos",
+                (v >= 10000000 && v <= 99999999) || "DNI debe tener 8 dígitos",
             },
           })}
-          className={`mt-1 block w-full ${
-            errors.dni ? "border-red-500 focus:ring-red-500" : "focus:ring-[#028a3b]"
+          className={`mt-1 block w-full no-spin ${
+            errors.dni
+              ? "border-red-500 focus:ring-red-500"
+              : "focus:ring-[#028a3b]"
           } rounded-md`}
         />
         {errors.dni && (
@@ -62,9 +65,7 @@ const DatosRemitenteFormFields: React.FC<DatosRemitenteFormFieldsProps> = ({
           } rounded-md`}
         />
         {errors.nombres && (
-          <p className="text-red-600 text-sm mt-1">
-            {errors.nombres.message}
-          </p>
+          <p className="text-red-600 text-sm mt-1">{errors.nombres.message}</p>
         )}
       </div>
 
@@ -80,8 +81,7 @@ const DatosRemitenteFormFields: React.FC<DatosRemitenteFormFieldsProps> = ({
             },
             pattern: {
               value: /^[a-zA-Z\s]+$/,
-              message:
-                "Apellido paterno debe contener solo letras y espacios",
+              message: "Apellido paterno debe contener solo letras y espacios",
             },
           })}
           className={`mt-1 block w-full ${
@@ -109,8 +109,7 @@ const DatosRemitenteFormFields: React.FC<DatosRemitenteFormFieldsProps> = ({
             },
             pattern: {
               value: /^[a-zA-Z\s]+$/,
-              message:
-                "Apellido materno debe contener solo letras y espacios",
+              message: "Apellido materno debe contener solo letras y espacios",
             },
           })}
           className={`mt-1 block w-full ${

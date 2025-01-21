@@ -118,7 +118,7 @@ export const RemitenteModalForm: React.FC<RemitenteModalFormProps> = ({
             name="dni"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>DNI</FormLabel>
+                <FormLabel htmlFor="dni-input">DNI</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Ingrese DNI"
@@ -152,7 +152,7 @@ export const RemitenteModalForm: React.FC<RemitenteModalFormProps> = ({
             name="apellidoPaterno"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Apellido Paterno</FormLabel>
+                <FormLabel className="text-sm sm:text-base">Apellido Paterno</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Ingrese apellido paterno"
@@ -194,7 +194,7 @@ export const RemitenteModalForm: React.FC<RemitenteModalFormProps> = ({
                   disabled={isLoading}
                 >
                   <FormControl>
-                    <SelectTrigger id="genero-select">
+                    <SelectTrigger id="genero-select" >
                       <SelectValue placeholder="Seleccione género" />
                     </SelectTrigger>
                   </FormControl>

@@ -45,7 +45,6 @@ const DatosRemitenteFormGenderSelect: React.FC<DatosRemitenteFormGenderSelectPro
             <SelectContent>
               <SelectItem value="Masculino">Masculino</SelectItem>
               <SelectItem value="Femenino">Femenino</SelectItem>
-              <SelectItem value="Otro">Otro</SelectItem>
             </SelectContent>
           </Select>
         )}

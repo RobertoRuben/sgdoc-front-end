@@ -38,15 +38,21 @@ const DatosDocumentoFormFields: React.FC<DatosDocumentoFormFieldsProps> = ({
           <Label htmlFor="folios">Número de folios</Label>
           <Input
             id="folios"
-            type="number"
+            // Si deseas que el navegador muestre solo teclado numérico en móviles, usa type="number"
+            // type="number"
             {...register("folios", {
               required: "Número de folios es requerido",
-              valueAsNumber: true,
+              pattern: {
+                value: /^\d+$/, // Solo dígitos (0-9)
+                message: "Solo se permiten números",
+              },
+              setValueAs: (v) => parseInt(v, 10),
               validate: {
                 positive: (v) =>
                   v > 0 || "El número de folios debe ser positivo",
                 integer: (v) =>
-                  Number.isInteger(v) || "El número de folios debe ser un entero",
+                  Number.isInteger(v) ||
+                  "El número de folios debe ser un entero",
               },
             })}
             className={`mt-1 block w-full ${

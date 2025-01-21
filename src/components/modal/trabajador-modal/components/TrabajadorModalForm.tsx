@@ -91,21 +91,20 @@ export const TrabajadorModalForm: React.FC<TrabajadoresModalFormProps> = ({traba
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="p-4 sm:p-6 space-y-4 sm:space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="p-6 space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <FormField
                         control={form.control}
                         name="dni"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel htmlFor="dni-input" className="text-sm sm:text-base">DNI</FormLabel>
+                                <FormLabel htmlFor="dni-input" >DNI</FormLabel>
                                 <FormControl>
                                     <Input
                                         id="dni-input"
                                         placeholder="Ingrese DNI"
                                         {...field}
                                         disabled={isLoading}
-                                        className="text-sm sm:text-base"
                                     />
                                 </FormControl>
                                 <FormMessage className="text-xs sm:text-sm" />
@@ -118,13 +117,12 @@ export const TrabajadorModalForm: React.FC<TrabajadoresModalFormProps> = ({traba
                         name="nombre"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel className="text-sm sm:text-base">Nombre</FormLabel>
+                                <FormLabel >Nombre</FormLabel>
                                 <FormControl>
                                     <Input
                                         placeholder="Ingrese nombre"
                                         {...field}
-                                        disabled={isLoading}
-                                        className="text-sm sm:text-base"
+                                        disabled={isLoading}  
                                     />
                                 </FormControl>
                                 <FormMessage className="text-xs sm:text-sm" />
@@ -137,13 +135,12 @@ export const TrabajadorModalForm: React.FC<TrabajadoresModalFormProps> = ({traba
                         name="apellidoPaterno"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel className="text-sm sm:text-base">Apellido Paterno</FormLabel>
+                                <FormLabel>Apellido Paterno</FormLabel>
                                 <FormControl>
                                     <Input
                                         placeholder="Ingrese apellido paterno"
                                         {...field}
                                         disabled={isLoading}
-                                        className="text-sm sm:text-base"
                                     />
                                 </FormControl>
                                 <FormMessage className="text-xs sm:text-sm" />
@@ -156,13 +153,12 @@ export const TrabajadorModalForm: React.FC<TrabajadoresModalFormProps> = ({traba
                         name="apellidoMaterno"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel className="text-sm sm:text-base">Apellido Materno</FormLabel>
+                                <FormLabel >Apellido Materno</FormLabel>
                                 <FormControl>
                                     <Input
                                         placeholder="Ingrese apellido materno"
                                         {...field}
                                         disabled={isLoading}
-                                        className="text-sm sm:text-base"
                                     />
                                 </FormControl>
                                 <FormMessage className="text-xs sm:text-sm" />
@@ -175,7 +171,7 @@ export const TrabajadorModalForm: React.FC<TrabajadoresModalFormProps> = ({traba
                         name="genero"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel htmlFor="genero-select" className="text-sm sm:text-base">Género</FormLabel>
+                                <FormLabel htmlFor="genero-select">Género</FormLabel>
                                 <Select
                                     name="genero"
                                     onValueChange={(value) => field.onChange(value)}
@@ -183,7 +179,7 @@ export const TrabajadorModalForm: React.FC<TrabajadoresModalFormProps> = ({traba
                                     disabled={isLoading}
                                 >
                                     <FormControl>
-                                        <SelectTrigger id="genero-select" className="w-full text-sm sm:text-base">
+                                        <SelectTrigger id="genero-select">
                                             <SelectValue placeholder="Seleccione género" />
                                         </SelectTrigger>
                                     </FormControl>
@@ -203,7 +199,7 @@ export const TrabajadorModalForm: React.FC<TrabajadoresModalFormProps> = ({traba
                         name="areaId"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel htmlFor="areaId-select" className="text-sm sm:text-base">Área</FormLabel>
+                                <FormLabel htmlFor="areaId-select">Área</FormLabel>
                                 <Select
                                     name="areaId"
                                     onValueChange={field.onChange}
@@ -211,7 +207,7 @@ export const TrabajadorModalForm: React.FC<TrabajadoresModalFormProps> = ({traba
                                     disabled={isLoading}
                                 >
                                     <FormControl>
-                                        <SelectTrigger id="areaId-select" className="w-full text-sm sm:text-base">
+                                        <SelectTrigger id="areaId-select">
                                             <SelectValue placeholder="Seleccione área" />
                                         </SelectTrigger>
                                     </FormControl>
