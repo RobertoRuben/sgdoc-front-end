@@ -8,6 +8,7 @@ import SuccessModal from "@/components/modal/alerts/success-modal/SuccessModal";
 import { IngresoDocumentosHeader } from "./IngresoDocumentosHeader";
 import { IngresoDocumentosSearch } from "./IngresoDocumentosSearch";
 import { IngresoDocumentosTable } from "./IngresoDocumentosTable";
+import { DerivacionModal } from "@/components/modal/derivacion-modal/DerivacionModal";
 import {
   getDocumentosByCurrentDate,
   downloadDocumento,
@@ -35,19 +36,26 @@ const tableVariants = {
  */
 export const IngresoDocumentosContainer: React.FC = () => {
   // Estado para la paginación y datos de documentos
-  const [documentosState, setDocumentosState] = useState<DocumentoPaginatedResponse>({
-    data: [],
-    pagination: {
-      currentPage: 1,
-      pageSize: 5, // Tamaño de página deseado
-      totalItems: 0,
-      totalPages: 0,
-    },
-  });
+  const [documentosState, setDocumentosState] =
+    useState<DocumentoPaginatedResponse>({
+      data: [],
+      pagination: {
+        currentPage: 1,
+        pageSize: 5, // Tamaño de página deseado
+        totalItems: 0,
+        totalPages: 0,
+      },
+    });
 
   // Estado para la página actual y el término de búsqueda
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchTerm, setSearchTerm] = useState<string>("");
+
+  // Nuevos estados para el modal de derivación
+  const [isDerivacionModalOpen, setIsDerivacionModalOpen] = useState(false);
+  const [selectedDocumentoId, setSelectedDocumentoId] = useState<
+    number | undefined
+  >();
 
   // Estado para mostrar spinner de carga
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -56,7 +64,8 @@ export const IngresoDocumentosContainer: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   // Control del modal de descarga
-  const [isDownloadModalOpen, setIsDownloadModalOpen] = useState<boolean>(false);
+  const [isDownloadModalOpen, setIsDownloadModalOpen] =
+    useState<boolean>(false);
   const [selectedDocument, setSelectedDocument] = useState<{
     id: number;
     nombreDocumento: string;
@@ -212,12 +221,30 @@ export const IngresoDocumentosContainer: React.FC = () => {
    */
   const handleSend = (id?: number) => {
     if (id !== undefined) {
-      console.log(`Enviando documento con ID: ${id}`);
+      setSelectedDocumentoId(id);
+      setIsDerivacionModalOpen(true);
+    }
+  };
+
+  const handleDerivar = async (areaId: number) => {
+    try {
+      console.log(
+        `Derivando documento ${selectedDocumentoId} al área ${areaId}`
+      );
+      // Aquí implementarías la lógica de derivación
+      setIsDerivacionModalOpen(false);
+      setSuccessModalConfig({
+        isOpen: true,
+        message: "Documento derivado exitosamente.",
+      });
+    } catch (error) {
+      showError("Error al derivar el documento.");
+      console.error(error);
     }
   };
 
   /**
-   * Callback que el modal hijo (RegistroDocumentoModal) llamará cuando se haya 
+   * Callback que el modal hijo (RegistroDocumentoModal) llamará cuando se haya
    * guardado (creado o editado) exitosamente un documento.
    *
    * - Si es un documento nuevo: se calcula la nueva última página
@@ -263,28 +290,27 @@ export const IngresoDocumentosContainer: React.FC = () => {
           </div>
         ) : (
           <div className="overflow-x-auto">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentPage}
-              custom={pageDirection}
-              variants={tableVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              transition={{ duration: 0.5 }}
-              className="w-full"
-            >
-              <IngresoDocumentosTable
-                currentDocumentos={filteredDocumentos}
-                currentPage={currentPage}
-                dataVersion={dataVersion}
-                onDownload={handleDownload}
-                onSend={handleSend}
-              />
-            </motion.div>
-          </AnimatePresence>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentPage}
+                custom={pageDirection}
+                variants={tableVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ duration: 0.5 }}
+                className="w-full"
+              >
+                <IngresoDocumentosTable
+                  currentDocumentos={filteredDocumentos}
+                  currentPage={currentPage}
+                  dataVersion={dataVersion}
+                  onDownload={handleDownload}
+                  onSend={handleSend}
+                />
+              </motion.div>
+            </AnimatePresence>
           </div>
-
         )}
 
         {/* Componente de paginación (solo si hay más de 1 página) */}
@@ -306,7 +332,6 @@ export const IngresoDocumentosContainer: React.FC = () => {
         />
       )}
 
-      {/* Modal de Descarga */}
       {selectedDocument && (
         <DownloadModal
           isOpen={isDownloadModalOpen}
@@ -318,7 +343,6 @@ export const IngresoDocumentosContainer: React.FC = () => {
         />
       )}
 
-      {/* Modal de Error */}
       {errorModalConfig.isOpen && (
         <ErrorModal
           isOpen={errorModalConfig.isOpen}
@@ -330,7 +354,6 @@ export const IngresoDocumentosContainer: React.FC = () => {
         />
       )}
 
-      {/* Modal de Éxito */}
       <SuccessModal
         isOpen={successModalConfig.isOpen}
         onClose={() =>
@@ -338,6 +361,12 @@ export const IngresoDocumentosContainer: React.FC = () => {
         }
         title="Operación Exitosa"
         message={successModalConfig.message}
+      />
+
+      <DerivacionModal
+        isOpen={isDerivacionModalOpen}
+        onClose={() => setIsDerivacionModalOpen(false)}
+        onSubmit={handleDerivar}
       />
     </div>
   );
