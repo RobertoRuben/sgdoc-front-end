@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+import { SearchSelect } from "@/components/ui/search-select";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -10,7 +12,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { DerivacionModalFooter } from "./DerivacionModalFooter";
-import ReactSelect from "react-select";
+import { getAreasDestinoByAreaOrigenId } from "@/service/comunicacionAreaService";
+import { ComunicacionAreaDestinoDetails } from "@/model/comunicacionAreaDestinoDetails";
 
 const formSchema = z.object({
   areaId: z.number({
@@ -24,20 +27,41 @@ interface DerivacionModalFormProps {
   isLoading?: boolean;
 }
 
-const areasOptions = [
-  // Aquí deberías llenar con las áreas disponibles
-  { value: 1, label: "Área 1" },
-  { value: 2, label: "Área 2" },
-];
-
 export const DerivacionModalForm: React.FC<DerivacionModalFormProps> = ({
   onClose,
   onSubmit,
   isLoading = false,
 }) => {
+  const [areasDestino, setAreasDestino] = useState<
+    ComunicacionAreaDestinoDetails[]
+  >([]);
+  const [loadingAreas, setLoadingAreas] = useState(false);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
+
+  useEffect(() => {
+    const loadAreasDestino = async () => {
+      try {
+        setLoadingAreas(true);
+        const areaOrigenId = Number(sessionStorage.getItem("areaId"));
+        const areas = await getAreasDestinoByAreaOrigenId(areaOrigenId);
+        setAreasDestino(areas);
+      } catch (error) {
+        console.error("Error al cargar áreas destino:", error);
+      } finally {
+        setLoadingAreas(false);
+      }
+    };
+
+    loadAreasDestino();
+  }, []);
+
+  const areasOptions = areasDestino.map((area) => ({
+    value: area.areaDestinoId,
+    label: area.nombreAreaDestino,
+  }));
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     await onSubmit(values.areaId);
@@ -45,7 +69,10 @@ export const DerivacionModalForm: React.FC<DerivacionModalFormProps> = ({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="p-6 space-y-6">
+      <form
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className="p-6 space-y-6"
+      >
         <FormField
           control={form.control}
           name="areaId"
@@ -53,64 +80,27 @@ export const DerivacionModalForm: React.FC<DerivacionModalFormProps> = ({
             <FormItem>
               <FormLabel>Seleccione el área a derivar el documento</FormLabel>
               <FormControl>
-                <ReactSelect
+                <SearchSelect<number>
                   inputId="area"
                   options={areasOptions}
                   value={areasOptions.find(
                     (option) => option.value === field.value
                   )}
-                  onChange={(option) => field.onChange(option?.value)}
-                  isDisabled={isLoading}
-                  isClearable
-                  isSearchable
-                  placeholder="Seleccione un área"
-                  className="basic-single text-sm"
-                  classNamePrefix="select"
-                  styles={{
-                    control: (baseStyles, state) => ({
-                      ...baseStyles,
-                      borderWidth: "0.5px",
-                      borderColor: state.isFocused ? "black" : "#e2e8f0",
-                      boxShadow: "none",
-                      fontSize: "0.875rem",
-                      "&:hover": {
-                        borderColor: "black",
-                        borderWidth: "0.5px",
-                      },
-                    }),
-                    option: (baseStyles, state) => ({
-                      ...baseStyles,
-                      fontSize: "0.875rem",
-                      backgroundColor: state.isSelected
-                        ? "#f3f4f6"
-                        : state.isFocused
-                        ? "#f9fafb"
-                        : "white",
-                      "&:hover": {
-                        backgroundColor: "#f3f4f6",
-                      },
-                    }),
-                    placeholder: (baseStyles) => ({
-                      ...baseStyles,
-                      fontSize: "0.875rem",
-                      color: "black",
-                    }),
-                    singleValue: (baseStyles) => ({
-                      ...baseStyles,
-                      fontSize: "0.875rem",
-                      color: "black",
-                    }),
+                  onChange={(selectedOption) => {
+                    field.onChange(selectedOption?.value);
                   }}
+                  isDisabled={isLoading || loadingAreas}
+                  isLoading={loadingAreas}
+                  placeholder={
+                    loadingAreas ? "Cargando áreas..." : "Seleccione un área"
+                  }
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <DerivacionModalFooter 
-          onClose={onClose}
-          isLoading={isLoading}
-        />
+        <DerivacionModalFooter onClose={onClose} isLoading={isLoading} />
       </form>
     </Form>
   );
