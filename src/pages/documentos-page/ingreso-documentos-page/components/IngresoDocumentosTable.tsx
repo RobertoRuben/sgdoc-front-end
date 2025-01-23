@@ -61,7 +61,7 @@ export const IngresoDocumentosTable: React.FC<IngresoDocumentosTableProps> = ({
         <TableHeader>
           <TableRow className="bg-[#145A32] hover:bg-[#0E3D22]">
             <TableHead className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
-              ID
+              N° de Registro
             </TableHead>
             <TableHead className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
               Documento
@@ -103,7 +103,7 @@ export const IngresoDocumentosTable: React.FC<IngresoDocumentosTableProps> = ({
               } hover:bg-gray-100 transition-colors duration-150 ease-in-out`}
             >
               <TableCell className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                {documento.id}
+                {String(documento.id).padStart(5, '0')}
               </TableCell>
               <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
                 {documento.nombreDocumento}

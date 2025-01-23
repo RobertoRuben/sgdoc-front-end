@@ -39,7 +39,7 @@ export const ListaDocumentosTable: React.FC<ListaDocumentosTableProps> = ({
   onDownload,
   showEmpty,
 }) => {
-  // Si no hay documentos y se indica mostrar el mensaje de vacío, se renderiza el mensaje
+
   if (currentDocumentos.length === 0 && showEmpty) {
     return (
       <div className="w-full p-8 text-center">
@@ -48,8 +48,6 @@ export const ListaDocumentosTable: React.FC<ListaDocumentosTableProps> = ({
     );
   }
 
-  // Si aún no se ha realizado una búsqueda o no se desea mostrar el mensaje en caso de estar vacío, se muestra el contenedor vacío.
-  // (O bien se puede retornar null si se prefiere no renderizar nada).
   if (currentDocumentos.length === 0) {
     return null;
   }
@@ -70,7 +68,7 @@ export const ListaDocumentosTable: React.FC<ListaDocumentosTableProps> = ({
             <TableHeader>
               <TableRow className="bg-[#145A32] border-b border-[#0E3D22] hover:bg-[#0E3D22]">
                 <TableHead className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
-                  ID
+                  N° de Registro
                 </TableHead>
                 <TableHead className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                   Documento
@@ -112,7 +110,7 @@ export const ListaDocumentosTable: React.FC<ListaDocumentosTableProps> = ({
                   } hover:bg-gray-100 transition-colors duration-150 ease-in-out`}
                 >
                   <TableCell className="px-4 py-4 text-sm font-medium text-gray-900">
-                    {documento.id}
+                    {String(documento.id).padStart(5, '0')}
                   </TableCell>
                   <TableCell className="px-4 py-4 text-sm text-gray-700">
                     {documento.nombreDocumento}

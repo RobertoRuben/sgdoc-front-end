@@ -11,7 +11,7 @@ import { getCategorias } from "@/service/categoriaService";
 import { getCentrosPoblados } from "@/service/centroPobladoService";
 import {
   getCaseriosByCentroPobladoId, getAllCaserios
-} from "@/service/caserioService";// Ajusta la ruta o el nombre del archivo
+} from "@/service/caserioService";
 import { Label } from "@/components/ui/label";
 import { SearchSelect } from "@/components/ui/search-select";
 
@@ -38,14 +38,13 @@ const DatosDocumentoFormSelects: React.FC<DatosDocumentoFormSelectsProps> = ({
             getAmbitos(),
             getCentrosPoblados(),
             getCategorias(),
-            getAllCaserios()     // Cargamos la lista completa de caseríos
+            getAllCaserios()     
           ]);
 
         setAmbitos(ambitosData);
         setCentrosPoblados(centrosPobladosData);
         setCategorias(categoriasData);
 
-        // Guardamos todos los caseríos y a la vez los mostramos
         setAllCaserios(caseriosData);
         setCaserios(caseriosData);
       } catch (error) {
@@ -55,13 +54,8 @@ const DatosDocumentoFormSelects: React.FC<DatosDocumentoFormSelectsProps> = ({
     loadInitialData();
   }, []);
 
-  /**
-   * Llama al servicio para filtrar caseríos por un centro poblado en particular
-   * y lo almacena en el state `caserios`.
-   */
   const loadCaseriosByCentroPoblado = async (centroPobladoId: number) => {
     try {
-      // Si el valor es 0 o no existe, reestablecemos a la lista completa:
       if (!centroPobladoId) {
         setCaserios(allCaserios);
         return;

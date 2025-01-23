@@ -46,7 +46,6 @@ export const ListaDocumentosContainer: React.FC = () => {
   const [dataVersion, setDataVersion] = useState<number>(0);
   const [hasFetched, setHasFetched] = useState<boolean>(false);
 
-  // Estados para búsqueda y filtros
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedCaserio, setSelectedCaserio] = useState<string | undefined>();
   const [selectedCentroPoblado, setSelectedCentroPoblado] = useState<
@@ -55,12 +54,10 @@ export const ListaDocumentosContainer: React.FC = () => {
   const [selectedAmbito, setSelectedAmbito] = useState<string | undefined>();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
 
-  // Catálogos
   const [ambitos, setAmbitos] = useState<Ambito[]>([]);
   const [centrosPoblados, setCentrosPoblados] = useState<CentroPoblado[]>([]);
   const [caserios, setCaserios] = useState<Caserio[]>([]);
 
-  // Estados para modales
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
   const [isDownloadModalOpen, setIsDownloadModalOpen] =
@@ -74,11 +71,9 @@ export const ListaDocumentosContainer: React.FC = () => {
     fileType: string;
   } | null>(null);
 
-  // Manejo de estados para "no results" y mensajes
   const [showNoResults, setShowNoResults] = useState<boolean>(false);
   const [noResultsMessage, setNoResultsMessage] = useState<string>("");
 
-  // Estados de modales globales
   const [errorModalConfig, setErrorModalConfig] = useState<{
     isOpen: boolean;
     message: string;
@@ -101,17 +96,14 @@ export const ListaDocumentosContainer: React.FC = () => {
     message: "",
   });
 
-  // Utilidad para mostrar errores
   const showError = (message: string) => {
     setErrorModalConfig({ isOpen: true, message });
   };
 
-  // Utilidad para mostrar mensajes de éxito
   const showSuccess = (message: string) => {
     setSuccessModalConfig({ isOpen: true, message });
   };
 
-  // Función para cargar catálogos y filtros iniciales
   const loadFilters = async () => {
     setIsLoading(true);
     try {
@@ -136,7 +128,6 @@ export const ListaDocumentosContainer: React.FC = () => {
     }
   };
 
-  // Función para cargar caseríos en base al centro poblado seleccionado
   const loadCaserios = async (centroPobladoId: string) => {
     try {
       const caseriosData = await getCaseriosByCentroPobladoId(
@@ -155,7 +146,6 @@ export const ListaDocumentosContainer: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Cada vez que cambie el centro poblado seleccionado, se cargan los caseríos correspondientes
   useEffect(() => {
     if (selectedCentroPoblado) {
       loadCaserios(selectedCentroPoblado);
@@ -165,7 +155,6 @@ export const ListaDocumentosContainer: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCentroPoblado]);
 
-  // Función para cargar documentos con paginación y filtros
   const loadDocumentos = async ({
     page,
     searchValue,
@@ -183,10 +172,8 @@ export const ListaDocumentosContainer: React.FC = () => {
   }) => {
     try {
       setIsLoading(true);
-      // Reiniciamos el mensaje de no resultados por cada búsqueda
       setShowNoResults(false);
 
-      // Convertir valor de búsqueda a número si corresponde (para posibles DNIs)
       const numericValue = parseInt(searchValue, 10);
       const p_dni = !isNaN(numericValue) ? numericValue : undefined;
       const p_fecha_ingreso = date
@@ -205,7 +192,6 @@ export const ListaDocumentosContainer: React.FC = () => {
         p_fecha_ingreso,
       });
 
-      // Se determina si se aplicó al menos un filtro (no solo paginación)
       const anyFilterApplied =
         searchValue.trim() !== "" ||
         !!ambito ||
@@ -213,7 +199,6 @@ export const ListaDocumentosContainer: React.FC = () => {
         !!caserio ||
         !!date;
 
-      // Solo si se aplicó algún filtro y la respuesta está vacía, se activa el modal de "no results"
       if (response.data.length === 0 && anyFilterApplied) {
         setShowNoResults(true);
         setNoResultsMessage("No se encontraron resultados para la búsqueda.");
@@ -227,11 +212,10 @@ export const ListaDocumentosContainer: React.FC = () => {
       showError("Error al buscar documentos");
     } finally {
       setIsLoading(false);
-      setHasFetched(true); // Indica que ya se realizó al menos una carga
+      setHasFetched(true); 
     }
   };
 
-  // Se define un debounce para la búsqueda
   const debouncedSearch = useCallback(
     debounce(
       (
@@ -256,7 +240,6 @@ export const ListaDocumentosContainer: React.FC = () => {
     []
   );
 
-  // Cada vez que cambien los parámetros de búsqueda/paginación, se dispara la función loadDocumentos con debounce
   useEffect(() => {
     debouncedSearch(
       currentPage,
@@ -276,13 +259,11 @@ export const ListaDocumentosContainer: React.FC = () => {
     debouncedSearch,
   ]);
 
-  // Manejo de cambio de página
   const handlePageChange = (page: number) => {
     if (page < 1 || page > documentosState.pagination.totalPages) return;
     setCurrentPage(page);
   };
 
-  // Manejo de la acción de editar
   const handleEdit = async (id?: number) => {
     try {
       if (id !== undefined) {
@@ -298,7 +279,6 @@ export const ListaDocumentosContainer: React.FC = () => {
     }
   };
 
-  // Manejo para el botón de eliminar
   const handleDeleteClick = (id?: number) => {
     if (!id) return;
     const documento = documentosState.data.find((d) => d.id === id);
@@ -311,7 +291,6 @@ export const ListaDocumentosContainer: React.FC = () => {
     }
   };
 
-  // Confirmación de eliminación
   const handleDeleteConfirm = async () => {
     try {
       if (selectedDocumento?.id) {
@@ -329,7 +308,6 @@ export const ListaDocumentosContainer: React.FC = () => {
     }
   };
 
-  // Manejo de descarga
   const handleDownload = (id?: number) => {
     if (id !== undefined) {
       const documento = documentosState.data.find((d) => d.id === id);
@@ -364,14 +342,12 @@ export const ListaDocumentosContainer: React.FC = () => {
     }
   };
 
-  // Manejo de la actualización del documento con refresco de datos y modal de éxito
   const handleUpdateDocumento = async (data: Documento): Promise<void> => {
     try {
       setIsLoading(true);
       await updateDocumento(data.id!, data);
       console.log("Documento actualizado correctamente");
 
-      // Refrescar la lista de documentos con los filtros actuales
       await loadDocumentos({
         page: currentPage,
         searchValue: searchTerm,
@@ -442,7 +418,6 @@ export const ListaDocumentosContainer: React.FC = () => {
                   onEdit={handleEdit}
                   onDelete={handleDeleteClick}
                   onDownload={handleDownload}
-                  // Si no se ha aplicado ningún filtro (y la primera carga terminó), no se muestra el mensaje vacío
                   showEmpty={hasFetched && documentosState.data.length === 0}
                 />
               </motion.div>

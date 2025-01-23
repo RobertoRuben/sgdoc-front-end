@@ -357,7 +357,7 @@ export const UsuarioContainer: React.FC = () => {
                     />
                 )}
 
-                {usuariosState.pagination.totalPages > 1 && (
+                {usuariosState.pagination.totalPages > 0 && (
                     <div className="py-4 px-4 sm:px-6 border-t border-gray-200">
                         <Pagination
                             currentPage={usuariosState.pagination.currentPage}
