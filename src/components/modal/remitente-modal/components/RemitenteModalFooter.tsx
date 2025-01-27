@@ -17,7 +17,7 @@ export const RemitenteModalFooter: React.FC<RemitenteModalFooterProps> = ({
   isLoading = false,
 }) => {
   return (
-    <DialogFooter className="pt-6 flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
+    <DialogFooter className="p-4 md:p-6 bg-gray-50 border-t border-gray-200 flex flex-col sm:flex-row gap-2 sm:gap-4">
       <Button
         type="button"
         onClick={onClose}

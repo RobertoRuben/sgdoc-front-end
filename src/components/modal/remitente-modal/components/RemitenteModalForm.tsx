@@ -79,7 +79,7 @@ export const RemitenteModalForm: React.FC<RemitenteModalFormProps> = ({
 
   useEffect(() => {
     if (remitente) {
-      const generoNormalizado = remitente.genero.trim(); // elimina espacios
+      const generoNormalizado = remitente.genero.trim();
       const generoValue = generoOptions.find(
         option => option.value === generoNormalizado
       )?.value || undefined;
@@ -110,110 +110,114 @@ export const RemitenteModalForm: React.FC<RemitenteModalFormProps> = ({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
-        className="p-6 space-y-6"
+        className="flex flex-col h-full"
       >
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <FormField
-            control={form.control}
-            name="dni"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel htmlFor="dni-input">DNI</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Ingrese DNI"
-                    disabled={isLoading}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="nombres"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nombres</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Ingrese nombres"
-                    disabled={isLoading}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="apellidoPaterno"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-sm sm:text-base">Apellido Paterno</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Ingrese apellido paterno"
-                    disabled={isLoading}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="apellidoMaterno"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Apellido Materno</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Ingrese apellido materno"
-                    disabled={isLoading}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="genero"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel htmlFor="genero-select">Género</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value }
-                  name="genero"
-                  disabled={isLoading}
-                >
+        <div className="flex-1 overflow-y-auto p-4 md:p-6">
+          <div className="grid grid-cols-1 gap-4 md:gap-6">
+            <FormField
+              control={form.control}
+              name="dni"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel htmlFor="dni-input">DNI</FormLabel>
                   <FormControl>
-                    <SelectTrigger id="genero-select" >
-                      <SelectValue placeholder="Seleccione género" />
-                    </SelectTrigger>
+                    <Input
+                      placeholder="Ingrese DNI"
+                      disabled={isLoading}
+                      {...field}
+                    />
                   </FormControl>
-                  <SelectContent>
-                    <SelectItem value="Masculino">Masculino</SelectItem>
-                    <SelectItem value="Femenino">Femenino</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="nombres"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nombres</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Ingrese nombres"
+                      disabled={isLoading}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="apellidoPaterno"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm sm:text-base">Apellido Paterno</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Ingrese apellido paterno"
+                      disabled={isLoading}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="apellidoMaterno"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Apellido Materno</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Ingrese apellido materno"
+                      disabled={isLoading}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="genero"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel htmlFor="genero-select">Género</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    name="genero"
+                    disabled={isLoading}
+                  >
+                    <FormControl>
+                      <SelectTrigger id="genero-select">
+                        <SelectValue placeholder="Seleccione género" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Masculino">Masculino</SelectItem>
+                      <SelectItem value="Femenino">Femenino</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+        <div className="sticky bottom-0 w-full mt-auto">
+          <RemitenteModalFooter
+            isEditing={isEditing}
+            onClose={onClose}
+            onSubmit={form.handleSubmit(handleSubmit)}
+            isLoading={isLoading}
           />
         </div>
-        <RemitenteModalFooter
-          isEditing={isEditing}
-          onClose={onClose}
-          onSubmit={form.handleSubmit(handleSubmit)}
-          isLoading={isLoading}
-        />
       </form>
     </Form>
   );
