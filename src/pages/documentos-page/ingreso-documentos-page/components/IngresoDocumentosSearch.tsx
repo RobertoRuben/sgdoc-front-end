@@ -29,7 +29,7 @@ export const IngresoDocumentosSearch: React.FC<IngresoDocumentosSearchProps> = (
       <Input
         type="text"
         id="search"
-        placeholder="Buscar documentos..."
+        placeholder="Buscar documento por DNI o por N° de Registro"
         className="pl-10 w-full border-gray-300 focus:border-[#03A64A] focus:ring focus:ring-[#03A64A] focus:ring-opacity-50 rounded-md shadow-sm"
         aria-label="Buscar documentos"
         value={localSearchTerm}

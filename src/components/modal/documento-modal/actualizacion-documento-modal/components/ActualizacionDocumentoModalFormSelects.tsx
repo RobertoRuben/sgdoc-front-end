@@ -1,35 +1,31 @@
-import type React from "react"
-import { useFormContext } from "react-hook-form"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup } from "@/components/ui/select"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import type { Ambito } from "@/model/ambito"
-import type { CentroPoblado } from "@/model/centroPoblado"
-import type { Caserio } from "@/model/caserio"
-import type { Categoria } from "@/model/categoria"
+import React from "react";
+import { useFormContext } from "react-hook-form";
+import { SearchSelect } from "@/components/ui/search-select";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import type { Ambito } from "@/model/ambito";
+import type { CentroPoblado } from "@/model/centroPoblado";
+import type { Caserio } from "@/model/caserio";
+import type { Categoria } from "@/model/categoria";
 
 interface DocumentoModalFormSelectsProps {
-  ambitos: Ambito[]
-  categorias: Categoria[]
-  centrosPoblados: CentroPoblado[]
-  caserios: Caserio[]
-  handleWheel: (event: React.WheelEvent<HTMLDivElement>) => void
-  handleLetterKeyPress: (items: HTMLElement[], key: string) => void
+  ambitos: Ambito[];
+  categorias: Categoria[];
+  centrosPoblados: CentroPoblado[];
+  caserios: Caserio[];
+  handleWheel: (event: React.WheelEvent<HTMLDivElement>) => void;
+  handleLetterKeyPress: (items: HTMLElement[], key: string) => void;
 }
 
-export const ActualizacionDocumentoModalFormSelects: React.FC<DocumentoModalFormSelectsProps> = ({
-  ambitos,
-  categorias,
-  centrosPoblados,
-  caserios,
-  handleWheel,
-  handleLetterKeyPress,
-}) => {
-  const {
-    control,
-    formState: { errors },
-  } = useFormContext()
-  const scrollAreaStyle = { overscrollBehavior: "contain" }
+export const ActualizacionDocumentoModalFormSelects: React.FC<
+  DocumentoModalFormSelectsProps
+> = ({ ambitos, categorias, centrosPoblados, caserios }) => {
+  const { control, setValue } = useFormContext();
 
   return (
     <>
@@ -40,44 +36,25 @@ export const ActualizacionDocumentoModalFormSelects: React.FC<DocumentoModalForm
           <FormItem>
             <FormLabel>Ámbito</FormLabel>
             <FormControl>
-              <Select onValueChange={(value) => field.onChange(Number(value))} value={String(field.value || "")}>
-                <SelectTrigger className={`w-full ${errors.ambitoId ? "border-red-500" : ""}`}>
-                  <SelectValue placeholder="Seleccione un ámbito" />
-                </SelectTrigger>
-                <SelectContent>
-                  <ScrollArea className="max-h-[200px] scroll-area" onWheel={handleWheel} style={scrollAreaStyle}>
-                    <SelectGroup
-                      onKeyDown={(e) => {
-                        if (e.key.length === 1 && e.key.match(/[a-z]/i)) {
-                          const items = Array.from(e.currentTarget.children)
-                          handleLetterKeyPress(items as HTMLElement[], e.key)
-                        }
-                      }}
-                    >
-                      {ambitos.map((ambito) => (
-                        <SelectItem
-                          key={ambito.id}
-                          value={String(ambito.id)}
-                          onKeyDown={(e) => {
-                            if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-                              e.preventDefault()
-                              const items = Array.from(e.currentTarget.parentElement?.children || [])
-                              const currentIndex = items.indexOf(e.currentTarget)
-                              const nextIndex =
-                                e.key === "ArrowDown"
-                                  ? (currentIndex + 1) % items.length
-                                  : (currentIndex - 1 + items.length) % items.length
-                              ;(items[nextIndex] as HTMLElement).focus()
-                            }
-                          }}
-                        >
-                          {ambito.nombreAmbito}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </ScrollArea>
-                </SelectContent>
-              </Select>
+              <SearchSelect<number>
+                inputId="ambito"
+                options={ambitos
+                  .filter((ambito) => ambito.id != null)
+                  .map((ambito) => ({
+                    value: ambito.id as number,
+                    label: ambito.nombreAmbito,
+                  }))}
+                value={ambitos
+                  .filter((ambito) => ambito.id != null)
+                  .map((ambito) => ({
+                    value: ambito.id as number,
+                    label: ambito.nombreAmbito,
+                  }))
+                  .find((option) => option.value === field.value)}
+                onChange={(option) => field.onChange(option?.value)}
+                isDisabled={false}
+                placeholder="Seleccione un ámbito"
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -91,45 +68,25 @@ export const ActualizacionDocumentoModalFormSelects: React.FC<DocumentoModalForm
           <FormItem>
             <FormLabel>Categoría</FormLabel>
             <FormControl>
-              <Select onValueChange={(value) => field.onChange(Number(value))} value={String(field.value || "")}>
-                <SelectTrigger className={`w-full ${errors.categoriaId ? "border-red-500" : ""}`}>
-                  <SelectValue placeholder="Seleccione una categoría" />
-                </SelectTrigger>
-                <SelectContent>
-                  <ScrollArea className="max-h-[200px] scroll-area" onWheel={handleWheel} style={scrollAreaStyle}>
-                    <SelectGroup
-                      onKeyDown={(e) => {
-                        if (e.key.length === 1 && e.key.match(/[a-z]/i)) {
-                          const items = Array.from(e.currentTarget.children)
-                          handleLetterKeyPress(items as HTMLElement[], e.key)
-                        }
-                      }}
-                    >
-                      {categorias.map((categoria) => (
-                        <SelectItem
-                          key={categoria.id}
-                          value={String(categoria.id)}
-                          className="hover:bg-gray-100 focus:bg-gray-200 focus:outline-none"
-                          onKeyDown={(e) => {
-                            if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-                              e.preventDefault()
-                              const items = Array.from(e.currentTarget.parentElement?.children || [])
-                              const currentIndex = items.indexOf(e.currentTarget)
-                              const nextIndex =
-                                e.key === "ArrowDown"
-                                  ? (currentIndex + 1) % items.length
-                                  : (currentIndex - 1 + items.length) % items.length
-                              ;(items[nextIndex] as HTMLElement).focus()
-                            }
-                          }}
-                        >
-                          {categoria.nombreCategoria}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </ScrollArea>
-                </SelectContent>
-              </Select>
+              <SearchSelect<number>
+                inputId="categoria"
+                options={categorias
+                  .filter((categoria) => categoria.id != null)
+                  .map((categoria) => ({
+                    value: categoria.id as number,
+                    label: categoria.nombreCategoria,
+                  }))}
+                value={categorias
+                  .filter((categoria) => categoria.id != null)
+                  .map((categoria) => ({
+                    value: categoria.id as number,
+                    label: categoria.nombreCategoria,
+                  }))
+                  .find((option) => option.value === field.value)}
+                onChange={(option) => field.onChange(option?.value)}
+                isDisabled={false}
+                placeholder="Seleccione una categoría"
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -143,45 +100,35 @@ export const ActualizacionDocumentoModalFormSelects: React.FC<DocumentoModalForm
           <FormItem>
             <FormLabel>Centro Poblado</FormLabel>
             <FormControl>
-              <Select onValueChange={(value) => field.onChange(Number(value))} value={String(field.value || "")}>
-                <SelectTrigger className={`w-full ${errors.centroPobladoId ? "border-red-500" : ""}`}>
-                  <SelectValue placeholder="Seleccione un centro poblado" />
-                </SelectTrigger>
-                <SelectContent>
-                  <ScrollArea className="max-h-[200px] scroll-area" onWheel={handleWheel} style={scrollAreaStyle}>
-                    <SelectGroup
-                      onKeyDown={(e) => {
-                        if (e.key.length === 1 && e.key.match(/[a-z]/i)) {
-                          const items = Array.from(e.currentTarget.children)
-                          handleLetterKeyPress(items as HTMLElement[], e.key)
-                        }
-                      }}
-                    >
-                      {centrosPoblados.map((centroPoblado) => (
-                        <SelectItem
-                          key={centroPoblado.id}
-                          value={String(centroPoblado.id)}
-                          className="hover:bg-gray-100 focus:bg-gray-200 focus:outline-none"
-                          onKeyDown={(e) => {
-                            if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-                              e.preventDefault()
-                              const items = Array.from(e.currentTarget.parentElement?.children || [])
-                              const currentIndex = items.indexOf(e.currentTarget)
-                              const nextIndex =
-                                e.key === "ArrowDown"
-                                  ? (currentIndex + 1) % items.length
-                                  : (currentIndex - 1 + items.length) % items.length
-                              ;(items[nextIndex] as HTMLElement).focus()
-                            }
-                          }}
-                        >
-                          {centroPoblado.nombreCentroPoblado}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </ScrollArea>
-                </SelectContent>
-              </Select>
+              <SearchSelect<number>
+                inputId="centroPoblado"
+                options={centrosPoblados
+                  .filter((centroPoblado) => centroPoblado.id != null)
+                  .map((centroPoblado) => ({
+                    value: centroPoblado.id as number,
+                    label: centroPoblado.nombreCentroPoblado,
+                  }))}
+                value={centrosPoblados
+                  .filter(
+                    (
+                      centroPoblado
+                    ): centroPoblado is CentroPoblado & { id: number } =>
+                      centroPoblado.id != null
+                  )
+                  .map((centroPoblado) => ({
+                    value: centroPoblado.id,
+                    label: centroPoblado.nombreCentroPoblado,
+                  }))
+                  .find((option) => option.value === field.value)}
+                onChange={(option) => {
+                  field.onChange(option?.value || null);
+                  if (!option) {
+                    setValue("caserioId", null);
+                  }
+                }}
+                isDisabled={false}
+                placeholder="Seleccione un centro poblado"
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -195,51 +142,30 @@ export const ActualizacionDocumentoModalFormSelects: React.FC<DocumentoModalForm
           <FormItem>
             <FormLabel>Caserío</FormLabel>
             <FormControl>
-              <Select onValueChange={(value) => field.onChange(Number(value))} value={String(field.value || "")}>
-                <SelectTrigger className={`w-full ${errors.caserioId ? "border-red-500" : ""}`}>
-                  <SelectValue placeholder="Seleccione un caserío" />
-                </SelectTrigger>
-                <SelectContent>
-                  <ScrollArea className="max-h-[200px] scroll-area" onWheel={handleWheel} style={scrollAreaStyle}>
-                    <SelectGroup
-                      onKeyDown={(e) => {
-                        if (e.key.length === 1 && e.key.match(/[a-z]/i)) {
-                          const items = Array.from(e.currentTarget.children)
-                          handleLetterKeyPress(items as HTMLElement[], e.key)
-                        }
-                      }}
-                    >
-                      {caserios.map((caserio) => (
-                        <SelectItem
-                          key={caserio.id}
-                          value={String(caserio.id)}
-                          className="hover:bg-gray-100 focus:bg-gray-200 focus:outline-none"
-                          onKeyDown={(e) => {
-                            if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-                              e.preventDefault()
-                              const items = Array.from(e.currentTarget.parentElement?.children || [])
-                              const currentIndex = items.indexOf(e.currentTarget)
-                              const nextIndex =
-                                e.key === "ArrowDown"
-                                  ? (currentIndex + 1) % items.length
-                                  : (currentIndex - 1 + items.length) % items.length
-                              ;(items[nextIndex] as HTMLElement).focus()
-                            }
-                          }}
-                        >
-                          {caserio.nombreCaserio}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </ScrollArea>
-                </SelectContent>
-              </Select>
+              <SearchSelect<number>
+                inputId="caserio"
+                options={caserios
+                  .filter((caserio) => caserio.id != null)
+                  .map((caserio) => ({
+                    value: caserio.id as number,
+                    label: caserio.nombreCaserio,
+                  }))}
+                value={caserios
+                  .filter((caserio) => caserio.id != null)
+                  .map((caserio) => ({
+                    value: caserio.id as number,
+                    label: caserio.nombreCaserio,
+                  }))
+                  .find((option) => option.value === field.value)}
+                onChange={(option) => field.onChange(option?.value)}
+                isDisabled={false}
+                placeholder="Seleccione un caserío"
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
     </>
-  )
-}
-
+  );
+};

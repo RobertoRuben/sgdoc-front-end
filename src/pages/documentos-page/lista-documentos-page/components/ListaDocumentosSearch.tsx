@@ -1,4 +1,3 @@
-// ListaDocumentosSearch.tsx
 import React, { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { PiBroom } from "react-icons/pi";
@@ -11,7 +10,11 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Ambito } from "@/model/ambito";
 import { CentroPoblado } from "@/model/centroPoblado";
@@ -23,7 +26,9 @@ interface ListaDocumentosSearchProps {
   selectedCaserio: string | undefined;
   setSelectedCaserio: React.Dispatch<React.SetStateAction<string | undefined>>;
   selectedCentroPoblado: string | undefined;
-  setSelectedCentroPoblado: React.Dispatch<React.SetStateAction<string | undefined>>;
+  setSelectedCentroPoblado: React.Dispatch<
+    React.SetStateAction<string | undefined>
+  >;
   selectedAmbito: string | undefined;
   setSelectedAmbito: React.Dispatch<React.SetStateAction<string | undefined>>;
   selectedDate: Date | undefined;
@@ -64,7 +69,9 @@ export const ListaDocumentosSearch: React.FC<ListaDocumentosSearchProps> = ({
   const handleKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Backspace") {
       setIsBackspaceHeld(false);
-      const syntheticEvent = { target: e.currentTarget } as React.ChangeEvent<HTMLInputElement>;
+      const syntheticEvent = {
+        target: e.currentTarget,
+      } as React.ChangeEvent<HTMLInputElement>;
       setSearchTerm(syntheticEvent.target.value);
     }
   };
@@ -90,7 +97,7 @@ export const ListaDocumentosSearch: React.FC<ListaDocumentosSearchProps> = ({
         <Input
           type="text"
           id="search"
-          placeholder="Buscar documentos..."
+          placeholder="Buscar documento por DNI o por N° de Registro"
           className="pl-10 pr-10 w-full border-gray-300 focus:border-[#03A64A] focus:ring focus:ring-[#03A64A] focus:ring-opacity-50 rounded-md shadow-sm"
           aria-label="Buscar documentos"
           value={deferredValue}
@@ -111,9 +118,16 @@ export const ListaDocumentosSearch: React.FC<ListaDocumentosSearchProps> = ({
       </div>
 
       {/* Select de Centro Poblado */}
-      <Select onValueChange={(val) => setSelectedCentroPoblado(val === "all" ? undefined : val)}>
+      <Select
+        onValueChange={(val) => {
+          console.log("Centro Poblado seleccionado:", val);
+          setSelectedCentroPoblado(val === "all" ? undefined : val);
+        }}
+      >
         <SelectTrigger className="w-full sm:w-[180px]">
-          <SelectValue placeholder={selectedCentroPoblado || "Centro Poblado"} />
+          <SelectValue
+            placeholder={selectedCentroPoblado || "Centro Poblado"}
+          />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">Todos</SelectItem>
@@ -126,22 +140,30 @@ export const ListaDocumentosSearch: React.FC<ListaDocumentosSearchProps> = ({
       </Select>
 
       {/* Select de Caserío */}
-      <Select onValueChange={(val) => setSelectedCaserio(val === "all" ? undefined : val)}>
+      <Select
+        onValueChange={(val) => {
+          console.log("Caserío seleccionado:", val);
+          setSelectedCaserio(val === "all" ? undefined : val);
+        }}
+      >
         <SelectTrigger className="w-full sm:w-[180px]">
           <SelectValue placeholder={selectedCaserio || "Caserío"} />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">Todos</SelectItem>
           {caserios.map((caserio) => (
-            <SelectItem key={caserio.id} value={caserio.nombreCaserio}>
+            <SelectItem key={caserio.id} value={String(caserio.id)}>
               {caserio.nombreCaserio}
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
 
-      {/* Select de Ámbito */}
-      <Select onValueChange={(val) => setSelectedAmbito(val === "all" ? undefined : val)}>
+      <Select
+        onValueChange={(val) =>
+          setSelectedAmbito(val === "all" ? undefined : val)
+        }
+      >
         <SelectTrigger className="w-full sm:w-[180px]">
           <SelectValue placeholder={selectedAmbito || "Ámbito"} />
         </SelectTrigger>
@@ -155,15 +177,24 @@ export const ListaDocumentosSearch: React.FC<ListaDocumentosSearchProps> = ({
         </SelectContent>
       </Select>
 
-      {/* Selección de Fecha */}
       <Popover>
         <PopoverTrigger asChild>
-          <Button variant="outline" className="w-full sm:w-[180px] justify-start text-left font-normal">
-            {selectedDate ? selectedDate.toLocaleDateString() : "Seleccionar Fecha"}
+          <Button
+            variant="outline"
+            className="w-full sm:w-[180px] justify-start text-left font-normal"
+          >
+            {selectedDate
+              ? selectedDate.toLocaleDateString()
+              : "Seleccionar Fecha"}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="p-0" align="start">
-          <Calendar mode="single" selected={selectedDate} onSelect={setSelectedDate} initialFocus />
+          <Calendar
+            mode="single"
+            selected={selectedDate}
+            onSelect={setSelectedDate}
+            initialFocus
+          />
         </PopoverContent>
       </Popover>
     </div>

@@ -6,6 +6,7 @@ interface SelectProps<T> {
   onChange: (value: { value: T; label: string } | null) => void;
   isDisabled?: boolean;
   isLoading?: boolean;
+  isClearable?: boolean; 
   placeholder?: string;
   inputId?: string;
 }
