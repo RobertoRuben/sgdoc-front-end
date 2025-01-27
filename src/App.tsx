@@ -1,23 +1,25 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
-import { Layout } from "@/components/layout/Layout"
-import { LoadingProvider } from "@/context/LoadingContext"
-import RemitentesPage from "@/pages/remitentes-page/RemitentesPage"
-import TrabajadoresPage from "@/pages/trabajadores-page/TrabajadoresPage"
-import AreasPage from "@/pages/areas-page/AreasPage"
-import LoginPage from "@/pages/login-page/LoginPage"
-import RolesPage from "@/pages/rol-page/RolesPage"
-import UsuariosPage from "@/pages/usuarios-page/UsuariosPage"
-import IngresoDocumentosPage from "@/pages/documentos-page/ingreso-documentos-page/IngresoDocumentosPage"
-import ListaDocumentosPage from "@/pages/documentos-page/lista-documentos-page/ListaDocumentosPage"
-import AmbitoPage from "@/pages/ambito-page/AmbitoPage"
-import CategoriaPage from "@/pages/categoria-page/CategoriaPage"
-import CentroPobladoPage from "@/pages/centro-poblado-page/CentroPobladoPage"
-import CaseriosPage from "@/pages/caserios-page/CaseriosPage"
-import DashboardMesaPartesPage from "@/pages/inicio-page/DashboardMesaPartesPage"
-import { Toaster } from "@/components/ui/toaster"
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { Layout } from "@/components/layout/Layout";
+import { LoadingProvider } from "@/context/LoadingContext";
 
-import { AuthProvider } from "./provider/AuthProvider"
-import { ProtectedRoute } from "@/auth/ProtectedRoute"
+import { AuthProvider } from "./provider/AuthProvider";
+import { ProtectedRoute } from "@/auth/ProtectedRoute";
+
+import LoginPage from "@/pages/login-page/LoginPage";
+import NotAuthorizedPage from "@/pages/not-authorized-page/NotAuthorizedPage";
+import RemitentesPage from "@/pages/remitentes-page/RemitentesPage";
+import TrabajadoresPage from "@/pages/trabajadores-page/TrabajadoresPage";
+import UsuariosPage from "@/pages/usuarios-page/UsuariosPage";
+import RolesPage from "@/pages/rol-page/RolesPage";
+import AreasPage from "@/pages/areas-page/AreasPage";
+import IngresoDocumentosPage from "@/pages/documentos-page/ingreso-documentos-page/IngresoDocumentosPage";
+import ListaDocumentosPage from "@/pages/documentos-page/lista-documentos-page/ListaDocumentosPage";
+import AmbitoPage from "@/pages/ambito-page/AmbitoPage";
+import CategoriaPage from "@/pages/categoria-page/CategoriaPage";
+import CentroPobladoPage from "@/pages/centro-poblado-page/CentroPobladoPage";
+import CaseriosPage from "@/pages/caserios-page/CaseriosPage";
+import DashboardMesaPartesPage from "@/pages/inicio-page/DashboardMesaPartesPage";
+import { Toaster } from "@/components/ui/toaster";
 
 function App() {
   return (
@@ -25,25 +27,40 @@ function App() {
       <AuthProvider>
         <LoadingProvider>
           <Toaster />
+
           <Routes>
             <Route path="/login" element={<LoginPage />} />
-            <Route path="/" element={<Navigate to="/inicio" replace />} />
+            <Route path="/not-authorized" element={<NotAuthorizedPage />} />
 
-            <Route path="/" element={<ProtectedRoute />}>
-              <Route path="" element={<Layout />}>
+            <Route element={<ProtectedRoute />}>
+              <Route path="/" element={<Layout />}>
+                <Route index element={<Navigate to="inicio" replace />} />
+                <Route path="inicio" element={<DashboardMesaPartesPage />} />
+
+                // Rutas con roles "Admin"
+                <Route element={<ProtectedRoute requiredRoles={["Admin"]} />}>
                 <Route path="remitentes/lista" element={<RemitentesPage />} />
-                <Route path="trabajadores/lista" element={<TrabajadoresPage />} />
+                  <Route path="trabajadores/lista" element={<TrabajadoresPage />} />
+                  <Route path="usuarios/lista" element={<UsuariosPage />} />
+                  <Route path="usuarios/roles/lista" element={<RolesPage />} />
+                  <Route path="mesa-partes/ingreso" element={<IngresoDocumentosPage />} />
+                </Route>
+
+                //Rutas con roles "Mesa de Partes"
+                <Route element={<ProtectedRoute requiredRoles={["Mesa de Partes"]} />}>
+                  <Route path="mesa-partes/ingreso" element={<IngresoDocumentosPage />} />
+                </Route>
+
+                //Rutas que solo requieren autenticación
                 <Route path="usuarios/lista" element={<UsuariosPage />} />
-                <Route path="usuarios/roles/lista" element={<RolesPage />} />
                 <Route path="areas/lista" element={<AreasPage />} />
-                <Route path="mesa-partes/ingreso" element={<IngresoDocumentosPage />} />
                 <Route path="documentos/lista" element={<ListaDocumentosPage />} />
                 <Route path="documentos/ambitos/lista" element={<AmbitoPage />} />
                 <Route path="documentos/categorias/lista" element={<CategoriaPage />} />
                 <Route path="distrito/centros-poblados/lista" element={<CentroPobladoPage />} />
                 <Route path="distrito/caserios/lista" element={<CaseriosPage />} />
-                <Route path="inicio" element={<DashboardMesaPartesPage />} />
 
+                // Redirecciones
                 <Route path="areas" element={<Navigate to="/areas/lista" replace />} />
                 <Route path="remitentes" element={<Navigate to="/remitentes/lista" replace />} />
                 <Route path="trabajadores" element={<Navigate to="/trabajadores/lista" replace />} />
@@ -62,6 +79,7 @@ function App() {
                   element={<Navigate to="/distrito/caserios/lista" replace />}
                 />
 
+                // Página no encontrada
                 <Route path="*" element={<div className="p-4">Página no encontrada</div>} />
               </Route>
             </Route>
@@ -69,7 +87,7 @@ function App() {
         </LoadingProvider>
       </AuthProvider>
     </Router>
-  )
+  );
 }
 
-export default App
+export default App;

@@ -1,12 +1,21 @@
-import { Navigate, Outlet } from "react-router-dom"
-import { useAuth } from "@/hooks/useAuth"
+import { Navigate, Outlet } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
-export function ProtectedRoute() {
-  const { isAuthenticated } = useAuth()
+type ProtectedRouteProps = {
+  requiredRoles?: string[];
+};
+
+export function ProtectedRoute({ requiredRoles = [] }: ProtectedRouteProps) {
+  const { isAuthenticated } = useAuth();
+  const userRole = sessionStorage.getItem("rolName") || "";
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
+    return <Navigate to="/login" replace />;
   }
 
-  return <Outlet />
+  if (requiredRoles.length > 0 && !requiredRoles.includes(userRole)) {
+    return <Navigate to="/not-authorized" replace />;
+  }
+
+  return <Outlet />;
 }
