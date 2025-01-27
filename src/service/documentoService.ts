@@ -134,16 +134,20 @@ export const searchDocumentos = async (params: {
   p_page: number;
   p_page_size: number;
   p_dni?: number;
-  p_nombre_caserio?: string;
-  p_nombre_centro_poblado?: string;
-  p_nombre_ambito?: string;
+  p_id_caserio?: number;
+  p_id_centro_poblado?: number;
+  p_id_ambito?: number;
   p_nombre_categoria?: string;
   p_fecha_ingreso?: string;
 }): Promise<DocumentoPaginatedResponse> => {
   try {
+    console.log("Params:", params);
     const response = await axiosInstance.get(`${API_BASE_URL}buscar`, {
       params: humps.decamelizeKeys(params),
     });
+    console.log(axiosInstance.defaults.headers)
+    console.log(params)
+    console.log("Response data:", response.data);
     const rawData = response.data;
     return {
       data: humps.camelizeKeys(rawData.data) as DocumentoDetails[],

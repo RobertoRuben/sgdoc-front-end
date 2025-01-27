@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Download, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,9 +10,9 @@ import {
   TableHead,
   TableRow,
 } from "@/components/ui/table";
+import { AsuntoModal } from "@/components/modal/documento-modal/asunto-documento-modal/AsuntoModal";
 import { DocumentoDetails } from "@/model/documentoDetails";
 
-// En caso de que no tengas una interfaz Documento, puedes crear algo parecido:
 interface IngresoDocumentosTableProps {
   currentDocumentos: DocumentoDetails[];
   currentPage: number;
@@ -39,10 +40,15 @@ export const IngresoDocumentosTable: React.FC<IngresoDocumentosTableProps> = ({
   onDownload,
   onSend,
 }) => {
+  const [isAsuntoModalOpen, setIsAsuntoModalOpen] = useState(false);
+  const [selectedDocumento, setSelectedDocumento] =
+    useState<DocumentoDetails>();
   if (currentDocumentos.length === 0) {
     return (
       <div className="w-full p-8 text-center">
-        <p className="text-gray-500">No se encontraron documentos</p>
+        <p className="text-gray-500">
+          No tienes documento registrados el dia de hoy
+        </p>
       </div>
     );
   }
@@ -84,6 +90,9 @@ export const IngresoDocumentosTable: React.FC<IngresoDocumentosTableProps> = ({
             <TableHead className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider hidden 2xl:table-cell">
               Caserío
             </TableHead>
+            <TableHead className="hidden 2xl:table-cell px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
+              Asunto
+            </TableHead>
             <TableHead className="px-4 py-3 text-right text-xs font-bold text-white uppercase tracking-wider">
               Acciones
             </TableHead>
@@ -103,7 +112,7 @@ export const IngresoDocumentosTable: React.FC<IngresoDocumentosTableProps> = ({
               } hover:bg-gray-100 transition-colors duration-150 ease-in-out`}
             >
               <TableCell className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                {String(documento.id).padStart(5, '0')}
+                {String(documento.id).padStart(5, "0")}
               </TableCell>
               <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
                 {documento.nombreDocumento}
@@ -126,6 +135,18 @@ export const IngresoDocumentosTable: React.FC<IngresoDocumentosTableProps> = ({
               <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 hidden 2xl:table-cell">
                 {documento.nombreCaserio}
               </TableCell>
+              <TableCell className="hidden 2xl:table-cell px-4 py-4 text-sm text-gray-700 text-center">
+                <Button
+                  variant="link"
+                  className="text-[#145A32] hover:text-[#0E3D22] p-0 h-auto font-normal"
+                  onClick={() => {
+                    setSelectedDocumento(documento);
+                    setIsAsuntoModalOpen(true);
+                  }}
+                >
+                  Ver
+                </Button>
+              </TableCell>
               <TableCell className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <div className="flex justify-end gap-2">
                   <Button
@@ -146,6 +167,11 @@ export const IngresoDocumentosTable: React.FC<IngresoDocumentosTableProps> = ({
           ))}
         </TableBody>
       </Table>
+      <AsuntoModal
+            isOpen={isAsuntoModalOpen}
+            documento={selectedDocumento!}
+            onClose={() => setIsAsuntoModalOpen(false)}
+          />
     </motion.div>
   );
 };

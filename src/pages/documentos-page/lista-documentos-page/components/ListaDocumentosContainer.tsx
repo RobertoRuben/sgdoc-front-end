@@ -14,6 +14,7 @@ import { Ambito } from "@/model/ambito";
 import { CentroPoblado } from "@/model/centroPoblado";
 import { Caserio } from "@/model/caserio";
 import { getAmbitos } from "@/service/ambitoService";
+import { getAllCaserios } from "@/service/caserioService";
 import { getCentrosPoblados } from "@/service/centroPobladoService";
 import { getCaseriosByCentroPobladoId } from "@/service/caserioService";
 import {
@@ -23,6 +24,7 @@ import {
   getDocumentoById,
   updateDocumento,
 } from "@/service/documentoService";
+import { DerivacionModal } from "@/components/modal/derivacion-modal/DerivacionModal";
 import NoResultsModal from "@/components/modal/alerts/no-results-modal/NoResultsModal";
 import ErrorModal from "@/components/modal/alerts/error-modal/ErrorModal";
 import SuccessModal from "@/components/modal/alerts/success-modal/SuccessModal";
@@ -46,6 +48,11 @@ export const ListaDocumentosContainer: React.FC = () => {
   const [dataVersion, setDataVersion] = useState<number>(0);
   const [hasFetched, setHasFetched] = useState<boolean>(false);
 
+  const [isDerivacionModalOpen, setIsDerivacionModalOpen] = useState(false);
+  const [selectedDocumentoId, setSelectedDocumentoId] = useState<
+    number | undefined
+  >();
+
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedCaserio, setSelectedCaserio] = useState<string | undefined>();
   const [selectedCentroPoblado, setSelectedCentroPoblado] = useState<
@@ -62,8 +69,9 @@ export const ListaDocumentosContainer: React.FC = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
   const [isDownloadModalOpen, setIsDownloadModalOpen] =
     useState<boolean>(false);
-  const [selectedDocumento, setSelectedDocumento] =
-    useState<Documento | undefined>(undefined);
+  const [selectedDocumento, setSelectedDocumento] = useState<
+    Documento | undefined
+  >(undefined);
   const [selectedDocumentDownload, setSelectedDocumentDownload] = useState<{
     id: number;
     nombreDocumento: string;
@@ -114,12 +122,8 @@ export const ListaDocumentosContainer: React.FC = () => {
       setAmbitos(ambitosData);
       setCentrosPoblados(centrosPobladosData);
 
-      if (centrosPobladosData.length > 0) {
-        const caseriosData = await getCaseriosByCentroPobladoId(
-          centrosPobladosData[0].id
-        );
-        setCaserios(caseriosData || []);
-      }
+      // Cargar todos los caseríos inicialmente
+      loadAllCaserios();
     } catch (error) {
       console.error(error);
       showError("Error al cargar los catálogos");
@@ -128,15 +132,25 @@ export const ListaDocumentosContainer: React.FC = () => {
     }
   };
 
-  const loadCaserios = async (centroPobladoId: string) => {
+  const loadAllCaserios = async () => {
+    try {
+      const caseriosData = await getAllCaserios();
+      setCaserios(caseriosData);
+    } catch (error) {
+      console.error(error);
+      showError("Error al cargar todos los caseríos");
+    }
+  };
+
+  const loadCaseriosByCentroPoblado = async (centroPobladoId: string) => {
     try {
       const caseriosData = await getCaseriosByCentroPobladoId(
         Number(centroPobladoId)
       );
-      setCaserios(caseriosData || []);
+      setCaserios(caseriosData ?? []);
     } catch (error) {
       console.error(error);
-      showError("Error al cargar los caseríos");
+      showError("Error al cargar los caseríos por centro poblado");
     }
   };
 
@@ -148,11 +162,12 @@ export const ListaDocumentosContainer: React.FC = () => {
 
   useEffect(() => {
     if (selectedCentroPoblado) {
-      loadCaserios(selectedCentroPoblado);
+      // Si hay un centro poblado seleccionado
+      loadCaseriosByCentroPoblado(selectedCentroPoblado);
     } else {
-      setCaserios([]);
+      // Mostrar todos
+      loadAllCaserios();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCentroPoblado]);
 
   const loadDocumentos = async ({
@@ -180,17 +195,25 @@ export const ListaDocumentosContainer: React.FC = () => {
         ? date.toISOString().split("T")[0]
         : undefined;
 
-      const response = await searchDocumentos({
+      // Convertir explícitamente los IDs a números
+      const params = {
         p_page: page,
         p_page_size: 4,
         p_dni,
-        p_nombre_caserio:
-          caserio && caserio !== "all" ? caserio : undefined,
-        p_nombre_centro_poblado:
-          centroPoblado && centroPoblado !== "all" ? centroPoblado : undefined,
-        p_nombre_ambito: ambito && ambito !== "all" ? ambito : undefined,
+        p_id_caserio:
+          caserio && caserio !== "all" ? parseInt(caserio, 10) : undefined,
+        p_id_centro_poblado:
+          centroPoblado && centroPoblado !== "all"
+            ? parseInt(centroPoblado, 10)
+            : undefined,
+        p_id_ambito:
+          ambito && ambito !== "all" ? parseInt(ambito, 10) : undefined,
         p_fecha_ingreso,
-      });
+      };
+
+      console.log("Params enviados al servicio:", params);
+
+      const response = await searchDocumentos(params);
 
       const anyFilterApplied =
         searchValue.trim() !== "" ||
@@ -212,7 +235,7 @@ export const ListaDocumentosContainer: React.FC = () => {
       showError("Error al buscar documentos");
     } finally {
       setIsLoading(false);
-      setHasFetched(true); 
+      setHasFetched(true);
     }
   };
 
@@ -258,6 +281,30 @@ export const ListaDocumentosContainer: React.FC = () => {
     selectedDate,
     debouncedSearch,
   ]);
+
+  const handleSend = (id?: number) => {
+    if (id !== undefined) {
+      setSelectedDocumentoId(id);
+      setIsDerivacionModalOpen(true);
+    }
+  };
+
+  const handleDerivar = async (areaId: number) => {
+    try {
+      console.log(
+        `Derivando documento ${selectedDocumentoId} al área ${areaId}`
+      );
+      // Aquí implementarías la lógica de derivación
+      setIsDerivacionModalOpen(false);
+      setSuccessModalConfig({
+        isOpen: true,
+        message: "Documento derivado exitosamente.",
+      });
+    } catch (error) {
+      showError("Error al derivar el documento.");
+      console.error(error);
+    }
+  };
 
   const handlePageChange = (page: number) => {
     if (page < 1 || page > documentosState.pagination.totalPages) return;
@@ -418,6 +465,7 @@ export const ListaDocumentosContainer: React.FC = () => {
                   onEdit={handleEdit}
                   onDelete={handleDeleteClick}
                   onDownload={handleDownload}
+                  onSend={handleSend}
                   showEmpty={hasFetched && documentosState.data.length === 0}
                 />
               </motion.div>
@@ -496,6 +544,12 @@ export const ListaDocumentosContainer: React.FC = () => {
         }
         title="Actualización Exitosa"
         message={updateSuccessConfig.message}
+      />
+
+      <DerivacionModal
+        isOpen={isDerivacionModalOpen}
+        onClose={() => setIsDerivacionModalOpen(false)}
+        onSubmit={handleDerivar}
       />
     </div>
   );

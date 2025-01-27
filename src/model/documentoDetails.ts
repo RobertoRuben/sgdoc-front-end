@@ -7,4 +7,5 @@ export interface DocumentoDetails{
     nombreCategoria: string;
     nombreDocumento: string;
     nombreCentroPoblado: string;
+    asunto: string;
 }
