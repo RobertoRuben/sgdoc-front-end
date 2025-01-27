@@ -1,12 +1,13 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { LoadingProvider } from "@/context/LoadingContext";
-
 import { AuthProvider } from "./provider/AuthProvider";
 import { ProtectedRoute } from "@/auth/ProtectedRoute";
 
 import LoginPage from "@/pages/login-page/LoginPage";
 import NotAuthorizedPage from "@/pages/not-authorized-page/NotAuthorizedPage";
+import NotFoundPage from "@/pages/not-found-page/NotFoundPage"; // <-- Importa tu NotFoundPage
+
 import RemitentesPage from "@/pages/remitentes-page/RemitentesPage";
 import TrabajadoresPage from "@/pages/trabajadores-page/TrabajadoresPage";
 import UsuariosPage from "@/pages/usuarios-page/UsuariosPage";
@@ -29,29 +30,32 @@ function App() {
           <Toaster />
 
           <Routes>
+            {/* Rutas públicas */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/not-authorized" element={<NotAuthorizedPage />} />
+            <Route path="/not-found" element={<NotFoundPage />} />
 
+            {/* Rutas protegidas */}
             <Route element={<ProtectedRoute />}>
               <Route path="/" element={<Layout />}>
                 <Route index element={<Navigate to="inicio" replace />} />
                 <Route path="inicio" element={<DashboardMesaPartesPage />} />
 
-                // Rutas con roles "Admin"
+                {/* Rutas con roles "Admin" */}
                 <Route element={<ProtectedRoute requiredRoles={["Admin"]} />}>
-                <Route path="remitentes/lista" element={<RemitentesPage />} />
+                  <Route path="remitentes/lista" element={<RemitentesPage />} />
                   <Route path="trabajadores/lista" element={<TrabajadoresPage />} />
                   <Route path="usuarios/lista" element={<UsuariosPage />} />
                   <Route path="usuarios/roles/lista" element={<RolesPage />} />
                   <Route path="mesa-partes/ingreso" element={<IngresoDocumentosPage />} />
                 </Route>
 
-                //Rutas con roles "Mesa de Partes"
+                {/* Rutas con roles "Mesa de Partes" */}
                 <Route element={<ProtectedRoute requiredRoles={["Mesa de Partes"]} />}>
                   <Route path="mesa-partes/ingreso" element={<IngresoDocumentosPage />} />
                 </Route>
 
-                //Rutas que solo requieren autenticación
+                {/* Rutas que solo requieren autenticación */}
                 <Route path="usuarios/lista" element={<UsuariosPage />} />
                 <Route path="areas/lista" element={<AreasPage />} />
                 <Route path="documentos/lista" element={<ListaDocumentosPage />} />
@@ -60,7 +64,7 @@ function App() {
                 <Route path="distrito/centros-poblados/lista" element={<CentroPobladoPage />} />
                 <Route path="distrito/caserios/lista" element={<CaseriosPage />} />
 
-                // Redirecciones
+                {/* Redirecciones */}
                 <Route path="areas" element={<Navigate to="/areas/lista" replace />} />
                 <Route path="remitentes" element={<Navigate to="/remitentes/lista" replace />} />
                 <Route path="trabajadores" element={<Navigate to="/trabajadores/lista" replace />} />
@@ -78,11 +82,11 @@ function App() {
                   path="distrito/caserios"
                   element={<Navigate to="/distrito/caserios/lista" replace />}
                 />
-
-                // Página no encontrada
-                <Route path="*" element={<div className="p-4">Página no encontrada</div>} />
               </Route>
             </Route>
+
+            {/* Cualquier otra ruta redirige a /not-found */}
+            <Route path="*" element={<Navigate to="/not-found" replace />} />
           </Routes>
         </LoadingProvider>
       </AuthProvider>
