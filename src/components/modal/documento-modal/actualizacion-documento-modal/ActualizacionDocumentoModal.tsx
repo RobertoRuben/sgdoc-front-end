@@ -31,7 +31,7 @@ export function ActualizacionDocumentoModal({
 }: ActualizacionDocumentoModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] p-0 bg-white max-h-[90vh] overflow-hidden">
+      <DialogContent className="sm:max-w-[600px] p-0 bg-white max-h-[90vh] h-full w-full overflow-hidden flex flex-col">
         <motion.div
           variants={fadeInVariants}
           initial="hidden"
@@ -46,9 +46,9 @@ export function ActualizacionDocumentoModal({
               initial="hidden"
               animate="visible"
               exit="exit"
-              className="flex-grow"
+              className="flex-1 overflow-y-auto"
             >
-              <div className="overflow-y-auto flex-grow scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
+              <div className="flex-1">
                 <ActualizacionDocumentoModalForm
                   documento={documento}
                   onClose={onClose}

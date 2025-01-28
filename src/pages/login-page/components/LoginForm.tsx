@@ -1,55 +1,65 @@
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
-import { useToast } from "@/hooks/use-toast"
-import { AuthCredentials } from "@/model/authCredentials"
-import { Loader2, Lock, User } from "lucide-react"
-import { useAuth } from "@/hooks/useAuth"
-import { useNavigate } from "react-router-dom"
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { AuthCredentials } from "@/model/authCredentials";
+import { Loader2, Lock, User } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 export const LoginFormContent = () => {
   const [credentials, setCredentials] = useState<AuthCredentials>({
     nombreUsuario: "",
     password: "",
-  })
-  const [isLoading, setIsLoading] = useState(false)
-  const { toast } = useToast()
+  });
 
-  const { login } = useAuth()
-  const navigate = useNavigate()
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    setIsLoading(false);
+    setCredentials({
+      nombreUsuario: "",
+      password: "",
+    });
+    setIsLoading(false);
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setCredentials((prev) => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setCredentials((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
 
     try {
-      await login(credentials.nombreUsuario, credentials.password)
+      await login(credentials.nombreUsuario, credentials.password);
 
       toast({
         title: "¡Bienvenido!",
         description: "Has iniciado sesión exitosamente en SGDOC",
         className: "bg-green-50 border-green-200",
-      })
+      });
 
-      navigate("/inicio")
+      navigate("/inicio");
     } catch (err) {
-        console.error("Error al iniciar sesión:", err)
+      console.error("Error al iniciar sesión:", err);
       toast({
         title: "Error de autenticación",
-        description: "Las credenciales ingresadas son incorrectas o falló la conexión.",
+        description:
+          "Las credenciales ingresadas son incorrectas o falló la conexión.",
         variant: "destructive",
-      })
+      });
     }
 
-    setIsLoading(false)
-  }
+    setIsLoading(false);
+  };
 
   const formVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -61,12 +71,12 @@ export const LoginFormContent = () => {
         staggerChildren: 0.1,
       },
     },
-  }
+  };
 
   const itemVariants = {
     hidden: { opacity: 0, x: -20 },
     visible: { opacity: 1, x: 0 },
-  }
+  };
 
   return (
     <motion.form
@@ -88,6 +98,7 @@ export const LoginFormContent = () => {
           value={credentials.nombreUsuario}
           onChange={handleChange}
           required
+          disabled={isLoading}
           className="w-full bg-white/50 backdrop-blur-sm focus:ring-[#03A64A] focus:border-[#03A64A]"
         />
       </motion.div>
@@ -104,14 +115,15 @@ export const LoginFormContent = () => {
           value={credentials.password}
           onChange={handleChange}
           required
+          disabled={isLoading}
           className="w-full bg-white/50 backdrop-blur-sm focus:ring-[#03A64A] focus:border-[#03A64A]"
         />
       </motion.div>
 
       <motion.div
         variants={itemVariants}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
+        whileHover={{ scale: isLoading ? 1 : 1.02 }}
+        whileTap={{ scale: isLoading ? 1 : 0.98 }}
       >
         <Button
           type="submit"
@@ -129,5 +141,5 @@ export const LoginFormContent = () => {
         </Button>
       </motion.div>
     </motion.form>
-  )
-}
+  );
+};

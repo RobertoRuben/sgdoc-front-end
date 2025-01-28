@@ -97,7 +97,7 @@ export const ListaDocumentosTable: React.FC<ListaDocumentosTableProps> = ({
                 <TableHead className="hidden 2xl:table-cell px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                   Caserío
                 </TableHead>
-                <TableHead className="hidden 2xl:table-cell px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
+                <TableHead className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                   Asunto
                 </TableHead>
                 <TableHead className="px-4 py-3 text-right text-xs font-bold text-white uppercase tracking-wider">
@@ -142,7 +142,7 @@ export const ListaDocumentosTable: React.FC<ListaDocumentosTableProps> = ({
                   <TableCell className="hidden 2xl:table-cell px-4 py-4 text-sm text-gray-700">
                     {documento.nombreCaserio}
                   </TableCell>
-                  <TableCell className="hidden 2xl:table-cell px-4 py-4 text-sm text-gray-700 text-center">
+                  <TableCell className="px-4 py-4 text-sm text-gray-700 text-center">
                     <Button
                       variant="link"
                       className="text-[#145A32] hover:text-[#0E3D22] p-0 h-auto font-normal"

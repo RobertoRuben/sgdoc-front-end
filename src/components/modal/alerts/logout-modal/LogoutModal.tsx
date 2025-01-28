@@ -16,14 +16,12 @@ interface LogoutModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => Promise<void>;
-  username: string;
 }
 
 export default function LogoutModal({
   isOpen,
   onClose,
   onConfirm,
-  username,
 }: LogoutModalProps) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -75,12 +73,12 @@ export default function LogoutModal({
                     id="logout-description"
                     className="sr-only"
                   >
-                    Modal para cerrar sesión de {username}
+                    Modal para cerrar sesión
                   </DialogDescription>
                 </DialogHeader>
 
                 <div className="mt-6 space-y-6">
-                  <LogoutWarning username={username} />
+                  <LogoutWarning/>
                   <LogoutActions
                     onClose={onClose}
                     onConfirm={handleConfirm}

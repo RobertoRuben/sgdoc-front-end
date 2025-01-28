@@ -223,27 +223,31 @@ export const ActualizacionDocumentoModalForm: React.FC<
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(handleFormSubmit)}
-          className="p-6 space-y-6"
+          className="flex flex-col h-full"
         >
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <ActualizacionDocumentoModalFormInputs
-              fileName={fileName}
-              setFileName={setFileName}
-              handleFileChange={handleFileChange}
-            />
-            <ActualizacionDocumentoModalFormSelects
-              ambitos={ambitos}
-              categorias={categorias}
-              centrosPoblados={centrosPoblados}
-              caserios={caseriosFiltrados} 
-              handleWheel={handleWheel}
-              handleLetterKeyPress={handleLetterKeyPress}
+          <div className="flex-1 overflow-y-auto p-4 md:p-6">
+            <div className="grid grid-cols-1 gap-4 md:gap-6">
+              <ActualizacionDocumentoModalFormInputs
+                fileName={fileName}
+                setFileName={setFileName}
+                handleFileChange={handleFileChange}
+              />
+              <ActualizacionDocumentoModalFormSelects
+                ambitos={ambitos}
+                categorias={categorias}
+                centrosPoblados={centrosPoblados}
+                caserios={caseriosFiltrados} 
+                handleWheel={handleWheel}
+                handleLetterKeyPress={handleLetterKeyPress}
+              />
+            </div>
+          </div>
+          <div className="sticky bottom-0 w-full mt-auto">
+            <ActualizacionDocumentoModalFooter
+              onClose={onClose}
+              isSubmitting={isSubmitting}
             />
           </div>
-          <ActualizacionDocumentoModalFooter
-            onClose={onClose}
-            isSubmitting={isSubmitting}
-          />
         </form>
       </Form>
     </FormProvider>
