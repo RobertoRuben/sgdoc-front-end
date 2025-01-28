@@ -160,7 +160,6 @@ export function Header({
                 isOpen={isLogoutModalOpen}
                 onClose={handleLogoutModalClose}
                 onConfirm={handleLogout}
-                username={mockUser.nombreUsuario}
             />
         </>
     );

@@ -2,11 +2,7 @@
 import { motion } from 'framer-motion';
 import { AlertCircle } from 'lucide-react';
 
-interface LogoutWarningProps {
-    username: string;
-}
-
-export function LogoutWarning({ username }: LogoutWarningProps) {
+export function LogoutWarning() {
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -28,11 +24,9 @@ export function LogoutWarning({ username }: LogoutWarningProps) {
                 <div className="absolute inset-0 bg-red-50 dark:bg-red-950/30 rounded-lg" />
                 <div className="relative space-y-3">
                     <p className="text-center text-gray-700 dark:text-gray-300">
-                        ¿Estás seguro que deseas cerrar la sesión de
+                        ¿Estás seguro que deseas cerrar sesión?
                         <span className="font-semibold text-red-600 dark:text-red-400 ml-1">
-                            {username}
                         </span>
-                        ?
                     </p>
                 </div>
             </motion.div>
