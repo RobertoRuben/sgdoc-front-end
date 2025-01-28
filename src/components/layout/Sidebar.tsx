@@ -11,20 +11,15 @@ type SidebarProps = {
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
     const [openMenus, setOpenMenus] = useState<{ [key: string]: boolean }>({});
-    
-    // 1. Obtener el rol del usuario desde sessionStorage (o AuthContext si prefieres).
+
     const userRole = sessionStorage.getItem('rolName') || '';
 
     const toggleMenu = (name: string) => {
         setOpenMenus((prev) => ({ ...prev, [name]: !prev[name] }));
     };
 
-    // 2. Filtrar los navItems según los roles permitidos
-    //    Si un item no tiene "allowedRoles", asúmelo siempre visible. O puedes ignorarlo.
     const filteredNavItems = navItems.filter((item) => {
-        // Si no hay allowedRoles definidos, se muestra por defecto
         if (!item.allowedRoles) return true; 
-        // Si sí hay allowedRoles, mostramos sólo si incluye el rol del usuario
         return item.allowedRoles.includes(userRole);
     });
 
@@ -103,11 +98,16 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                                     ) : (
                                         <Link
                                             to={item.path || '#'}
-                                            className="flex items-center p-2 hover:bg-[#028a3b] rounded font-semibold"
+                                            className="flex items-center p-2 hover:bg-[#028a3b] rounded font-semibold relative"
                                             onClick={onClose}
                                         >
                                             <item.icon className="w-5 h-5 mr-2" strokeWidth={3} />
                                             {item.name}
+                                            {item.name === "Bandeja de Entrada" && (
+                                                <span className="absolute right-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold text-white bg-red-500 rounded-full">
+                                                    4
+                                                </span>
+                                            )}
                                         </Link>
                                     )}
                                 </li>

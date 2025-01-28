@@ -8,7 +8,8 @@ import {
     UserPlus,
     UserCheck,
     ChartColumnIcon,
-    InboxIcon
+    InboxIcon,
+    Mail
 } from 'lucide-react';
 import React from 'react';
 
@@ -40,6 +41,11 @@ export const navItems: NavItem[] = [
         subItems: [
             { name: "Ingreso de Documentos", path: "/mesa-partes/ingreso" }
         ],
+    },
+    {
+        name: "Bandeja de Entrada",
+        icon: Mail,
+        path: "/bandeja-entrada",
     },
     {
         name: "Documentos",
