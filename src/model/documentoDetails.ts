@@ -1,11 +1,13 @@
 export interface DocumentoDetails{
     id: number;
-    dniRemitente: number;
-    fechaIngreso: Date;
+    dniRemitente?: number;
+    fechaIngreso?: Date;
     nombreAmbito: string;
-    nombreCaserio: string;
+    nombreCaserio?: string;
     nombreCategoria: string;
     nombreDocumento: string;
-    nombreCentroPoblado: string;
+    nombreCentroPoblado?: string;
     asunto: string;
+    idDerivacion?: number;
+    estadoDerivacion?: string;
 }

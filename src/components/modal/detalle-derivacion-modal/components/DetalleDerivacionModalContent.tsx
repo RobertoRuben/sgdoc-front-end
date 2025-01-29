@@ -1,0 +1,98 @@
+import { Button } from "@/components/ui/button";
+import { XCircle, CheckCircle2 } from "lucide-react";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
+
+interface DetalleDerivacion {
+  derivacion_id: number;
+  id: number;
+  estado: string;
+  comentario: string;
+  fecha: string;
+  recepcionadoPor: string;
+  recepcionada?: boolean;
+}
+
+interface DetalleDerivacionModalContentProps {
+  detalles: DetalleDerivacion[];
+  onClose: () => void;
+}
+
+export const DetalleDerivacionModalContent: React.FC<DetalleDerivacionModalContentProps> = ({
+  detalles,
+  onClose,
+}) => {
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return format(date, "dd 'de' MMMM 'de' yyyy 'a las' HH:mm", { locale: es });
+  };
+
+  const getStatusColor = (estado: string) => {
+    switch (estado.toLowerCase()) {
+      case 'pendiente':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'recibido':
+        return 'bg-green-100 text-green-800';
+      case 'rechazado':
+        return 'bg-red-100 text-red-800';
+      case 'en proceso':
+        return 'bg-blue-100 text-blue-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-full">
+      <div className="p-4 md:p-6 space-y-6">
+        <div className="space-y-4">
+          {detalles.map((detalle, index) => (
+            <div
+              key={detalle.id}
+              className="bg-white rounded-lg shadow-sm border p-4 space-y-3"
+            >
+              <div className="flex items-center justify-between">
+                <span
+                  className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
+                    detalle.estado
+                  )}`}
+                >
+                  {detalle.estado}
+                </span>
+                <span className="text-sm text-gray-500">
+                  {formatDate(detalle.fecha)}
+                </span>
+              </div>
+              
+              <div className="space-y-2">
+                <p className="text-gray-700">{detalle.comentario}</p>
+                <div className="flex items-center space-x-2 text-sm text-gray-600">
+                  <span className="font-medium">Recepcionado por:</span>
+                  <span>{detalle.recepcionadoPor}</span>
+                  {detalle.recepcionada && (
+                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  )}
+                </div>
+              </div>
+              
+              {index < detalles.length - 1 && (
+                <div className="border-b border-gray-200 my-2"></div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="p-4 md:p-6 bg-gray-50 border-t border-gray-200 mt-auto">
+        <Button
+          type="button"
+          onClick={onClose}
+          className="w-full sm:w-auto bg-emerald-600 text-white hover:bg-emerald-700 flex items-center justify-center"
+        >
+          <XCircle className="w-5 h-5 mr-2" />
+          Cerrar
+        </Button>
+      </div>
+    </div>
+  );
+};

@@ -2,19 +2,9 @@ import React, { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { PiBroom } from "react-icons/pi";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/ui/popover";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Ambito } from "@/model/ambito";
 import { CentroPoblado } from "@/model/centroPoblado";
@@ -26,9 +16,7 @@ interface ListaDocumentosRecibidosSearchProps {
   selectedCaserio: string | undefined;
   setSelectedCaserio: React.Dispatch<React.SetStateAction<string | undefined>>;
   selectedCentroPoblado: string | undefined;
-  setSelectedCentroPoblado: React.Dispatch<
-    React.SetStateAction<string | undefined>
-  >;
+  setSelectedCentroPoblado: React.Dispatch<React.SetStateAction<string | undefined>>;
   selectedAmbito: string | undefined;
   setSelectedAmbito: React.Dispatch<React.SetStateAction<string | undefined>>;
   selectedDate: Date | undefined;
@@ -97,7 +85,7 @@ export const ListaDocumentosRecibidosSearch: React.FC<ListaDocumentosRecibidosSe
         <Input
           type="text"
           id="search"
-          placeholder="Buscar documento por DNI o por N° de Registro"
+          placeholder="Buscar documento por ID o nombre de área..."
           className="pl-10 pr-10 w-full border-gray-300 focus:border-[#03A64A] focus:ring focus:ring-[#03A64A] focus:ring-opacity-50 rounded-md shadow-sm"
           aria-label="Buscar documentos"
           value={deferredValue}
@@ -125,9 +113,7 @@ export const ListaDocumentosRecibidosSearch: React.FC<ListaDocumentosRecibidosSe
         }}
       >
         <SelectTrigger className="w-full sm:w-[180px]">
-          <SelectValue
-            placeholder={selectedCentroPoblado || "Centro Poblado"}
-          />
+          <SelectValue placeholder={selectedCentroPoblado || "Centro Poblado"} />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">Todos</SelectItem>
@@ -159,10 +145,9 @@ export const ListaDocumentosRecibidosSearch: React.FC<ListaDocumentosRecibidosSe
         </SelectContent>
       </Select>
 
+      {/* Select de Ámbito */}
       <Select
-        onValueChange={(val) =>
-          setSelectedAmbito(val === "all" ? undefined : val)
-        }
+        onValueChange={(val) => setSelectedAmbito(val === "all" ? undefined : val)}
       >
         <SelectTrigger className="w-full sm:w-[180px]">
           <SelectValue placeholder={selectedAmbito || "Ámbito"} />
@@ -177,15 +162,11 @@ export const ListaDocumentosRecibidosSearch: React.FC<ListaDocumentosRecibidosSe
         </SelectContent>
       </Select>
 
+      {/* Selector de fecha */}
       <Popover>
         <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            className="w-full sm:w-[180px] justify-start text-left font-normal"
-          >
-            {selectedDate
-              ? selectedDate.toLocaleDateString()
-              : "Seleccionar Fecha"}
+          <Button variant="outline" className="w-full sm:w-[180px] justify-start text-left font-normal">
+            {selectedDate ? selectedDate.toLocaleDateString() : "Seleccionar Fecha"}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="p-0" align="start">

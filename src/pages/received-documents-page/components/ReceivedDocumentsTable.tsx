@@ -12,7 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { DocumentoDetails } from "@/model/documentoDetails";
+import { DocumentoReceivedDetails } from "@/model/documentoReceived";
 
 const tableVariants = {
   initial: { opacity: 0, scale: 0.95 },
@@ -27,7 +27,7 @@ const rowVariants = {
 };
 
 interface ListaDocumentosRecibidosTableProps {
-  currentDocumentos: DocumentoDetails[];
+  currentDocumentos: DocumentoReceivedDetails[];
   onDelete: (id?: number) => void;
   onDownload: (id?: number) => void;
   onSend: (id?: number) => void;
@@ -43,7 +43,7 @@ export const ListaDocumentosRecibidosTable: React.FC<ListaDocumentosRecibidosTab
 }) => {
   const [isAsuntoModalOpen, setIsAsuntoModalOpen] = useState(false);
   const [selectedDocumento, setSelectedDocumento] =
-    useState<DocumentoDetails>();
+    useState<DocumentoReceivedDetails>();
   if (currentDocumentos.length === 0 && showEmpty) {
     return (
       <div className="w-full p-8 text-center">
@@ -75,19 +75,22 @@ export const ListaDocumentosRecibidosTable: React.FC<ListaDocumentosRecibidosTab
                   N° de Registro
                 </TableHead>
                 <TableHead className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
+                  N° de Derivacion
+                </TableHead>
+                <TableHead className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                   Documento
                 </TableHead>
                 <TableHead className="hidden sm:table-cell px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
-                  DNI Remitente
+                  Area Origen
+                </TableHead>
+                <TableHead className="hidden lg:table-cell px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
+                  Enviado Por
                 </TableHead>
                 <TableHead className="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
-                  Fecha de Ingreso
+                  Fecha Envio
                 </TableHead>
                 <TableHead className="hidden lg:table-cell px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                   Ámbito
-                </TableHead>
-                <TableHead className="hidden xl:table-cell px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
-                  Categoría
                 </TableHead>
                 <TableHead className="hidden xl:table-cell px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                   Centro Poblado
@@ -119,20 +122,23 @@ export const ListaDocumentosRecibidosTable: React.FC<ListaDocumentosRecibidosTab
                   <TableCell className="px-4 py-4 text-sm font-medium text-gray-900">
                     {String(documento.id).padStart(5, "0")}
                   </TableCell>
+                  <TableCell className="px-4 py-4 text-sm font-medium text-gray-900">
+                    {String(documento.derivacionId).padStart(5, "0")}
+                  </TableCell>
                   <TableCell className="px-4 py-4 text-sm text-gray-700">
                     {documento.nombreDocumento}
                   </TableCell>
                   <TableCell className="hidden sm:table-cell px-4 py-4 text-sm text-gray-700">
-                    {documento.dniRemitente}
+                    {documento.nombreAreaOrigen}
+                  </TableCell>
+                  <TableCell className="hidden sm:table-cell px-4 py-4 text-sm text-gray-700">
+                    {documento.derivadoPor}
                   </TableCell>
                   <TableCell className="hidden md:table-cell px-4 py-4 text-sm text-gray-700">
-                    {new Date(documento.fechaIngreso).toLocaleDateString()}
+                    {new Date(documento.fechaEnvio).toLocaleString()}
                   </TableCell>
                   <TableCell className="hidden lg:table-cell px-4 py-4 text-sm text-gray-700">
                     {documento.nombreAmbito}
-                  </TableCell>
-                  <TableCell className="hidden xl:table-cell px-4 py-4 text-sm text-gray-700">
-                    {documento.nombreCategoria}
                   </TableCell>
                   <TableCell className="hidden xl:table-cell px-4 py-4 text-sm text-gray-700">
                     {documento.nombreCentroPoblado}

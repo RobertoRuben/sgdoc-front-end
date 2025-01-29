@@ -3,7 +3,7 @@ import debounce from "lodash/debounce";
 import { AnimatePresence, motion } from "framer-motion";
 import { Pagination } from "@/components/ui/pagination";
 import { Documento } from "@/model/documento";
-import { DocumentoPaginatedResponse } from "@/model/documentoPaginatedResponse";
+import { DocumentoReceivedPaginatedResponse } from "@/model/documentoReceivedPaginatedResponse";
 import DeleteModal from "@/components/modal/alerts/delete-modal/DeleteModal";
 import DownloadModal from "@/components/modal/alerts/download-modal/DownloadModal";
 import { ListaDocumentosRecibidosHeader } from "./ReceivedDocumentsHeader";
@@ -13,14 +13,15 @@ import { Ambito } from "@/model/ambito";
 import { CentroPoblado } from "@/model/centroPoblado";
 import { Caserio } from "@/model/caserio";
 import { getAmbitos } from "@/service/ambitoService";
-import { getAllCaserios } from "@/service/caserioService";
+import { getAllCaserios, getCaseriosByCentroPobladoId } from "@/service/caserioService";
 import { getCentrosPoblados } from "@/service/centroPobladoService";
-import { getCaseriosByCentroPobladoId } from "@/service/caserioService";
+
 import {
-  searchDocumentos,
+  getReceivedDocumentsByAreaId,
   downloadDocumento,
-  deleteDocumento
+  deleteDocumento,
 } from "@/service/documentoService";
+
 import { DerivacionModal } from "@/components/modal/derivacion-modal/DerivacionModal";
 import NoResultsModal from "@/components/modal/alerts/no-results-modal/NoResultsModal";
 import ErrorModal from "@/components/modal/alerts/error-modal/ErrorModal";
@@ -35,38 +36,38 @@ const tableVariants = {
 };
 
 export const ListaDocumentosRecibidosContainer: React.FC = () => {
-  const [documentosState, setDocumentosState] =
-    useState<DocumentoPaginatedResponse>({
-      data: [],
-      pagination: { currentPage: 1, pageSize: 4, totalItems: 0, totalPages: 0 },
-    });
+  // Estado principal con los documentos y la paginación
+  const [documentosState, setDocumentosState] = useState<DocumentoReceivedPaginatedResponse>({
+    data: [],
+    pagination: { currentPage: 1, pageSize: 4, totalItems: 0, totalPages: 0 },
+  });
+
+  // Estado para manejo de carga y paginación
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [hasFetched, setHasFetched] = useState<boolean>(false);
 
+  // Modal de derivación
   const [isDerivacionModalOpen, setIsDerivacionModalOpen] = useState(false);
-  const [selectedDocumentoId, setSelectedDocumentoId] = useState<
-    number | undefined
-  >();
+  const [selectedDocumentoId, setSelectedDocumentoId] = useState<number | undefined>();
 
+  // Filtros
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedCaserio, setSelectedCaserio] = useState<string | undefined>();
-  const [selectedCentroPoblado, setSelectedCentroPoblado] = useState<
-    string | undefined
-  >();
+  const [selectedCentroPoblado, setSelectedCentroPoblado] = useState<string | undefined>();
   const [selectedAmbito, setSelectedAmbito] = useState<string | undefined>();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
 
+  // Catálogos (para selects)
   const [ambitos, setAmbitos] = useState<Ambito[]>([]);
   const [centrosPoblados, setCentrosPoblados] = useState<CentroPoblado[]>([]);
   const [caserios, setCaserios] = useState<Caserio[]>([]);
 
+  // Modal de eliminación
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
-  const [isDownloadModalOpen, setIsDownloadModalOpen] =
-    useState<boolean>(false);
-  const [selectedDocumento, setSelectedDocumento] = useState<
-    Documento | undefined
-  >(undefined);
+  // Modal de descarga
+  const [isDownloadModalOpen, setIsDownloadModalOpen] = useState<boolean>(false);
+  const [selectedDocumento, setSelectedDocumento] = useState<Documento | undefined>(undefined);
   const [selectedDocumentDownload, setSelectedDocumentDownload] = useState<{
     id: number;
     nombreDocumento: string;
@@ -74,27 +75,20 @@ export const ListaDocumentosRecibidosContainer: React.FC = () => {
     fileType: string;
   } | null>(null);
 
+  // Modal de "No hay resultados"
   const [showNoResults, setShowNoResults] = useState<boolean>(false);
   const [noResultsMessage, setNoResultsMessage] = useState<string>("");
 
-  const [errorModalConfig, setErrorModalConfig] = useState<{
-    isOpen: boolean;
-    message: string;
-  }>({
+  // Modales de error / éxito
+  const [errorModalConfig, setErrorModalConfig] = useState<{ isOpen: boolean; message: string }>({
     isOpen: false,
     message: "",
   });
-  const [successModalConfig, setSuccessModalConfig] = useState<{
-    isOpen: boolean;
-    message: string;
-  }>({
+  const [successModalConfig, setSuccessModalConfig] = useState<{ isOpen: boolean; message: string }>({
     isOpen: false,
     message: "",
   });
-  const [updateSuccessConfig, setUpdateSuccessConfig] = useState<{
-    isOpen: boolean;
-    message: string;
-  }>({
+  const [updateSuccessConfig, setUpdateSuccessConfig] = useState<{ isOpen: boolean; message: string }>({
     isOpen: false,
     message: "",
   });
@@ -107,13 +101,13 @@ export const ListaDocumentosRecibidosContainer: React.FC = () => {
     setSuccessModalConfig({ isOpen: true, message });
   };
 
+  /**
+   * Carga de catálogos de inicio: Ámbitos, Centros Poblados, Caseríos
+   */
   const loadFilters = async () => {
     setIsLoading(true);
     try {
-      const [ambitosData, centrosPobladosData] = await Promise.all([
-        getAmbitos(),
-        getCentrosPoblados(),
-      ]);
+      const [ambitosData, centrosPobladosData] = await Promise.all([getAmbitos(), getCentrosPoblados()]);
       setAmbitos(ambitosData);
       setCentrosPoblados(centrosPobladosData);
 
@@ -139,9 +133,7 @@ export const ListaDocumentosRecibidosContainer: React.FC = () => {
 
   const loadCaseriosByCentroPoblado = async (centroPobladoId: string) => {
     try {
-      const caseriosData = await getCaseriosByCentroPobladoId(
-        Number(centroPobladoId)
-      );
+      const caseriosData = await getCaseriosByCentroPobladoId(Number(centroPobladoId));
       setCaserios(caseriosData ?? []);
     } catch (error) {
       console.error(error);
@@ -149,22 +141,25 @@ export const ListaDocumentosRecibidosContainer: React.FC = () => {
     }
   };
 
-  // Hook para cargar catálogos al iniciar
+  // Al montar el componente, cargamos catálogos
   useEffect(() => {
     loadFilters();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Cada vez que cambie selectedCentroPoblado, recarga los caseríos
   useEffect(() => {
     if (selectedCentroPoblado) {
-      // Si hay un centro poblado seleccionado
       loadCaseriosByCentroPoblado(selectedCentroPoblado);
     } else {
-      // Mostrar todos
       loadAllCaserios();
     }
   }, [selectedCentroPoblado]);
 
+  /**
+   * Función que llama al servicio getReceivedDocumentsByAreaId
+   * para filtrar y paginar documentos.
+   */
   const loadDocumentos = async ({
     page,
     searchValue,
@@ -184,38 +179,39 @@ export const ListaDocumentosRecibidosContainer: React.FC = () => {
       setIsLoading(true);
       setShowNoResults(false);
 
-      const numericValue = parseInt(searchValue, 10);
-      const p_dni = !isNaN(numericValue) ? numericValue : undefined;
-      const p_fecha_ingreso = date
-        ? date.toISOString().split("T")[0]
-        : undefined;
+      // Convertimos la fecha en YYYY-MM-DD si existe
+      const p_fecha_ingreso = date ? date.toISOString().split("T")[0] : undefined;
 
-      // Convertir explícitamente los IDs a números
+      // Suponemos que en sessionStorage tenemos 'areaId' del área destino
+      // Ajusta a tu lógica si lo obtienes de otro lado
+      const areaId = sessionStorage.getItem("areaId");
+      if (!areaId) {
+        throw new Error("No se encontró el ID del área (destino)");
+      }
+
+      // Armamos los parámetros para el servicio
       const params = {
-        p_page: page,
-        p_page_size: 4,
-        p_dni,
-        p_id_caserio:
-          caserio && caserio !== "all" ? parseInt(caserio, 10) : undefined,
+        p_area_destino_id: parseInt(areaId, 10),
+        p_search_document: searchValue.trim() === "" ? null : searchValue,
+        p_id_caserio: caserio && caserio !== "all" ? parseInt(caserio, 10) : undefined,
         p_id_centro_poblado:
-          centroPoblado && centroPoblado !== "all"
-            ? parseInt(centroPoblado, 10)
-            : undefined,
-        p_id_ambito:
-          ambito && ambito !== "all" ? parseInt(ambito, 10) : undefined,
+          centroPoblado && centroPoblado !== "all" ? parseInt(centroPoblado, 10) : undefined,
+        p_id_ambito: ambito && ambito !== "all" ? parseInt(ambito, 10) : undefined,
+        p_nombre_categoria: undefined, // Si tienes un select de categorías, asigna aquí su valor
         p_fecha_ingreso,
+        p_page: page,
+        p_page_size: 4, // Ajusta si deseas un page_size distinto
       };
 
-      console.log("Params enviados al servicio:", params);
+      console.log("params enviados desde container (Documentos Recibidos):", params);
 
-      const response = await searchDocumentos(params);
+      // Llamamos al servicio
+      const response = await getReceivedDocumentsByAreaId(params);
+      console.log("response desde getReceivedDocumentsByAreaId:", response);
 
+      // Verificamos si hay filtros aplicados
       const anyFilterApplied =
-        searchValue.trim() !== "" ||
-        !!ambito ||
-        !!centroPoblado ||
-        !!caserio ||
-        !!date;
+        searchValue.trim() !== "" || !!ambito || !!centroPoblado || !!caserio || !!date;
 
       if (response.data.length === 0 && anyFilterApplied) {
         setShowNoResults(true);
@@ -227,56 +223,33 @@ export const ListaDocumentosRecibidosContainer: React.FC = () => {
       setDocumentosState(response);
     } catch (error) {
       console.error(error);
-      showError("Error al buscar documentos");
+      showError("Error al buscar documentos (recibidos)");
     } finally {
       setIsLoading(false);
       setHasFetched(true);
     }
   };
 
+  /**
+   * Debounce para evitar llamadas excesivas al backend
+   * Se invoca cada vez que cambien los filtros o la página.
+   */
   const debouncedSearch = useCallback(
     debounce(
-      (
-        page: number,
-        searchValue: string,
-        ambito?: string,
-        centroPoblado?: string,
-        caserio?: string,
-        date?: Date
-      ) => {
-        loadDocumentos({
-          page,
-          searchValue,
-          ambito,
-          centroPoblado,
-          caserio,
-          date,
-        });
+      (page: number, searchValue: string, ambito?: string, centroPoblado?: string, caserio?: string, date?: Date) => {
+        loadDocumentos({ page, searchValue, ambito, centroPoblado, caserio, date });
       },
       500
     ),
     []
   );
 
+  // Disparamos la búsqueda cada vez que cambian los filtros/página
   useEffect(() => {
-    debouncedSearch(
-      currentPage,
-      searchTerm,
-      selectedAmbito,
-      selectedCentroPoblado,
-      selectedCaserio,
-      selectedDate
-    );
-  }, [
-    currentPage,
-    searchTerm,
-    selectedAmbito,
-    selectedCentroPoblado,
-    selectedCaserio,
-    selectedDate,
-    debouncedSearch,
-  ]);
+    debouncedSearch(currentPage, searchTerm, selectedAmbito, selectedCentroPoblado, selectedCaserio, selectedDate);
+  }, [currentPage, searchTerm, selectedAmbito, selectedCentroPoblado, selectedCaserio, selectedDate, debouncedSearch]);
 
+  // Acción de derivar
   const handleSend = (id?: number) => {
     if (id !== undefined) {
       setSelectedDocumentoId(id);
@@ -286,10 +259,8 @@ export const ListaDocumentosRecibidosContainer: React.FC = () => {
 
   const handleDerivar = async (areaId: number) => {
     try {
-      console.log(
-        `Derivando documento ${selectedDocumentoId} al área ${areaId}`
-      );
-      // Aquí implementarías la lógica de derivación
+      console.log(`Derivando documento ${selectedDocumentoId} al área ${areaId}`);
+      // Aquí implementarías la llamada a tu servicio de "derivación"
       setIsDerivacionModalOpen(false);
       setSuccessModalConfig({
         isOpen: true,
@@ -301,12 +272,13 @@ export const ListaDocumentosRecibidosContainer: React.FC = () => {
     }
   };
 
+  // Paginación
   const handlePageChange = (page: number) => {
     if (page < 1 || page > documentosState.pagination.totalPages) return;
     setCurrentPage(page);
   };
 
-
+  // Eliminar
   const handleDeleteClick = (id?: number) => {
     if (!id) return;
     const documento = documentosState.data.find((d) => d.id === id);
@@ -336,6 +308,7 @@ export const ListaDocumentosRecibidosContainer: React.FC = () => {
     }
   };
 
+  // Descargar
   const handleDownload = (id?: number) => {
     if (id !== undefined) {
       const documento = documentosState.data.find((d) => d.id === id);
@@ -375,6 +348,7 @@ export const ListaDocumentosRecibidosContainer: React.FC = () => {
       <ListaDocumentosRecibidosHeader title="Documentos Recibidos" />
 
       <div className="w-full overflow-hidden bg-white rounded-lg shadow-lg">
+        {/* Barra de búsqueda y filtros */}
         <ListaDocumentosRecibidosSearch
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
@@ -424,6 +398,7 @@ export const ListaDocumentosRecibidosContainer: React.FC = () => {
           </div>
         )}
 
+        {/* Paginación */}
         {documentosState.pagination.totalPages > 0 && (
           <div className="py-4 px-4 sm:px-6 border-t border-gray-200">
             <Pagination
@@ -435,6 +410,7 @@ export const ListaDocumentosRecibidosContainer: React.FC = () => {
         )}
       </div>
 
+      {/* Modal de eliminar */}
       {isDeleteModalOpen && (
         <DeleteModal
           isOpen={isDeleteModalOpen}
@@ -444,6 +420,7 @@ export const ListaDocumentosRecibidosContainer: React.FC = () => {
         />
       )}
 
+      {/* Modal de descarga */}
       {selectedDocumentDownload && (
         <DownloadModal
           isOpen={isDownloadModalOpen}
@@ -455,39 +432,38 @@ export const ListaDocumentosRecibidosContainer: React.FC = () => {
         />
       )}
 
+      {/* Modal de "No hay resultados" */}
       <NoResultsModal
         isOpen={showNoResults}
         onClose={() => setShowNoResults(false)}
         message={noResultsMessage}
       />
 
+      {/* Modal de errores */}
       <ErrorModal
         isOpen={errorModalConfig.isOpen}
-        onClose={() =>
-          setErrorModalConfig((prev) => ({ ...prev, isOpen: false }))
-        }
+        onClose={() => setErrorModalConfig((prev) => ({ ...prev, isOpen: false }))}
         title="Error"
         errorMessage={errorModalConfig.message}
       />
 
+      {/* Modal de operación exitosa */}
       <SuccessModal
         isOpen={successModalConfig.isOpen}
-        onClose={() =>
-          setSuccessModalConfig((prev) => ({ ...prev, isOpen: false }))
-        }
+        onClose={() => setSuccessModalConfig((prev) => ({ ...prev, isOpen: false }))}
         title="Operación Exitosa"
         message={successModalConfig.message}
       />
 
+      {/* Modal de actualización exitosa */}
       <UpdateSuccessModal
         isOpen={updateSuccessConfig.isOpen}
-        onClose={() =>
-          setUpdateSuccessConfig((prev) => ({ ...prev, isOpen: false }))
-        }
+        onClose={() => setUpdateSuccessConfig((prev) => ({ ...prev, isOpen: false }))}
         title="Actualización Exitosa"
         message={updateSuccessConfig.message}
       />
 
+      {/* Modal de derivación */}
       <DerivacionModal
         isOpen={isDerivacionModalOpen}
         onClose={() => setIsDerivacionModalOpen(false)}

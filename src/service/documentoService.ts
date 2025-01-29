@@ -3,7 +3,9 @@ import humps from "humps";
 import { Documento } from "@/model/documento";
 import { DocumentoPayload } from "@/model/documentoPayload";
 import { DocumentoDetails } from "@/model/documentoDetails.ts";
+import { DocumentoReceivedDetails } from "@/model/documentoReceived";
 import { DocumentoPaginatedResponse } from "@/model/documentoPaginatedResponse";
+import { DocumentoReceivedPaginatedResponse } from "@/model/documentoReceivedPaginatedResponse";
 import axiosInstance from "./axiosConfig";
 
 const API_BASE_URL = `/documentos/`;
@@ -141,13 +143,9 @@ export const searchDocumentos = async (params: {
   p_fecha_ingreso?: string;
 }): Promise<DocumentoPaginatedResponse> => {
   try {
-    console.log("Params:", params);
     const response = await axiosInstance.get(`${API_BASE_URL}buscar`, {
       params: humps.decamelizeKeys(params),
     });
-    console.log(axiosInstance.defaults.headers)
-    console.log(params)
-    console.log("Response data:", response.data);
     const rawData = response.data;
     return {
       data: humps.camelizeKeys(rawData.data) as DocumentoDetails[],
@@ -208,3 +206,77 @@ export const getDocumentosByCurrentDate = async (
     throw new Error("Error al obtener los documentos con fecha actual");
   }
 };
+
+export const getSentDocumentsByAreaId = async (params: {
+  p_area_origen_id: number;
+  p_search_document?: number;
+  p_id_caserio?: number;
+  p_id_centro_poblado?: number;
+  p_id_ambito?: number;
+  p_nombre_categoria?: string;
+  p_fecha_ingreso?: string;
+  p_page: number;
+  p_page_size: number;
+}): Promise<DocumentoPaginatedResponse> => {
+  try {
+    const response = await axiosInstance.get(`${API_BASE_URL}enviados`, {
+      params: humps.decamelizeKeys(params),
+    });
+    const rawData = response.data;
+    return {
+      data: humps.camelizeKeys(rawData.data) as DocumentoDetails[],
+      pagination: {
+        currentPage: rawData.pagination.current_page,
+        pageSize: rawData.pagination.page_size,
+        totalItems: rawData.pagination.total_items,
+        totalPages: rawData.pagination.total_pages,
+      },
+    };
+  } catch (error) {
+    if (error instanceof AxiosError && error.response?.data?.detail) {
+      throw new Error(error.response.data.detail);
+    }
+    throw new Error("Error al obtener los documentos enviados por área de origen");
+  }
+};
+
+export const getReceivedDocumentsByAreaId = async (params: {
+  p_area_destino_id: number;
+  p_search_document?: string | null;
+  p_id_caserio?: number;
+  p_id_centro_poblado?: number;
+  p_id_ambito?: number;
+  p_nombre_categoria?: string;
+  p_fecha_ingreso?: string;
+  p_page: number;
+  p_page_size: number;
+}): Promise<DocumentoReceivedPaginatedResponse> => {
+  try {
+    // Llamada al endpoint /documentos/recibidos
+    const response = await axiosInstance.get(`${API_BASE_URL}recibidos`, {
+      params: humps.decamelizeKeys(params),
+    });
+    console.log("respuesta: ", response);
+    console.log("parámetros enviados: ", params);
+
+    const rawData = response.data;
+    console.log("rawData: ", rawData);
+
+    // Armamos la respuesta en formato camelCase
+    return {
+      data: humps.camelizeKeys(rawData.data) as DocumentoReceivedDetails[],
+      pagination: {
+        currentPage: rawData.pagination.current_page,
+        pageSize: rawData.pagination.page_size,
+        totalItems: rawData.pagination.total_items,
+        totalPages: rawData.pagination.total_pages,
+      },
+    };
+  } catch (error) {
+    if (error instanceof AxiosError && error.response?.data?.detail) {
+      throw new Error(error.response.data.detail);
+    }
+    throw new Error("Error al obtener los documentos recibidos por área de destino");
+  }
+};
+
