@@ -20,6 +20,7 @@ import CategoriaPage from "@/pages/categoria-page/CategoriaPage";
 import CentroPobladoPage from "@/pages/centro-poblado-page/CentroPobladoPage";
 import CaseriosPage from "@/pages/caserios-page/CaseriosPage";
 import DashboardMesaPartesPage from "@/pages/inicio-page/DashboardMesaPartesPage";
+import ListaDocumentosRecibidosPage from "./pages/received-documents-page/ReceivedDocumentsPage";
 import { Toaster } from "@/components/ui/toaster";
 
 function App() {
@@ -63,6 +64,7 @@ function App() {
                 <Route path="documentos/categorias/lista" element={<CategoriaPage />} />
                 <Route path="distrito/centros-poblados/lista" element={<CentroPobladoPage />} />
                 <Route path="distrito/caserios/lista" element={<CaseriosPage />} />
+                <Route path="bandeja-entrada" element={<ListaDocumentosRecibidosPage />} />
 
                 {/* Redirecciones */}
                 <Route path="areas" element={<Navigate to="/areas/lista" replace />} />
