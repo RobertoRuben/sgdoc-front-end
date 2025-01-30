@@ -248,6 +248,7 @@ export const getReceivedDocumentsByAreaId = async (params: {
   p_id_ambito?: number;
   p_nombre_categoria?: string;
   p_fecha_ingreso?: string;
+  p_recepcionada?: boolean;
   p_page: number;
   p_page_size: number;
 }): Promise<DocumentoReceivedPaginatedResponse> => {

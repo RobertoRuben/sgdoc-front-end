@@ -1,8 +1,9 @@
-import React from "react";
-import { useState } from "react";
+"use client";
+
+import React, { useState } from "react";
 import { AsuntoModal } from "@/components/modal/documento-modal/asunto-documento-modal/AsuntoModal";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trash2, Download, Send } from "lucide-react";
+import { Download, Send, XCircle, Check } from "lucide-react"; // Agrega el icono que gustes
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -28,22 +29,30 @@ const rowVariants = {
 
 interface ListaDocumentosRecibidosTableProps {
   currentDocumentos: DocumentoReceivedDetails[];
-  onDelete: (id?: number) => void;
   onDownload: (id?: number) => void;
   onSend: (id?: number) => void;
+  onVerDetalle: (derivacionId?: number) => void;
+  onReject: (id?: number) => void;
+  onConfirmarRecepcion: (id?: number) => void; // <-- Nueva prop
   showEmpty: boolean;
 }
 
-export const ListaDocumentosRecibidosTable: React.FC<ListaDocumentosRecibidosTableProps> = ({
+export const ListaDocumentosRecibidosTable: React.FC<
+  ListaDocumentosRecibidosTableProps
+> = ({
   currentDocumentos,
-  onDelete,
   onDownload,
   onSend,
+  onVerDetalle,
+  onReject,
+  onConfirmarRecepcion,
   showEmpty,
 }) => {
   const [isAsuntoModalOpen, setIsAsuntoModalOpen] = useState(false);
-  const [selectedDocumento, setSelectedDocumento] =
-    useState<DocumentoReceivedDetails>();
+  const [selectedDocumento, setSelectedDocumento] = useState<
+    DocumentoReceivedDetails | undefined
+  >();
+
   if (currentDocumentos.length === 0 && showEmpty) {
     return (
       <div className="w-full p-8 text-center">
@@ -81,7 +90,7 @@ export const ListaDocumentosRecibidosTable: React.FC<ListaDocumentosRecibidosTab
                   Documento
                 </TableHead>
                 <TableHead className="hidden sm:table-cell px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
-                  Area Origen
+                  Área Origen
                 </TableHead>
                 <TableHead className="hidden lg:table-cell px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                   Enviado Por
@@ -101,11 +110,15 @@ export const ListaDocumentosRecibidosTable: React.FC<ListaDocumentosRecibidosTab
                 <TableHead className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                   Asunto
                 </TableHead>
+                <TableHead className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
+                  Detalle
+                </TableHead>
                 <TableHead className="px-4 py-3 text-right text-xs font-bold text-white uppercase tracking-wider">
                   Acciones
                 </TableHead>
               </TableRow>
             </TableHeader>
+
             <TableBody>
               {currentDocumentos.map((documento, index) => (
                 <motion.tr
@@ -131,7 +144,7 @@ export const ListaDocumentosRecibidosTable: React.FC<ListaDocumentosRecibidosTab
                   <TableCell className="hidden sm:table-cell px-4 py-4 text-sm text-gray-700">
                     {documento.nombreAreaOrigen}
                   </TableCell>
-                  <TableCell className="hidden sm:table-cell px-4 py-4 text-sm text-gray-700">
+                  <TableCell className="hidden lg:table-cell px-4 py-4 text-sm text-gray-700">
                     {documento.derivadoPor}
                   </TableCell>
                   <TableCell className="hidden md:table-cell px-4 py-4 text-sm text-gray-700">
@@ -158,25 +171,49 @@ export const ListaDocumentosRecibidosTable: React.FC<ListaDocumentosRecibidosTab
                       Ver
                     </Button>
                   </TableCell>
+                  <TableCell className="px-4 py-4 text-sm text-gray-700 text-center">
+                    <Button
+                      variant="link"
+                      className="text-[#145A32] hover:text-[#0E3D22] p-0 h-auto font-normal"
+                      onClick={() => onVerDetalle(documento.derivacionId)}
+                    >
+                      Ver
+                    </Button>
+                  </TableCell>
                   <TableCell className="px-4 py-4 text-right text-sm font-medium">
-                    <div className="flex justify-end gap-2">
+                    <div className="flex flex-wrap sm:flex-nowrap gap-1 sm:gap-2 justify-end">
+                      {/* Confirmar Recepción */}
                       <Button
-                        onClick={() => onSend(documento.id)}
-                        className="bg-[#7db0aa] text-white hover:bg-[#5e8b86]"
+                        onClick={() =>
+                          onConfirmarRecepcion(documento.derivacionId)
+                        }
+                        className="bg-emerald-600 text-white hover:bg-emerald-700"
                       >
-                        <Send className="w-5 h-5" />
+                        <Check className="w-5 h-5" />
                       </Button>
+
+                      {/* Rechazar */}
                       <Button
-                        onClick={() => onDelete(documento.id)}
+                        onClick={() => onReject(documento.derivacionId)}
                         className="bg-red-500 text-white hover:bg-red-600"
                       >
-                        <Trash2 className="w-5 h-5" />
+                        <XCircle className="w-5 h-5" />
                       </Button>
+
+                      {/* Descargar */}
                       <Button
                         onClick={() => onDownload(documento.id)}
                         className="bg-[#1496cc] text-white hover:bg-[#0d7ba8]"
                       >
                         <Download className="w-5 h-5" />
+                      </Button>
+
+                      {/* Derivar */}
+                      <Button
+                        onClick={() => onSend(documento.id)}
+                        className="bg-[#7db0aa] text-white hover:bg-[#5e8b86]"
+                      >
+                        <Send className="w-5 h-5" />
                       </Button>
                     </div>
                   </TableCell>
@@ -184,6 +221,8 @@ export const ListaDocumentosRecibidosTable: React.FC<ListaDocumentosRecibidosTab
               ))}
             </TableBody>
           </Table>
+
+          {/* Modal para el Asunto */}
           <AsuntoModal
             isOpen={isAsuntoModalOpen}
             documento={selectedDocumento!}

@@ -1,9 +1,9 @@
 export interface DetalleDerivacionDetails{
-    derivacion_id: number;
+    derivacion_id?: number;
     id: number;
     estado: string;
     comentario: string;
     fecha: string;
-    recepcionadoPor: string;
+    nombreUsuario: string;
     recepcionada?: boolean;
   }

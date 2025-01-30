@@ -105,6 +105,8 @@ export const ListaDocumentosRecibidosSearch: React.FC<ListaDocumentosRecibidosSe
         )}
       </div>
 
+      
+
       {/* Select de Centro Poblado */}
       <Select
         onValueChange={(val) => {
