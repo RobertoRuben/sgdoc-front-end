@@ -9,31 +9,21 @@ import { IngresoDocumentosHeader } from "./IngresoDocumentosHeader";
 import { IngresoDocumentosSearch } from "./IngresoDocumentosSearch";
 import { IngresoDocumentosTable } from "./IngresoDocumentosTable";
 import { DerivacionModal } from "@/components/modal/derivacion-modal/DerivacionModal";
+import { Derivacion } from "@/model/derivacion";
 import {
   getDocumentosByCurrentDate,
   downloadDocumento,
 } from "@/service/documentoService";
+import { createDerivacion } from "@/service/derivacionService";
 import LoadingSpinner from "@/components/layout/LoadingSpinner";
 import ErrorModal from "@/components/modal/alerts/error-modal/ErrorModal";
 
-/**
- * Variants para animar la tabla con framer-motion según la dirección de cambio de página.
- * Se utiliza la propiedad "custom" para determinar si el usuario avanzó (direction > 0)
- * o retrocedió (direction < 0).
- */
 const tableVariants = {
   initial: { opacity: 0, scale: 0.95 },
   animate: { opacity: 1, scale: 1 },
   exit: { opacity: 0, scale: 0.95 },
 };
 
-/**
- * Contenedor principal para manejar:
- * - La lista paginada de documentos.
- * - La búsqueda y paginación.
- * - El registro y la descarga de documentos.
- * - Manejo de errores y mensajes de éxito.
- */
 export const IngresoDocumentosContainer: React.FC = () => {
   // Estado para la paginación y datos de documentos
   const [documentosState, setDocumentosState] =
@@ -226,19 +216,46 @@ export const IngresoDocumentosContainer: React.FC = () => {
     }
   };
 
-  const handleDerivar = async (areaId: number) => {
+  const handleDerivar = async (areaDestinoId: number) => {
+    if (!selectedDocumentoId) return;
+
     try {
-      console.log(
-        `Derivando documento ${selectedDocumentoId} al área ${areaId}`
-      );
-      // Aquí implementarías la lógica de derivación
+      // Obtenemos el área de origen y el usuario desde sessionStorage
+      const areaOrigenIdString = sessionStorage.getItem("areaId");
+      const userIdString = sessionStorage.getItem("userId");
+
+      // Validaciones mínimas
+      if (!areaOrigenIdString || !userIdString) {
+        showError(
+          "No se encontró areaId o userId en sessionStorage. No se puede derivar."
+        );
+        return;
+      }
+
+      const areaOrigenId = parseInt(areaOrigenIdString, 10);
+      const userId = parseInt(userIdString, 10);
+
+      // Construimos el objeto Derivacion según tu modelo
+      const nuevaDerivacion: Derivacion = {
+        documentoId: selectedDocumentoId,
+        areaOrigenId,
+        areaDestinoId,
+        usuarioId: userId,
+        // Si tu back-end necesita más campos, agrégalos aquí
+      };
+
+      // Llamamos al servicio
+      await createDerivacion(nuevaDerivacion);
+
+      // Si no hay error, cerramos el modal y mostramos el éxito
       setIsDerivacionModalOpen(false);
       setSuccessModalConfig({
         isOpen: true,
         message: "Documento derivado exitosamente.",
       });
-    } catch (error) {
-      showError("Error al derivar el documento.");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      showError(error.message || "Error al derivar el documento.");
       console.error(error);
     }
   };
