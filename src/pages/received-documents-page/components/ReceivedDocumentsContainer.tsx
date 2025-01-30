@@ -28,6 +28,8 @@ import ErrorModal from "@/components/modal/alerts/error-modal/ErrorModal";
 import SuccessModal from "@/components/modal/alerts/success-modal/SuccessModal";
 import UpdateSuccessModal from "@/components/modal/alerts/update-modal/UpdateSuccessModal";
 import LoadingSpinner from "@/components/layout/LoadingSpinner";
+import { createDerivacion } from "@/service/derivacionService";
+import { Derivacion } from "@/model/derivacion";
 
 const tableVariants = {
   initial: { opacity: 0, scale: 0.95 },
@@ -257,17 +259,46 @@ export const ListaDocumentosRecibidosContainer: React.FC = () => {
     }
   };
 
-  const handleDerivar = async (areaId: number) => {
+  const handleDerivar = async (areaDestinoId: number) => {
+    if (!selectedDocumentoId) return;
+
     try {
-      console.log(`Derivando documento ${selectedDocumentoId} al área ${areaId}`);
-      // Aquí implementarías la llamada a tu servicio de "derivación"
+      // Obtenemos el área de origen y el usuario desde sessionStorage
+      const areaOrigenIdString = sessionStorage.getItem("areaId");
+      const userIdString = sessionStorage.getItem("userId");
+
+      // Validaciones mínimas
+      if (!areaOrigenIdString || !userIdString) {
+        showError(
+          "No se encontró areaId o userId en sessionStorage. No se puede derivar."
+        );
+        return;
+      }
+
+      const areaOrigenId = parseInt(areaOrigenIdString, 10);
+      const userId = parseInt(userIdString, 10);
+
+      // Construimos el objeto Derivacion según tu modelo
+      const nuevaDerivacion: Derivacion = {
+        documentoId: selectedDocumentoId,
+        areaOrigenId,
+        areaDestinoId,
+        usuarioId: userId,
+        // Si tu back-end necesita más campos, agrégalos aquí
+      };
+
+      // Llamamos al servicio
+      await createDerivacion(nuevaDerivacion);
+
+      // Si no hay error, cerramos el modal y mostramos el éxito
       setIsDerivacionModalOpen(false);
       setSuccessModalConfig({
         isOpen: true,
         message: "Documento derivado exitosamente.",
       });
-    } catch (error) {
-      showError("Error al derivar el documento.");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      showError(error.message || "Error al derivar el documento.");
       console.error(error);
     }
   };
