@@ -35,7 +35,6 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/not-authorized" element={<NotAuthorizedPage />} />
             <Route path="/not-found" element={<NotFoundPage />} />
-
             {/* Rutas protegidas */}
             <Route element={<ProtectedRoute />}>
               <Route path="/" element={<Layout />}>
@@ -64,7 +63,7 @@ function App() {
                 <Route path="documentos/categorias/lista" element={<CategoriaPage />} />
                 <Route path="distrito/centros-poblados/lista" element={<CentroPobladoPage />} />
                 <Route path="distrito/caserios/lista" element={<CaseriosPage />} />
-                <Route path="bandeja-entrada" element={<ListaDocumentosRecibidosPage />} />
+                <Route path="bandeja-entrada/recibidos" element={<ListaDocumentosRecibidosPage />} />
 
                 {/* Redirecciones */}
                 <Route path="areas" element={<Navigate to="/areas/lista" replace />} />

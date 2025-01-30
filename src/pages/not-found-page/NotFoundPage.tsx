@@ -10,7 +10,12 @@ export default function NotFoundPage() {
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
-        setIsVisible(true);
+        // Pequeño delay para asegurar que la animación se ejecute después del montaje
+        const timer = setTimeout(() => {
+            setIsVisible(true);
+        }, 100);
+
+        return () => clearTimeout(timer);
     }, []);
 
     const handleBackToHome = () => {

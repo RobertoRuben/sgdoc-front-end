@@ -44,8 +44,13 @@ export const navItems: NavItem[] = [
     },
     {
         name: "Bandeja de Entrada",
-        icon: Mail,
         path: "/bandeja-entrada",
+        icon: Mail,
+        subItems: [
+            { name: "Documentos Recibidos", path: "/bandeja-entrada/recibidos" },
+            { name: "Documentos Rechazados", path: "/bandeja-entrada/rechazados" },
+            { name: "Documentos Enviados", path: "/bandeja-entrada/enviados" },
+        ],
     },
     {
         name: "Documentos",

@@ -31,19 +31,11 @@ export const ErrorContent = ({ isVisible, onBackClick }: ErrorContentProps) => {
                 </Button>
 
                 <div className={`mt-12 transition-all duration-1000 delay-700 ease-out ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}>
-                    <svg
-                        className="w-64 h-64 text-gray-400 animate-pulse"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth="1"
-                    >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                    </svg>
+                    <img 
+                        src="/chirimoya-triste.png" 
+                        alt="Chirimoya" 
+                        className="w-64 h-64 object-contain hover:animate-pulse transition-all duration-300 ease-in-out transform hover:scale-110"
+                    />
                 </div>
             </div>
         </div>
