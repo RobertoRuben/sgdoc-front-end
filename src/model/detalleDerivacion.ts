@@ -1,6 +1,6 @@
 export interface DetalleDerivacion{
     estado: string;
     comentario?: string;
-    usuarioRecepcionId?: number;
+    usuarioId?: number;
     derivacionId: number;
 }

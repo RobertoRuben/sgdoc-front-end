@@ -8,8 +8,10 @@ const API_BASE_URL = `/detalle-derivaciones`;
 
 export const createDetalleDerivacion = async (detalleDerivacion: DetalleDerivacion): Promise<DetalleDerivacionDetails> => {
   try {
+    console.log("detalleDerivacion");
     console.log(detalleDerivacion);
     const response = await axiosInstance.post(API_BASE_URL, humps.decamelizeKeys(detalleDerivacion));
+    console.log("response");
     console.log(response);
     return humps.camelizeKeys(response.data) as DetalleDerivacionDetails;
   } catch (error) {

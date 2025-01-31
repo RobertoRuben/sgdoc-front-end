@@ -1,3 +1,4 @@
+// SidebarConfig.ts
 import {
     Home,
     Users,
@@ -17,7 +18,11 @@ export type NavItem = {
     name: string;
     icon: React.ElementType;
     path?: string;
-    subItems?: { name: string; path: string }[];
+    subItems?: { 
+        name: string; 
+        path: string;
+        allowedRoles?: string[];
+    }[];
     allowedRoles?: string[];
 };
 
@@ -26,13 +31,13 @@ export const navItems: NavItem[] = [
         name: "Inicio",
         icon: Home,
         path: "/inicio",
-        allowedRoles: ['Admin', 'Mesa de Partes'],
+        allowedRoles: ['Admin', 'Mesa de Partes', 'Alcalde'],
     },
     {
         name: "Dashboard",
         icon: ChartColumnIcon,
         path: "/dashboard",
-        allowedRoles: ['Admin'],
+        allowedRoles: ['Admin', 'Alcalde', 'Gerente Municipal'],
     },
     {
         name: "Mesa de Partes",
@@ -47,9 +52,21 @@ export const navItems: NavItem[] = [
         path: "/bandeja-entrada",
         icon: Mail,
         subItems: [
-            { name: "Documentos Recibidos", path: "/bandeja-entrada/recibidos" },
-            { name: "Documentos Rechazados", path: "/bandeja-entrada/rechazados" },
-            { name: "Documentos Enviados", path: "/bandeja-entrada/enviados" },
+            { 
+                name: "Documentos Recibidos", 
+                path: "/bandeja-entrada/recibidos",
+                allowedRoles: ['Admin', 'Alcalde', 'Gerente Municipal', 'Subgerente'] 
+            },
+            { 
+                name: "Documentos Enviados", 
+                path: "/bandeja-entrada/enviados",
+                allowedRoles: ['Admin', 'Alcalde', 'Gerente Municipal', 'Subgerente', 'Mesa de Partes'] 
+            },
+            { 
+                name: "Documentos Rechazados", 
+                path: "/bandeja-entrada/rechazados",
+                allowedRoles: ['Admin', 'Alcalde', 'Gerente Municipal', 'Subgerente'] 
+            },
         ],
     },
     {

@@ -1,5 +1,5 @@
 export interface DetalleDerivacionDetails{
-    derivacion_id?: number;
+    derivacionId?: number;
     id: number;
     estado: string;
     comentario: string;
