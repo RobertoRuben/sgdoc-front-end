@@ -2,7 +2,7 @@ import { AxiosError } from "axios";
 import humps from "humps";
 import { ComunicacionAreaDestinoDetails } from '@/model/comunicacionAreaDestinoDetails';
 import axiosInstance from "@/service/axiosConfig";
-const API_BASE_URL = `/comunicaciones_area/`;
+const API_BASE_URL = `/comunicaciones-area/`;
 
 export const getAreasDestinoByAreaOrigenId = async (
     areaOrigenId: number

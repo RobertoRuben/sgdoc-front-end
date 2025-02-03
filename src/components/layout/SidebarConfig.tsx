@@ -42,7 +42,7 @@ export const navItems: NavItem[] = [
     {
         name: "Mesa de Partes",
         icon: InboxIcon,
-        allowedRoles: ['Admin', 'Mesa de Partes'],
+        allowedRoles: ['Admin', 'Mesa de Partes', 'Gerente Municipal'],
         subItems: [
             { name: "Ingreso de Documentos", path: "/mesa-partes/ingreso" }
         ],
@@ -124,6 +124,6 @@ export const navItems: NavItem[] = [
         name: "Configuración",
         icon: Settings,
         path: "/configuracion",
-        allowedRoles: ['Admin'],
+        allowedRoles: ['Admin', 'Gerente Municipal', 'Alcalde'],
     },
 ];
