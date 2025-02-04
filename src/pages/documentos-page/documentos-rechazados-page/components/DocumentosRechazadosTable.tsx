@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { AsuntoModal } from "@/components/modal/documento-modal/asunto-documento-modal/AsuntoModal";
 import { motion, AnimatePresence } from "framer-motion";
-import { Download, Send, XCircle, Check } from "lucide-react";
+import { Download, XCircle} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -13,7 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { DocumentoReceivedDetails } from "@/model/documentoReceivedDetails";
+import { DocumentoRechazadosDetails } from "@/model/documentosRechazadosDetails";
 
 const tableVariants = {
   initial: { opacity: 0, scale: 0.95 },
@@ -27,8 +27,8 @@ const rowVariants = {
   exit: { opacity: 0 },
 };
 
-interface ListaDocumentosRecibidosTableProps {
-  currentDocumentos: DocumentoReceivedDetails[];
+interface ListaDocumentosRechazadosTableProps {
+  currentDocumentos: DocumentoRechazadosDetails[];
   onDownload: (id?: number) => void;
   onSend: (id?: number) => void;
   onVerDetalle: (derivacionId?: number) => void;
@@ -38,21 +38,18 @@ interface ListaDocumentosRecibidosTableProps {
   selectedConfirmacion?: string; // Nueva prop
 }
 
-export const ListaDocumentosRecibidosTable: React.FC<
-  ListaDocumentosRecibidosTableProps
+export const ListaDocumentosRechazadosTable: React.FC<
+  ListaDocumentosRechazadosTableProps
 > = ({
   currentDocumentos,
   onDownload,
-  onSend,
   onVerDetalle,
   onReject,
-  onConfirmarRecepcion,
   showEmpty,
-  selectedConfirmacion, // Recibe la nueva prop
 }) => {
   const [isAsuntoModalOpen, setIsAsuntoModalOpen] = useState(false);
   const [selectedDocumento, setSelectedDocumento] = useState<
-    DocumentoReceivedDetails | undefined
+    DocumentoRechazadosDetails | undefined
   >();
 
   if (currentDocumentos.length === 0 && showEmpty) {
@@ -99,6 +96,9 @@ export const ListaDocumentosRecibidosTable: React.FC<
                 </TableHead>
                 <TableHead className="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                   Fecha Envio
+                </TableHead>
+                <TableHead className="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
+                  Fecha Rechazo
                 </TableHead>
                 <TableHead className="hidden lg:table-cell px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                   Ámbito
@@ -152,6 +152,9 @@ export const ListaDocumentosRecibidosTable: React.FC<
                   <TableCell className="hidden md:table-cell px-4 py-4 text-sm text-gray-700">
                     {new Date(documento.fechaEnvio).toLocaleString()}
                   </TableCell>
+                  <TableCell className="hidden md:table-cell px-4 py-4 text-sm text-gray-700">
+                    {new Date(documento.fechaRechazo).toLocaleString()}
+                  </TableCell>
                   <TableCell className="hidden lg:table-cell px-4 py-4 text-sm text-gray-700">
                     {documento.nombreAmbito}
                   </TableCell>
@@ -184,36 +187,17 @@ export const ListaDocumentosRecibidosTable: React.FC<
                   </TableCell>
                   <TableCell className="px-4 py-4 text-right text-sm font-medium">
                     <div className="flex flex-wrap sm:flex-nowrap gap-1 sm:gap-2 justify-end">
-                      {selectedConfirmacion !== "true" && (
-                        <Button
-                          onClick={() =>
-                            onConfirmarRecepcion(documento.derivacionId)
-                          }
-                          className="bg-emerald-600 text-white hover:bg-emerald-700"
-                        >
-                          <Check className="w-5 h-5" />
-                        </Button>
-                      )}
-
                       <Button
                         onClick={() => onReject(documento.derivacionId)}
                         className="bg-red-500 text-white hover:bg-red-600"
                       >
                         <XCircle className="w-5 h-5" />
                       </Button>
-
                       <Button
                         onClick={() => onDownload(documento.id)}
                         className="bg-[#1496cc] text-white hover:bg-[#0d7ba8]"
                       >
                         <Download className="w-5 h-5" />
-                      </Button>
-
-                      <Button
-                        onClick={() => onSend(documento.id)}
-                        className="bg-[#7db0aa] text-white hover:bg-[#5e8b86]"
-                      >
-                        <Send className="w-5 h-5" />
                       </Button>
                     </div>
                   </TableCell>

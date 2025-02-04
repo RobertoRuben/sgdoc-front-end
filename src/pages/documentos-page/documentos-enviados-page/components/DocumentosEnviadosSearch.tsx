@@ -10,7 +10,7 @@ import { Ambito } from "@/model/ambito";
 import { CentroPoblado } from "@/model/centroPoblado";
 import { Caserio } from "@/model/caserio";
 
-interface ListaDocumentosRecibidosSearchProps {
+interface ListaDocumentosEnviadosSearchProps {
   searchTerm: string;
   setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
   selectedCaserio: string | undefined;
@@ -28,7 +28,7 @@ interface ListaDocumentosRecibidosSearchProps {
   caserios: Caserio[];
 }
 
-export const ListaDocumentosRecibidosSearch: React.FC<ListaDocumentosRecibidosSearchProps> = ({
+export const ListaDocumentosEnviadosSearch: React.FC<ListaDocumentosEnviadosSearchProps> = ({
   searchTerm,
   setSearchTerm,
   selectedCaserio,
@@ -39,8 +39,6 @@ export const ListaDocumentosRecibidosSearch: React.FC<ListaDocumentosRecibidosSe
   setSelectedAmbito,
   selectedDate,
   setSelectedDate,
-  selectedConfirmacion,
-  setSelectedConfirmacion,
   ambitos,
   centrosPoblados,
   caserios,
@@ -165,21 +163,6 @@ export const ListaDocumentosRecibidosSearch: React.FC<ListaDocumentosRecibidosSe
           ))}
         </SelectContent>
       </Select>
-
-      {/* Select de Confirmación de Recepción */}
-      <Select
-        onValueChange={(val) => setSelectedConfirmacion(val === "all" ? undefined : val)}
-      >
-        <SelectTrigger className="w-full sm:w-[180px]">
-          <SelectValue placeholder={selectedConfirmacion || "Confirmación Recepción"} />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">Todos</SelectItem>
-          <SelectItem value="true">Confirmada</SelectItem>
-          <SelectItem value="false">No Confirmada</SelectItem>
-        </SelectContent>
-      </Select>
-
       {/* Selector de fecha */}
       <Popover>
         <PopoverTrigger asChild>

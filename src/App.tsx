@@ -1,4 +1,9 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { LoadingProvider } from "@/context/LoadingContext";
 import { AuthProvider } from "./provider/AuthProvider";
@@ -21,6 +26,8 @@ import CentroPobladoPage from "@/pages/centro-poblado-page/CentroPobladoPage";
 import CaseriosPage from "@/pages/caserios-page/CaseriosPage";
 import DashboardMesaPartesPage from "@/pages/inicio-page/DashboardMesaPartesPage";
 import ListaDocumentosRecibidosPage from "./pages/received-documents-page/ReceivedDocumentsPage";
+import ListaDocumentosEnviadosPage from "./pages/documentos-page/documentos-enviados-page/DocumentosEnviadosPage";
+import ListaDocumentosRechazadosPage from "./pages/documentos-page/documentos-rechazados-page/DocumentosRechazadosPage";
 import { Toaster } from "@/components/ui/toaster";
 
 function App() {
@@ -44,40 +51,96 @@ function App() {
                 {/* Rutas con roles "Admin" */}
                 <Route element={<ProtectedRoute requiredRoles={["Admin"]} />}>
                   <Route path="remitentes/lista" element={<RemitentesPage />} />
-                  <Route path="trabajadores/lista" element={<TrabajadoresPage />} />
+                  <Route path="trabajadores/lista" element={<TrabajadoresPage />}/>
                   <Route path="usuarios/lista" element={<UsuariosPage />} />
                   <Route path="usuarios/roles/lista" element={<RolesPage />} />
-                  <Route path="mesa-partes/ingreso" element={<IngresoDocumentosPage />} />
                 </Route>
 
-                {/* Rutas con roles "Mesa de Partes" */}
-                <Route element={<ProtectedRoute requiredRoles={["Mesa de Partes"]} />}>
-                  <Route path="mesa-partes/ingreso" element={<IngresoDocumentosPage />} />
+                {/* Ruta compartida para ambos roles */}
+                <Route element={<ProtectedRoute requiredRoles={["Admin", "Mesa de Partes"]}/>}>
+                  <Route path="mesa-partes/ingreso" element={<IngresoDocumentosPage />}/>
                 </Route>
 
                 {/* Rutas que solo requieren autenticación */}
                 <Route path="usuarios/lista" element={<UsuariosPage />} />
                 <Route path="areas/lista" element={<AreasPage />} />
-                <Route path="documentos/lista" element={<ListaDocumentosPage />} />
-                <Route path="documentos/ambitos/lista" element={<AmbitoPage />} />
-                <Route path="documentos/categorias/lista" element={<CategoriaPage />} />
-                <Route path="distrito/centros-poblados/lista" element={<CentroPobladoPage />} />
-                <Route path="distrito/caserios/lista" element={<CaseriosPage />} />
-                <Route path="bandeja-entrada/recibidos" element={<ListaDocumentosRecibidosPage />} />
+                <Route
+                  path="documentos/lista"
+                  element={<ListaDocumentosPage />}
+                />
+                <Route
+                  path="documentos/ambitos/lista"
+                  element={<AmbitoPage />}
+                />
+                <Route
+                  path="documentos/categorias/lista"
+                  element={<CategoriaPage />}
+                />
+                <Route
+                  path="distrito/centros-poblados/lista"
+                  element={<CentroPobladoPage />}
+                />
+                <Route
+                  path="distrito/caserios/lista"
+                  element={<CaseriosPage />}
+                />
+                <Route
+                  path="bandeja-entrada/recibidos"
+                  element={<ListaDocumentosRecibidosPage />}
+                />
+                <Route
+                  path="bandeja-entrada/enviados"
+                  element={<ListaDocumentosEnviadosPage />}
+                />
+                <Route
+                  path="bandeja-entrada/rechazados"
+                  element={<ListaDocumentosRechazadosPage />}
+                />
 
                 {/* Redirecciones */}
-                <Route path="areas" element={<Navigate to="/areas/lista" replace />} />
-                <Route path="remitentes" element={<Navigate to="/remitentes/lista" replace />} />
-                <Route path="trabajadores" element={<Navigate to="/trabajadores/lista" replace />} />
-                <Route path="documentos" element={<Navigate to="/documentos/lista" replace />} />
-                <Route path="usuarios" element={<Navigate to="/usuarios/lista" replace />} />
-                <Route path="mesa-partes" element={<Navigate to="/mesa-partes/ingreso" replace />} />
-                <Route path="usuarios/roles" element={<Navigate to="/usuarios/roles/lista" replace />} />
-                <Route path="documentos/ambitos" element={<Navigate to="/documentos/ambitos/lista" replace />} />
-                <Route path="documentos/categorias" element={<Navigate to="/documentos/categorias/lista" replace />} />
+                <Route
+                  path="areas"
+                  element={<Navigate to="/areas/lista" replace />}
+                />
+                <Route
+                  path="remitentes"
+                  element={<Navigate to="/remitentes/lista" replace />}
+                />
+                <Route
+                  path="trabajadores"
+                  element={<Navigate to="/trabajadores/lista" replace />}
+                />
+                <Route
+                  path="documentos"
+                  element={<Navigate to="/documentos/lista" replace />}
+                />
+                <Route
+                  path="usuarios"
+                  element={<Navigate to="/usuarios/lista" replace />}
+                />
+                <Route
+                  path="mesa-partes"
+                  element={<Navigate to="/mesa-partes/ingreso" replace />}
+                />
+                <Route
+                  path="usuarios/roles"
+                  element={<Navigate to="/usuarios/roles/lista" replace />}
+                />
+                <Route
+                  path="documentos/ambitos"
+                  element={<Navigate to="/documentos/ambitos/lista" replace />}
+                />
+                <Route
+                  path="documentos/categorias"
+                  element={
+                    <Navigate to="/documentos/categorias/lista" replace />
+                  }
+                />
                 <Route
                   path="distrito/centros-poblados"
-                  element={<Navigate to="/distrito/centros-poblados/lista" replace />}
+                  element={
+                    <Navigate to="/distrito/centros-poblados/lista" replace />
+                  }
                 />
                 <Route
                   path="distrito/caserios"

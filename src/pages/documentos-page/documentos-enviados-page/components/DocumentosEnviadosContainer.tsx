@@ -5,11 +5,11 @@ import React, { useState, useEffect, useCallback } from "react";
 import debounce from "lodash/debounce";
 import { AnimatePresence, motion } from "framer-motion";
 import { Pagination } from "@/components/ui/pagination";
-import { DocumentoReceivedPaginatedResponse } from "@/model/documentoReceivedPaginatedResponse";
+import { DocumentoSentPaginatedResponse } from "@/model/documentoSendPaginatedResponse";
 import DownloadModal from "@/components/modal/alerts/download-modal/DownloadModal";
-import { ListaDocumentosRecibidosHeader } from "./ReceivedDocumentsHeader";
-import { ListaDocumentosRecibidosSearch } from "./ReceivedDocumentsSearch";
-import { ListaDocumentosRecibidosTable } from "./ReceivedDocumentsTable";
+import { ListaDocumentosEnviadosHeader } from "./DocumentosEnviadosHeader";
+import { ListaDocumentosEnviadosSearch } from "./DocumentosEnviadosSearch";
+import { ListaDocumentosEnviadosTable } from "./DocumentosEnviadosTable";
 import { Ambito } from "@/model/ambito";
 import { CentroPoblado } from "@/model/centroPoblado";
 import { Caserio } from "@/model/caserio";
@@ -21,7 +21,7 @@ import {
 import { getCentrosPoblados } from "@/service/centroPobladoService";
 
 import {
-  getReceivedDocumentsByAreaId,
+  getSentDocumentsByAreaId,
   downloadDocumento,
 } from "@/service/documentoService";
 
@@ -54,10 +54,10 @@ const tableVariants = {
   exit: { opacity: 0, scale: 0.95 },
 };
 
-export const ListaDocumentosRecibidosContainer: React.FC = () => {
+export const ListaDocumentosEnviadosContainer: React.FC = () => {
   // Estado principal con los documentos y la paginación
   const [documentosState, setDocumentosState] =
-    useState<DocumentoReceivedPaginatedResponse>({
+    useState<DocumentoSentPaginatedResponse>({
       data: [],
       pagination: { currentPage: 1, pageSize: 4, totalItems: 0, totalPages: 0 },
     });
@@ -250,7 +250,7 @@ export const ListaDocumentosRecibidosContainer: React.FC = () => {
 
       // Armamos los parámetros para el servicio
       const params = {
-        p_area_destino_id: parseInt(areaId, 10),
+        p_area_origen_id: parseInt(areaId, 10),
         p_search_document: searchValue.trim() === "" ? null : searchValue,
         p_id_caserio:
           caserio && caserio !== "all" ? parseInt(caserio, 10) : undefined,
@@ -262,7 +262,6 @@ export const ListaDocumentosRecibidosContainer: React.FC = () => {
           ambito && ambito !== "all" ? parseInt(ambito, 10) : undefined,
         p_nombre_categoria: undefined,
         p_fecha_ingreso,
-        p_recepcionada: confirmacion ? confirmacion === "true" : undefined,
         p_page: page,
         p_page_size: 4,
       };
@@ -270,7 +269,7 @@ export const ListaDocumentosRecibidosContainer: React.FC = () => {
       console.log("params enviados (Documentos Recibidos):", params);
 
       // Llamamos al servicio
-      const response = await getReceivedDocumentsByAreaId(params);
+      const response = await getSentDocumentsByAreaId(params);
       console.log("response desde getReceivedDocumentsByAreaId:", response);
 
       // Verificamos si hay filtros aplicados
@@ -556,11 +555,11 @@ export const ListaDocumentosRecibidosContainer: React.FC = () => {
 
   return (
     <div className="pt-2 px-2 bg-transparent">
-      <ListaDocumentosRecibidosHeader title="Documentos Recibidos" />
+      <ListaDocumentosEnviadosHeader title="Documentos Enviados" />
 
       <div className="w-full overflow-hidden bg-white rounded-lg shadow-lg">
         {/* Barra de búsqueda y filtros */}
-        <ListaDocumentosRecibidosSearch
+        <ListaDocumentosEnviadosSearch
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
           selectedCaserio={selectedCaserio}
@@ -599,7 +598,7 @@ export const ListaDocumentosRecibidosContainer: React.FC = () => {
                 transition={{ duration: 0.5 }}
                 className="w-full"
               >
-                <ListaDocumentosRecibidosTable
+                <ListaDocumentosEnviadosTable
                   currentDocumentos={documentosState.data}
                   onDownload={handleDownload}
                   onSend={handleSend}
