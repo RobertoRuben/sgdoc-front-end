@@ -42,6 +42,7 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/not-authorized" element={<NotAuthorizedPage />} />
             <Route path="/not-found" element={<NotFoundPage />} />
+
             {/* Rutas protegidas */}
             <Route element={<ProtectedRoute />}>
               <Route path="/" element={<Layout />}>
@@ -54,98 +55,36 @@ function App() {
                   <Route path="trabajadores/lista" element={<TrabajadoresPage />}/>
                   <Route path="usuarios/lista" element={<UsuariosPage />} />
                   <Route path="usuarios/roles/lista" element={<RolesPage />} />
+                  <Route path="areas/lista" element={<AreasPage />} />
                 </Route>
 
                 {/* Ruta compartida para ambos roles */}
                 <Route element={<ProtectedRoute requiredRoles={["Admin", "Mesa de Partes"]}/>}>
                   <Route path="mesa-partes/ingreso" element={<IngresoDocumentosPage />}/>
+                  <Route path="documentos/lista" element={<ListaDocumentosPage />}/>
+                  <Route path="documentos/ambitos/lista" element={<AmbitoPage />}/>
+                  <Route path="documentos/categorias/lista" element={<CategoriaPage />}/>
+                  <Route path="distrito/centros-poblados/lista" element={<CentroPobladoPage />}/>
+                  <Route path="distrito/caserios/lista" element={<CaseriosPage />}/>
                 </Route>
 
                 {/* Rutas que solo requieren autenticación */}
-                <Route path="usuarios/lista" element={<UsuariosPage />} />
-                <Route path="areas/lista" element={<AreasPage />} />
-                <Route
-                  path="documentos/lista"
-                  element={<ListaDocumentosPage />}
-                />
-                <Route
-                  path="documentos/ambitos/lista"
-                  element={<AmbitoPage />}
-                />
-                <Route
-                  path="documentos/categorias/lista"
-                  element={<CategoriaPage />}
-                />
-                <Route
-                  path="distrito/centros-poblados/lista"
-                  element={<CentroPobladoPage />}
-                />
-                <Route
-                  path="distrito/caserios/lista"
-                  element={<CaseriosPage />}
-                />
-                <Route
-                  path="bandeja-entrada/recibidos"
-                  element={<ListaDocumentosRecibidosPage />}
-                />
-                <Route
-                  path="bandeja-entrada/enviados"
-                  element={<ListaDocumentosEnviadosPage />}
-                />
-                <Route
-                  path="bandeja-entrada/rechazados"
-                  element={<ListaDocumentosRechazadosPage />}
-                />
+                <Route path="inbox/recibidos" element={<ListaDocumentosRecibidosPage />}/>
+                <Route path="inbox/enviados" element={<ListaDocumentosEnviadosPage />}/>
+                <Route path="inbox/rechazados" element={<ListaDocumentosRechazadosPage />}/>
 
                 {/* Redirecciones */}
-                <Route
-                  path="areas"
-                  element={<Navigate to="/areas/lista" replace />}
-                />
-                <Route
-                  path="remitentes"
-                  element={<Navigate to="/remitentes/lista" replace />}
-                />
-                <Route
-                  path="trabajadores"
-                  element={<Navigate to="/trabajadores/lista" replace />}
-                />
-                <Route
-                  path="documentos"
-                  element={<Navigate to="/documentos/lista" replace />}
-                />
-                <Route
-                  path="usuarios"
-                  element={<Navigate to="/usuarios/lista" replace />}
-                />
-                <Route
-                  path="mesa-partes"
-                  element={<Navigate to="/mesa-partes/ingreso" replace />}
-                />
-                <Route
-                  path="usuarios/roles"
-                  element={<Navigate to="/usuarios/roles/lista" replace />}
-                />
-                <Route
-                  path="documentos/ambitos"
-                  element={<Navigate to="/documentos/ambitos/lista" replace />}
-                />
-                <Route
-                  path="documentos/categorias"
-                  element={
-                    <Navigate to="/documentos/categorias/lista" replace />
-                  }
-                />
-                <Route
-                  path="distrito/centros-poblados"
-                  element={
-                    <Navigate to="/distrito/centros-poblados/lista" replace />
-                  }
-                />
-                <Route
-                  path="distrito/caserios"
-                  element={<Navigate to="/distrito/caserios/lista" replace />}
-                />
+                <Route path="areas" element={<Navigate to="/areas/lista" replace />}/>
+                <Route path="remitentes" element={<Navigate to="/remitentes/lista" replace />}/>
+                <Route path="trabajadores" element={<Navigate to="/trabajadores/lista" replace />}/>
+                <Route path="documentos" element={<Navigate to="/documentos/lista" replace />}/>
+                <Route path="usuarios" element={<Navigate to="/usuarios/lista" replace />}/>
+                <Route path="mesa-partes" element={<Navigate to="/mesa-partes/ingreso" replace />}/>
+                <Route path="usuarios/roles" element={<Navigate to="/usuarios/roles/lista" replace />}/>
+                <Route path="documentos/ambitos" element={<Navigate to="/documentos/ambitos/lista" replace />}/>
+                <Route path="documentos/categorias" element={<Navigate to="/documentos/categorias/lista" replace />}/>
+                <Route path="distrito/centros-poblados" element={<Navigate to="/distrito/centros-poblados/lista" replace />}/>
+                <Route path="distrito/caserios" element={<Navigate to="/distrito/caserios/lista" replace />}/>
               </Route>
             </Route>
 

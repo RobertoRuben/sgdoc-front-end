@@ -32,7 +32,9 @@ import SuccessModal from "@/components/modal/alerts/success-modal/SuccessModal";
 import UpdateSuccessModal from "@/components/modal/alerts/update-modal/UpdateSuccessModal";
 import LoadingSpinner from "@/components/layout/LoadingSpinner";
 import { createDerivacion } from "@/service/derivacionService";
+import { createNotificacion } from "@/service/notificactionService";
 import { Derivacion } from "@/model/derivacion";
+import { Notificacion } from "@/model/notification";
 
 /** Importamos los servicios de detalle de derivación */
 import {
@@ -388,6 +390,12 @@ export const ListaDocumentosRecibidosContainer: React.FC = () => {
         isOpen: true,
         message: "Documento derivado exitosamente.",
       });
+
+      const nuevaNotificacion: Notificacion = {
+        comentario: 'Se te ha enviado un nuevo documento. Revisa en tu bandeja los documentos recibos.',
+        areaDestinoId: areaDestinoId
+      };
+      await createNotificacion(nuevaNotificacion);
 
       // Refresca la data
       await loadDocumentos({

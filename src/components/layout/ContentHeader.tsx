@@ -1,4 +1,3 @@
-// src/components/layout/ContentHeader.tsx
 import React from 'react';
 import { Link } from 'react-router-dom';
 

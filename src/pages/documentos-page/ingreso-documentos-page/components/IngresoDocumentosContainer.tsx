@@ -10,11 +10,13 @@ import { IngresoDocumentosSearch } from "./IngresoDocumentosSearch";
 import { IngresoDocumentosTable } from "./IngresoDocumentosTable";
 import { DerivacionModal } from "@/components/modal/derivacion-modal/DerivacionModal";
 import { Derivacion } from "@/model/derivacion";
+import { Notificacion } from "@/model/notification";
 import {
   getDocumentosByCurrentDate,
   downloadDocumento,
 } from "@/service/documentoService";
 import { createDerivacion } from "@/service/derivacionService";
+import { createNotificacion } from "@/service/notificactionService";
 import LoadingSpinner from "@/components/layout/LoadingSpinner";
 import ErrorModal from "@/components/modal/alerts/error-modal/ErrorModal";
 
@@ -246,6 +248,12 @@ export const IngresoDocumentosContainer: React.FC = () => {
 
       // Llamamos al servicio
       await createDerivacion(nuevaDerivacion);
+
+      const nuevaNotificacion: Notificacion = {
+        comentario: 'Se te ha enviado un nuevo documento. Revisa en bandeja de entrada la seccion de documentos recibidos.',
+        areaDestinoId: areaDestinoId
+      };
+      await createNotificacion(nuevaNotificacion);
 
       // Si no hay error, cerramos el modal y mostramos el éxito
       setIsDerivacionModalOpen(false);

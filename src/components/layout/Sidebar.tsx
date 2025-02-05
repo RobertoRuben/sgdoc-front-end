@@ -1,4 +1,3 @@
-// Sidebar.tsx
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronDown, ChevronRight, X } from 'lucide-react';
@@ -8,9 +7,10 @@ import logo from '../../assets/mda-logo.png';
 type SidebarProps = {
     isOpen: boolean;
     onClose: () => void;
+    unconfirmedCount?: number;
 };
 
-export function Sidebar({ isOpen, onClose }: SidebarProps) {
+export function Sidebar({ isOpen, onClose, unconfirmedCount = 0 }: SidebarProps) {
     const [openMenus, setOpenMenus] = useState<{ [key: string]: boolean }>({});
     const userRole = sessionStorage.getItem('rolName') || '';
 
@@ -19,10 +19,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     };
 
     const filteredNavItems = navItems.filter((item) => {
-        // Verificar si el ítem padre tiene acceso
         const hasParentAccess = !item.allowedRoles || item.allowedRoles.includes(userRole);
-        
-        // Verificar si tiene subítems accesibles
         const hasAccessibleSubItems = item.subItems 
             ? item.subItems.some(sub => !sub.allowedRoles || sub.allowedRoles.includes(userRole))
             : true;
@@ -77,10 +74,15 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                                                     aria-expanded={openMenus[item.name] || false}
                                                     disabled={filteredSubItems?.length === 0}
                                                 >
-                                                    <span className="flex items-center">
-                                                        <item.icon className="w-5 h-5 mr-2" strokeWidth={3} />
-                                                        {item.name}
-                                                    </span>
+                                                    <div className="flex items-center gap-2">
+                                                        <item.icon className="w-5 h-5" strokeWidth={3} />
+                                                        <span>{item.name}</span>
+                                                        {item.name === "Inbox" && unconfirmedCount > 0 && (
+                                                            <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold text-white bg-red-500 rounded-full">
+                                                                {unconfirmedCount}
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                     {filteredSubItems && filteredSubItems.length > 0 && (
                                                         openMenus[item.name] ? 
                                                         <ChevronDown className="h-4 w-4" /> : 
@@ -99,10 +101,15 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                                                         <li key={subIndex}>
                                                             <Link
                                                                 to={subItem.path}
-                                                                className="block p-2 hover:bg-[#028a3b] rounded"
+                                                                className="flex justify-between items-center p-2 hover:bg-[#028a3b] rounded"
                                                                 onClick={onClose}
                                                             >
-                                                                {subItem.name}
+                                                                <span>{subItem.name}</span>
+                                                                {subItem.name === "Recibidos" && unconfirmedCount > 0 && (
+                                                                    <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold text-white bg-red-500 rounded-full">
+                                                                        {unconfirmedCount}
+                                                                    </span>
+                                                                )}
                                                             </Link>
                                                         </li>
                                                     ))}
@@ -116,11 +123,6 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                                             >
                                                 <item.icon className="w-5 h-5 mr-2" strokeWidth={3} />
                                                 {item.name}
-                                                {item.name === "Bandeja de Entrada" && (
-                                                    <span className="absolute right-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold text-white bg-red-500 rounded-full">
-                                                        4
-                                                    </span>
-                                                )}
                                             </Link>
                                         )}
                                     </li>

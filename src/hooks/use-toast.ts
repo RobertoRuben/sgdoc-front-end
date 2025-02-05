@@ -1,19 +1,38 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable no-case-declarations */
 "use client"
 
-// Inspired by react-hot-toast library
 import * as React from "react"
 import type { ToastActionElement, ToastProps } from "@/components/ui/toast"
 
+/**
+ * Ajusta estos valores según tu preferencia.
+ * TOAST_LIMIT: máximo de toasts que pueden estar visibles simultáneamente.
+ * TOAST_REMOVE_DELAY: tiempo en milisegundos para que un toast sea eliminado del estado después de cerrarse.
+ */
 const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 1000000 // Adjust the delay as necessary
+const TOAST_REMOVE_DELAY = 1000000
 
-type ToasterToast = ToastProps & {
-  id: string
+/**
+ * Extendemos ToastProps (de tu librería UI) omitiendo "title" y "description",
+ * y añadiendo nuestras propias definiciones para que sean ReactNode.
+ */
+type ExtendedToastProps = Omit<ToastProps, "title" | "description"> & {
   title?: React.ReactNode
   description?: React.ReactNode
+}
+
+/**
+ * Este será el tipo principal que maneja nuestro reducer y que se mostrará en la interfaz.
+ */
+type ToasterToast = ExtendedToastProps & {
+  id: string
   action?: ToastActionElement
 }
 
+/**
+ * Acciones posibles en nuestro reducer
+ */
 const actionTypes = {
   ADD_TOAST: "ADD_TOAST",
   UPDATE_TOAST: "UPDATE_TOAST",
@@ -21,28 +40,100 @@ const actionTypes = {
   REMOVE_TOAST: "REMOVE_TOAST",
 } as const
 
-let count = 0
-
-// Function to generate unique IDs for each toast
-function genId() {
-  count = (count + 1) % Number.MAX_SAFE_INTEGER
-  return count.toString()
-}
-
 type ActionType = typeof actionTypes
 
 type Action =
-    | { type: ActionType["ADD_TOAST"]; toast: ToasterToast }
-    | { type: ActionType["UPDATE_TOAST"]; toast: Partial<ToasterToast> }
-    | { type: ActionType["DISMISS_TOAST"]; toastId?: ToasterToast["id"] }
-    | { type: ActionType["REMOVE_TOAST"]; toastId?: ToasterToast["id"] }
+  | { type: ActionType["ADD_TOAST"]; toast: ToasterToast }
+  | { type: ActionType["UPDATE_TOAST"]; toast: Partial<ToasterToast> }
+  | { type: ActionType["DISMISS_TOAST"]; toastId?: ToasterToast["id"] }
+  | { type: ActionType["REMOVE_TOAST"]; toastId?: ToasterToast["id"] }
 
+/**
+ * Estado global de todos los toasts activos.
+ */
 interface State {
   toasts: ToasterToast[]
 }
 
+/**
+ * Guarda los timeouts para borrar los toasts después de cerrarlos.
+ */
 const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
 
+/**
+ * Reducer principal que maneja la lógica de añadir, actualizar, cerrar y eliminar toasts.
+ */
+const reducer = (state: State, action: Action): State => {
+  switch (action.type) {
+    case "ADD_TOAST":
+      return {
+        ...state,
+        toasts: [action.toast, ...state.toasts].slice(0, TOAST_LIMIT),
+      }
+
+    case "UPDATE_TOAST":
+      return {
+        ...state,
+        toasts: state.toasts.map((t) =>
+          t.id === action.toast.id ? { ...t, ...action.toast } : t
+        ),
+      }
+
+    case "DISMISS_TOAST":
+      const { toastId } = action
+      if (toastId) {
+        addToRemoveQueue(toastId)
+      } else {
+        state.toasts.forEach((toast) => addToRemoveQueue(toast.id))
+      }
+      return {
+        ...state,
+        toasts: state.toasts.map((t) =>
+          t.id === toastId || toastId === undefined
+            ? { ...t, open: false }
+            : t
+        ),
+      }
+
+    case "REMOVE_TOAST":
+      if (action.toastId === undefined) {
+        // Eliminamos todos
+        return { ...state, toasts: [] }
+      }
+      // Eliminamos solo uno
+      return {
+        ...state,
+        toasts: state.toasts.filter((t) => t.id !== action.toastId),
+      }
+
+    default:
+      return state
+  }
+}
+
+/**
+ * Array de listeners para notificar a todos los que usan el hook cuando
+ * el estado cambia.
+ */
+const listeners: Array<(state: State) => void> = []
+
+/**
+ * Estado en memoria global del que se alimentan los listeners (useState).
+ */
+let memoryState: State = { toasts: [] }
+
+/**
+ * Despacho centralizado de acciones al reducer.
+ * Actualiza el estado global y llama a todos los listeners.
+ */
+function dispatch(action: Action) {
+  memoryState = reducer(memoryState, action)
+  listeners.forEach((listener) => listener(memoryState))
+}
+
+/**
+ * Añade un toast a la cola de "remoción" después de un tiempo para limpiarlo del estado.
+ */
 const addToRemoveQueue = (toastId: string) => {
   if (toastTimeouts.has(toastId)) return
 
@@ -54,57 +145,29 @@ const addToRemoveQueue = (toastId: string) => {
   toastTimeouts.set(toastId, timeout)
 }
 
-const reducer = (state: State, action: Action): State => {
-  switch (action.type) {
-    case "ADD_TOAST":
-      return { ...state, toasts: [action.toast, ...state.toasts].slice(0, TOAST_LIMIT) }
-    case "UPDATE_TOAST":
-      return {
-        ...state,
-        toasts: state.toasts.map((t) =>
-            t.id === action.toast.id ? { ...t, ...action.toast } : t
-        ),
-      }
-    case "DISMISS_TOAST":
-      const { toastId } = action
-      if (toastId) {
-        addToRemoveQueue(toastId)
-      } else {
-        state.toasts.forEach((toast) => addToRemoveQueue(toast.id))
-      }
-      return {
-        ...state,
-        toasts: state.toasts.map((t) =>
-            t.id === toastId || toastId === undefined ? { ...t, open: false } : t
-        ),
-      }
-    case "REMOVE_TOAST":
-      if (action.toastId === undefined) {
-        return { ...state, toasts: [] }
-      }
-      return {
-        ...state,
-        toasts: state.toasts.filter((t) => t.id !== action.toastId),
-      }
-  }
+/**
+ * Genera IDs únicos para cada toast.
+ */
+let count = 0
+function genId() {
+  count = (count + 1) % Number.MAX_SAFE_INTEGER
+  return count.toString()
 }
 
-const listeners: Array<(state: State) => void> = []
-
-let memoryState: State = { toasts: [] }
-
-function dispatch(action: Action) {
-  memoryState = reducer(memoryState, action)
-  listeners.forEach((listener) => listener(memoryState))
-}
-
+/**
+ * Este tipo representa lo que puede recibir la función `toast(...)`.
+ * Internamente, se le añade un ID en el reducer.
+ */
 type Toast = Omit<ToasterToast, "id">
 
+/**
+ * Función principal para disparar un nuevo toast.
+ */
 function toast({ ...props }: Toast) {
   const id = genId()
 
-  const update = (props: ToasterToast) =>
-      dispatch({ type: "UPDATE_TOAST", toast: { ...props, id } })
+  const update = (updateProps: Partial<ToasterToast>) =>
+    dispatch({ type: "UPDATE_TOAST", toast: { ...updateProps, id } })
 
   const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id })
 
@@ -114,6 +177,7 @@ function toast({ ...props }: Toast) {
       ...props,
       id,
       open: true,
+      // Cuando open cambie a false, se descarta.
       onOpenChange: (open) => {
         if (!open) dismiss()
       },
@@ -127,6 +191,10 @@ function toast({ ...props }: Toast) {
   }
 }
 
+/**
+ * Hook para suscribirse a los cambios en los toasts.
+ * Provee la función `toast(...)` y también `dismiss(...)` para cerrar un toast en particular.
+ */
 function useToast() {
   const [state, setState] = React.useState<State>(memoryState)
 
@@ -140,7 +208,13 @@ function useToast() {
     }
   }, [state])
 
-  return { ...state, toast, dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId }) }
+  // Exponemos el estado y las funciones
+  return {
+    ...state,
+    toast,
+    dismiss: (toastId?: string) =>
+      dispatch({ type: "DISMISS_TOAST", toastId }),
+  }
 }
 
 export { useToast, toast }

@@ -40,16 +40,16 @@ export const DetalleDerivacionModalContent: React.FC<
 
   return (
     <div className="flex flex-col h-full">
-      <div className="p-4 md:p-6 space-y-6">
-        <div className="space-y-4">
+      <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 hover:scrollbar-thumb-gray-500">
+        <div className="p-4 md:p-6 space-y-4">
           {detalles.map((detalle, index) => (
             <div
               key={detalle.id}
               className="bg-white rounded-lg shadow-sm border p-4 space-y-3"
             >
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 <span
-                  className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
+                  className={`px-3 py-1 rounded-full text-sm font-medium w-fit ${getStatusColor(
                     detalle.estado
                   )}`}
                 >
@@ -65,26 +65,28 @@ export const DetalleDerivacionModalContent: React.FC<
                 {detalle.estado.toLowerCase() === "rechazada" && (
                   <div className="font-medium text-gray-700">Motivo de Rechazo:</div>
                 )}
-                <p className="text-gray-700">{detalle.comentario}</p>
+                <p className="text-gray-700 break-words">{detalle.comentario}</p>
                 
                 {/* Recepcionado por Área Destino - Solo muestra si no es estado "iniciada" */}
                 {detalle.estado.toLowerCase() !== "iniciada" && (
-                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                  <div className="flex flex-wrap items-center gap-2 text-sm text-gray-600">
                     <span className="font-medium">
                       Recepcionado por Área Destino:
                     </span>
-                    <span>{detalle.recepcionada ? "Sí" : "No"}</span>
-                    {detalle.recepcionada ? (
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
-                    ) : (
-                      <XCircle className="h-4 w-4 text-red-500" />
-                    )}
+                    <div className="flex items-center gap-1">
+                      <span>{detalle.recepcionada ? "Sí" : "No"}</span>
+                      {detalle.recepcionada ? (
+                        <CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0" />
+                      ) : (
+                        <XCircle className="h-4 w-4 text-red-500 flex-shrink-0" />
+                      )}
+                    </div>
                   </div>
                 )}
 
                 {/* Usuario - No muestra en estado "en progreso" */}
                 {detalle.estado.toLowerCase() !== "en progreso" && (
-                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 text-sm text-gray-600">
                     <span className="font-medium">
                       Usuario que{" "}
                       {detalle.estado.toLowerCase() === "rechazada"
@@ -94,7 +96,7 @@ export const DetalleDerivacionModalContent: React.FC<
                         : "recepcionó"}{" "}
                       el documento:
                     </span>
-                    <span>
+                    <span className="break-words">
                       {detalle.nombreUsuario?.trim()
                         ? detalle.nombreUsuario
                         : "Ningún usuario confirmó la recepción"}
@@ -111,7 +113,7 @@ export const DetalleDerivacionModalContent: React.FC<
         </div>
       </div>
 
-      <div className="p-4 md:p-6 bg-gray-50 border-t border-gray-200 mt-auto">
+      <div className="sticky bottom-0 w-full bg-gray-50 border-t border-gray-200 p-4 md:p-6 mt-auto">
         <Button
           type="button"
           onClick={onClose}

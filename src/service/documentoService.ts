@@ -1,6 +1,7 @@
 import { AxiosError } from "axios";
 import humps from "humps";
 import { Documento } from "@/model/documento";
+import { DocumentosNoConfirmadosResponse } from "@/model/documentosNoConfirmadosResponse";
 import { DocumentoPayload } from "@/model/documentoPayload";
 import { DocumentoDetails } from "@/model/documentoDetails.ts";
 import { DocumentoReceivedDetails } from "@/model/documentoReceivedDetails";
@@ -44,8 +45,6 @@ export const createDocumento = async (documento: DocumentoPayload): Promise<Docu
         }
       });
   
-      console.log("FormData enviado al backend:", Array.from(formData.entries()));
-  
       const response = await axiosInstance.post(API_BASE_URL, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -55,11 +54,6 @@ export const createDocumento = async (documento: DocumentoPayload): Promise<Docu
       return humps.camelizeKeys(response.data) as Documento;
     } catch (error) {
       if (error instanceof AxiosError) {
-        console.error("Error del servidor:", {
-          status: error.response?.status,
-          data: error.response?.data,
-          headers: error.response?.headers,
-        });
         if (error.response?.data?.detail) {
           throw new Error(`Error del servidor: ${error.response.data.detail}`);
         }
@@ -257,17 +251,12 @@ export const getReceivedDocumentsByAreaId = async (params: {
   p_page_size: number;
 }): Promise<DocumentoReceivedPaginatedResponse> => {
   try {
-    // Llamada al endpoint /documentos/recibidos
     const response = await axiosInstance.get(`${API_BASE_URL}recibidos`, {
       params: humps.decamelizeKeys(params),
     });
-    console.log("respuesta: ", response);
-    console.log("parámetros enviados: ", params);
 
     const rawData = response.data;
-    console.log("rawData: ", rawData);
 
-    // Armamos la respuesta en formato camelCase
     return {
       data: humps.camelizeKeys(rawData.data) as DocumentoReceivedDetails[],
       pagination: {
@@ -301,11 +290,8 @@ export const getRejectedDocumentsByAreaId = async (params: {
     const response = await axiosInstance.get(`${API_BASE_URL}rechazados`, {
       params: humps.decamelizeKeys(params),
     });
-    console.log("respuesta: ", response);
-    console.log("parámetros enviados: ", params);
 
     const rawData = response.data;
-    console.log("rawData: ", rawData);
 
     return {
       data: humps.camelizeKeys(rawData.data) as DocumentoRechazadosDetails[],
@@ -323,4 +309,22 @@ export const getRejectedDocumentsByAreaId = async (params: {
     throw new Error("Error al obtener los documentos recibidos por área de destino");
   }
 };
+
+
+export const getDocumentosNoConfirmados = async (
+  p_area_destino_id: number
+): Promise<DocumentosNoConfirmadosResponse> => {
+  try {
+    const response = await axiosInstance.get(`${API_BASE_URL}no-confirmados`, {
+      params: { p_area_destino_id },
+    });
+    return humps.camelizeKeys(response.data) as DocumentosNoConfirmadosResponse;
+  } catch (error) {
+    if (error instanceof AxiosError && error.response?.data?.detail) {
+      throw new Error(error.response.data.detail);
+    }
+    throw new Error("Error al obtener la cantidad de documentos no confirmados");
+  }
+};
+
 
