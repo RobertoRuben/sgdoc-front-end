@@ -44,13 +44,13 @@ export function DetalleDerivacionModal({
 }: DetalleDerivacionModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] p-0 bg-white max-h-[90vh] overflow-hidden">
+      <DialogContent className="sm:max-w-[600px] p-0 bg-white max-h-[90vh] h-[calc(100vh-2rem)] overflow-hidden flex flex-col">
         <motion.div
           variants={fadeInVariants}
           initial="hidden"
           animate="visible"
           exit="exit"
-          className="h-full"
+          className="flex flex-col h-full"
         >
           <DetalleDerivacionModalHeader />
           <AnimatePresence mode="wait">
@@ -59,7 +59,7 @@ export function DetalleDerivacionModal({
               initial="hidden"
               animate="visible"
               exit="exit"
-              className="overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-400 scrollbar-track-transparent"
+              className="flex-1 min-h-0"
             >
               <DetalleDerivacionModalContent detalles={detalles} onClose={onClose} />
             </motion.div>

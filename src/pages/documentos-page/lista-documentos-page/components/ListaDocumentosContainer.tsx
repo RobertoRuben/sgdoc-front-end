@@ -31,7 +31,9 @@ import SuccessModal from "@/components/modal/alerts/success-modal/SuccessModal";
 import UpdateSuccessModal from "@/components/modal/alerts/update-modal/UpdateSuccessModal";
 import LoadingSpinner from "@/components/layout/LoadingSpinner";
 import { createDerivacion } from "@/service/derivacionService";
+import { createNotificacion } from "@/service/notificactionService";
 import { Derivacion } from "@/model/derivacion";
+import { Notificacion } from "@/model/notification";
 
 const tableVariants = {
   initial: { opacity: 0, scale: 0.95 },
@@ -310,19 +312,21 @@ export const ListaDocumentosContainer: React.FC = () => {
       const areaOrigenId = parseInt(areaOrigenIdString, 10);
       const userId = parseInt(userIdString, 10);
 
-      // Construimos el objeto Derivacion según tu modelo
       const nuevaDerivacion: Derivacion = {
         documentoId: selectedDocumentoId,
         areaOrigenId,
         areaDestinoId,
         usuarioId: userId,
-        // Si tu back-end necesita más campos, agrégalos aquí
       };
 
-      // Llamamos al servicio
       await createDerivacion(nuevaDerivacion);
 
-      // Si no hay error, cerramos el modal y mostramos el éxito
+      const nuevaNotificacion: Notificacion = {
+        comentario: 'Se te ha enviado un nuevo documento. Revisa en tu bandeja los documentos recibos.',
+        areaDestinoId: areaDestinoId
+      };
+      await createNotificacion(nuevaNotificacion);
+
       setIsDerivacionModalOpen(false);
       setSuccessModalConfig({
         isOpen: true,

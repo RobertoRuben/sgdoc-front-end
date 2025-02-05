@@ -128,7 +128,7 @@ export const ListaDocumentosTable: React.FC<ListaDocumentosTableProps> = ({
                     {documento.dniRemitente}
                   </TableCell>
                   <TableCell className="hidden md:table-cell px-4 py-4 text-sm text-gray-700">
-                    {new Date(documento.fechaIngreso).toLocaleDateString()}
+                    {documento.fechaIngreso ? new Date(documento.fechaIngreso).toLocaleDateString() : ''}
                   </TableCell>
                   <TableCell className="hidden lg:table-cell px-4 py-4 text-sm text-gray-700">
                     {documento.nombreAmbito}
