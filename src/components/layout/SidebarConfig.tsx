@@ -1,4 +1,3 @@
-// SidebarConfig.ts
 import {
     Home,
     Users,
@@ -31,7 +30,7 @@ export const navItems: NavItem[] = [
         name: "Inicio",
         icon: Home,
         path: "/inicio",
-        allowedRoles: ['Admin', 'Mesa de Partes', 'Alcalde'],
+        allowedRoles: ['Admin', 'Mesa de Partes', 'Alcalde', 'Gerente Municipal'],
     },
     {
         name: "Dashboard",
@@ -48,23 +47,23 @@ export const navItems: NavItem[] = [
         ],
     },
     {
-        name: "Bandeja de Entrada",
-        path: "/bandeja-entrada",
+        name: "Inbox",
+        path: "/inbox",
         icon: Mail,
         subItems: [
             { 
-                name: "Documentos Recibidos", 
-                path: "/bandeja-entrada/recibidos",
+                name: "Recibidos", 
+                path: "/inbox/recibidos",
                 allowedRoles: ['Admin', 'Alcalde', 'Gerente Municipal', 'Subgerente'] 
             },
             { 
-                name: "Documentos Enviados", 
-                path: "/bandeja-entrada/enviados",
+                name: "Enviados", 
+                path: "/inbox/enviados",
                 allowedRoles: ['Admin', 'Alcalde', 'Gerente Municipal', 'Subgerente', 'Mesa de Partes'] 
             },
             { 
-                name: "Documentos Rechazados", 
-                path: "/bandeja-entrada/rechazados",
+                name: "Rechazados", 
+                path: "/inbox/rechazados",
                 allowedRoles: ['Admin', 'Alcalde', 'Gerente Municipal', 'Subgerente'] 
             },
         ],

@@ -12,27 +12,24 @@ import { getBreadcrumb } from "@/utils/getBreadcrumb";
 import { useLoading } from "@/context/LoadingContext";
 import LoadingSpinner from "./LoadingSpinner";
 import { AnimatePresence, motion } from "framer-motion";
-
-// Importamos nuestro hook personalizado:
+import { getDocumentosNoConfirmados } from "@/service/documentoService";
 import { useAreaNotifications } from "@/hooks/useAreaNotifications";
 
 export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false); 
   const [notificationCount, setNotificationCount] = useState(0);
+  const [unconfirmedCount, setUnconfirmedCount] = useState(0);
 
   const location = useLocation();
   const { isLoading, setLoading } = useLoading();
 
-  // Incrementa el conteo de notificaciones al recibir un nuevo mensaje WebSocket
   const handleNewNotification = () => {
     setNotificationCount((prev) => prev + 1);
   };
 
-  // Conecta al WebSocket si "areaId" existe. Evita reconexiones duplicadas.
   useAreaNotifications({ onNewNotification: handleNewNotification });
 
-  // Genera el breadcrumb en base a la ruta
   const breadcrumb = useMemo(
     () => getBreadcrumb(location.pathname, navItems),
     [location.pathname]
@@ -40,17 +37,13 @@ export function Layout() {
 
   const handleViewNotifications = () => {
     console.log("Depuración: Se hizo clic en 'Ver notificaciones'.");
-    // Podrías resetear el contador a 0 aquí si deseas
-    // setNotificationCount(0);
   };
 
-  // Determina si se debe mostrar el ContentHeader
   const excludedRoutes = ["/inicio", "/dashboard"];
   const shouldShowContentHeader = !excludedRoutes.some((route) =>
     location.pathname.startsWith(route)
   );
 
-  // Manejo de transiciones de carga al navegar
   useEffect(() => {
     const handleStart = () => setLoading(true);
     const handleComplete = () => setLoading(false);
@@ -59,7 +52,22 @@ export function Layout() {
     handleComplete();
   }, [location, setLoading]);
 
-  // Determina el título del Header
+  useEffect(() => {
+    const fetchUnconfirmedCount = async () => {
+      try {
+        const areaId = Number(sessionStorage.getItem('areaId'));
+        if (areaId) {
+          const response = await getDocumentosNoConfirmados(areaId);
+          setUnconfirmedCount(response.total);
+        }
+      } catch (error) {
+        console.error("Error obteniendo documentos no confirmados:", error);
+      }
+    };
+  
+    fetchUnconfirmedCount();
+  }, []);
+
   const headerTitle = location.pathname === "/inicio" ? "Bienvenido" : "SGDOC";
 
   return (
@@ -68,7 +76,11 @@ export function Layout() {
         modalOpen ? "pointer-events-none" : "pointer-events-auto"
       }`}
     >
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Sidebar 
+        isOpen={sidebarOpen} 
+        onClose={() => setSidebarOpen(false)}
+        unconfirmedCount={unconfirmedCount}
+      />
 
       <div className="flex-1 flex flex-col min-w-0">
         <Header
