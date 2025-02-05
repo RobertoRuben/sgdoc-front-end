@@ -18,17 +18,21 @@ import { useAreaNotifications } from "@/hooks/useAreaNotifications";
 
 export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false); // Estado para controlar superposición
-  const [notificationCount] = useState(0);
+  const [modalOpen, setModalOpen] = useState(false); 
+  const [notificationCount, setNotificationCount] = useState(0);
 
   const location = useLocation();
   const { isLoading, setLoading } = useLoading();
 
-  // 1. Llamamos a nuestro hook para conectarnos al WebSocket de notificaciones.
-  //    Este hook abrirá la conexión solo si existe un "areaId" en sessionStorage.
-  useAreaNotifications();
+  // Incrementa el conteo de notificaciones al recibir un nuevo mensaje WebSocket
+  const handleNewNotification = () => {
+    setNotificationCount((prev) => prev + 1);
+  };
 
-  // 2. Obtenemos el "breadcrumb"
+  // Conecta al WebSocket si "areaId" existe. Evita reconexiones duplicadas.
+  useAreaNotifications({ onNewNotification: handleNewNotification });
+
+  // Genera el breadcrumb en base a la ruta
   const breadcrumb = useMemo(
     () => getBreadcrumb(location.pathname, navItems),
     [location.pathname]
@@ -36,15 +40,17 @@ export function Layout() {
 
   const handleViewNotifications = () => {
     console.log("Depuración: Se hizo clic en 'Ver notificaciones'.");
+    // Podrías resetear el contador a 0 aquí si deseas
+    // setNotificationCount(0);
   };
 
-  // 3. Determina si mostrar el ContentHeader según la ruta
+  // Determina si se debe mostrar el ContentHeader
   const excludedRoutes = ["/inicio", "/dashboard"];
   const shouldShowContentHeader = !excludedRoutes.some((route) =>
     location.pathname.startsWith(route)
   );
 
-  // 4. Manejar transiciones de carga al cambiar de ruta
+  // Manejo de transiciones de carga al navegar
   useEffect(() => {
     const handleStart = () => setLoading(true);
     const handleComplete = () => setLoading(false);
@@ -53,7 +59,7 @@ export function Layout() {
     handleComplete();
   }, [location, setLoading]);
 
-  // 5. Determinamos el título que se muestra en el header
+  // Determina el título del Header
   const headerTitle = location.pathname === "/inicio" ? "Bienvenido" : "SGDOC";
 
   return (
