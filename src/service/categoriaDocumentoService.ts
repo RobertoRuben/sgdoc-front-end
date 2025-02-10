@@ -1,15 +1,15 @@
 import { AxiosError } from "axios";
 import humps from "humps";
-import { Categoria } from "@/model/categoria";
-import { CategoriaPaginatedResponse } from "@/model/categoriaPaginatedResponse";
+import { CategoriaDocumento } from "@/model/categoriaDocumento.ts";
+import { CategoriaDocumentoPaginatedResponse } from "@/model/categoriaDocumentoPaginatedResponse.ts";
 import axiosInstance from "./axiosConfig";
 
-const API_BASE_URL = `/categorias/`;
+const API_BASE_URL = `/categorias-documento/`;
 
-export const getCategorias = async (): Promise<Categoria[]> => {
+export const getCategorias = async (): Promise<CategoriaDocumento[]> => {
   try {
     const response = await axiosInstance.get(API_BASE_URL);
-    return humps.camelizeKeys(response.data) as Categoria[];
+    return humps.camelizeKeys(response.data) as CategoriaDocumento[];
   } catch (error) {
     if (error instanceof AxiosError && error.response?.data?.detail) {
       throw new Error(error.response.data.detail);
@@ -19,12 +19,12 @@ export const getCategorias = async (): Promise<Categoria[]> => {
 };
 
 export const createCategoria = async (
-  categoria: Categoria
-): Promise<Categoria> => {
+  categoria: CategoriaDocumento
+): Promise<CategoriaDocumento> => {
   try {
     const payload = humps.decamelizeKeys(categoria);
     const response = await axiosInstance.post(API_BASE_URL, payload);
-    return humps.camelizeKeys(response.data) as Categoria;
+    return humps.camelizeKeys(response.data) as CategoriaDocumento;
   } catch (error) {
     if (error instanceof AxiosError && error.response?.data?.detail) {
       throw new Error(error.response.data.detail);
@@ -35,12 +35,12 @@ export const createCategoria = async (
 
 export const updateCategoria = async (
   id: number,
-  categoria: Omit<Categoria, "id">
-): Promise<Categoria | null> => {
+  categoria: Omit<CategoriaDocumento, "id">
+): Promise<CategoriaDocumento | null> => {
   try {
     const payload = humps.decamelizeKeys(categoria);
     const response = await axiosInstance.put(`${API_BASE_URL}${id}/`, payload);
-    return humps.camelizeKeys(response.data) as Categoria;
+    return humps.camelizeKeys(response.data) as CategoriaDocumento;
   } catch (error) {
     if (error instanceof AxiosError && error.response?.data?.detail) {
       throw new Error(error.response.data.detail);
@@ -67,11 +67,11 @@ export const deleteCategoria = async (id: number): Promise<boolean> => {
 
 export const getCategoriaById = async (
   id: number
-): Promise<Categoria | null> => {
+): Promise<CategoriaDocumento | null> => {
   try {
     const response = await axiosInstance.get(`${API_BASE_URL}${id}/`);
     if (!response.data) return null;
-    return humps.camelizeKeys(response.data) as Categoria;
+    return humps.camelizeKeys(response.data) as CategoriaDocumento;
   } catch (error) {
     if (error instanceof AxiosError) {
       if (error.response?.status === 404) {
@@ -87,12 +87,12 @@ export const getCategoriaById = async (
 
 export const findByString = async (
   searchString: string
-): Promise<Categoria[]> => {
+): Promise<CategoriaDocumento[]> => {
   try {
     const response = await axiosInstance.get(`${API_BASE_URL}search`, {
       params: humps.decamelizeKeys({ searchString }),
     });
-    return humps.camelizeKeys(response.data) as Categoria[];
+    return humps.camelizeKeys(response.data) as CategoriaDocumento[];
   } catch (error) {
     if (error instanceof AxiosError) {
       if (error.response?.status === 404) {
@@ -113,7 +113,7 @@ export const findByString = async (
 export const getCategoriasPaginated = async (
   page: number,
   pageSize: number
-): Promise<CategoriaPaginatedResponse> => {
+): Promise<CategoriaDocumentoPaginatedResponse> => {
   try {
     const response = await axiosInstance.get(`${API_BASE_URL}paginated`, {
       params: {
@@ -123,7 +123,7 @@ export const getCategoriasPaginated = async (
     });
     const rawData = response.data;
     return {
-      data: humps.camelizeKeys(rawData.data) as Categoria[],
+      data: humps.camelizeKeys(rawData.data) as CategoriaDocumento[],
       pagination: {
         currentPage: rawData.pagination.current_page,
         pageSize: rawData.pagination.page_size,

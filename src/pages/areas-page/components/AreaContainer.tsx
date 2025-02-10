@@ -85,9 +85,9 @@ export const AreaContainer: React.FC = () => {
       setIsLoading(true);
       const response = await getAreasPaginated(page, areasState.pagination.pageSize);
       setAreasState(response);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       showError("Error al cargar la lista de áreas");
+      console.error(error);
     } finally {
       setIsLoading(false);
     }

@@ -15,7 +15,7 @@ interface AreaTableProps {
   areas: Area[];
   dataVersion: number;
   currentPage: number;
-  searchTerm: string; // Añadido searchTerm
+  searchTerm: string;
   onEdit: (id?: number) => void;
   onDelete: (id?: number) => void;
 }

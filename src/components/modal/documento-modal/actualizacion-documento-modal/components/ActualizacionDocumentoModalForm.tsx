@@ -7,14 +7,14 @@ import type { Documento } from "@/model/documento";
 import type { Ambito } from "@/model/ambito";
 import type { CentroPoblado } from "@/model/centroPoblado";
 import type { Caserio } from "@/model/caserio";
-import type { Categoria } from "@/model/categoria";
+import type { CategoriaDocumento } from "@/model/categoriaDocumento.ts";
 import { ActualizacionDocumentoModalFooter } from "./ActualizacionDocumentoModalFooter";
 import { Form } from "@/components/ui/form";
 import LoadingSpinner from "@/components/layout/LoadingSpinner";
 import { ActualizacionDocumentoModalFormInputs } from "./ActualizacionDocumentoModalFormInputs";
 import { ActualizacionDocumentoModalFormSelects } from "./ActualizacionDocumentoModalFormSelects";
 import { getAmbitos } from "@/service/ambitoService";
-import { getCategorias } from "@/service/categoriaService";
+import { getCategorias } from "@/service/categoriaDocumentoService.ts";
 import { getCentrosPoblados } from "@/service/centroPobladoService";
 import {
   getAllCaserios,
@@ -65,7 +65,7 @@ export const ActualizacionDocumentoModalForm: React.FC<
   const [ambitos, setAmbitos] = useState<Ambito[]>([]);
   const [centrosPoblados, setCentrosPoblados] = useState<CentroPoblado[]>([]);
   const [caserios, setCaserios] = useState<Caserio[]>([]);
-  const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [categorias, setCategorias] = useState<CategoriaDocumento[]>([]);
   const [catalogsLoaded, setCatalogsLoaded] = useState(false);
   const [caseriosFiltrados, setCaseriosFiltrados] = useState<Caserio[]>([]);
 

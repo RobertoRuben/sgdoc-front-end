@@ -1,3 +1,3 @@
 export interface DocumentosNoConfirmadosResponse {
-    total: number;
+    totalDocumentosNoConfirmados: number;
 }

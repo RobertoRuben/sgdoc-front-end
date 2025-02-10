@@ -76,11 +76,11 @@ export const TrabajadorModalForm: React.FC<TrabajadorModalFormProps> = ({
     if (!areas || areas.length === 0 || isLoading) return;
 
     form.reset({
-      dni: trabajador.dni.toString(),
+      dni: trabajador.dni ? trabajador.dni.toString() : "",
       nombre: trabajador.nombres,
       apellidoPaterno: trabajador.apellidoPaterno,
       apellidoMaterno: trabajador.apellidoMaterno,
-      genero: trabajador.genero as "Masculino" | "Femenino" | "Otro",
+      genero: trabajador.genero as "Masculino" | "Femenino",
       areaId: trabajador.areaId?.toString().trim() || "",
     });
   }, [trabajador, areas, isLoading, form]);

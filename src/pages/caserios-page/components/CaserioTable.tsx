@@ -9,10 +9,10 @@ import {
   TableHead,
   TableRow,
 } from "@/components/ui/table";
-import { CaserioDetails } from "@/model/caserioDetails";
+import {Caserio} from "@/model/caserio.ts";
 
 interface CaserioTableProps {
-  caserios: CaserioDetails[];
+  caserios: Caserio[];
   dataVersion: number;
   currentPage: number;
   searchTerm: string;

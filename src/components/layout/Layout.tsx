@@ -58,7 +58,7 @@ export function Layout() {
         const areaId = Number(sessionStorage.getItem('areaId'));
         if (areaId) {
           const response = await getDocumentosNoConfirmados(areaId);
-          setUnconfirmedCount(response.total);
+          setUnconfirmedCount(response.totalDocumentosNoConfirmados);
         }
       } catch (error) {
         console.error("Error obteniendo documentos no confirmados:", error);

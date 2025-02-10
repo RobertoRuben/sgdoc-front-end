@@ -1,17 +1,15 @@
 import {AxiosError} from "axios";
 import humps from "humps";
 import {Trabajador} from "@/model/trabajador";
-import {TrabajadorNombresDetails} from "@/model/trabajadorNombresDetails";
-import {TrabajadorDetails} from "@/model/trabajadorDetails";
 import {TrabajadorPaginatedResponse} from "@/model/trabajadorPaginatedResponse";
 import axiosInstance from "./axiosConfig";
 
 const API_BASE_URL = `/trabajadores/`;
 
-export const getTrabajadoresNames = async (): Promise<TrabajadorNombresDetails[]> => {
+export const getTrabajadoresNames = async (): Promise<Trabajador[]> => {
     try {
-        const response = await axiosInstance.get(`${API_BASE_URL}names`);
-        return humps.camelizeKeys(response.data) as TrabajadorNombresDetails[];
+        const response = await axiosInstance.get(`${API_BASE_URL}ids-and-names`);
+        return humps.camelizeKeys(response.data) as Trabajador[];
     } catch (error) {
         if (error instanceof AxiosError && error.response?.data?.detail) {
             throw new Error(error.response.data.detail);
@@ -21,11 +19,11 @@ export const getTrabajadoresNames = async (): Promise<TrabajadorNombresDetails[]
 }
 
 
-export const createTrabajador = async (trabaja: Trabajador): Promise<TrabajadorDetails> => {
+export const createTrabajador = async (trabaja: Trabajador): Promise<Trabajador> => {
     try{
         const payload = humps.decamelizeKeys(trabaja);
         const response = await axiosInstance.post(API_BASE_URL, payload);
-        return humps.camelizeKeys(response.data) as TrabajadorDetails;
+        return humps.camelizeKeys(response.data) as Trabajador;
     }catch(error){
         if(error instanceof AxiosError && error.response?.data?.detail){
             throw new Error(error.response.data.detail);
@@ -35,11 +33,11 @@ export const createTrabajador = async (trabaja: Trabajador): Promise<TrabajadorD
 }
 
 
-export const updateTrabajador = async (id: number, trabajador: Omit<Trabajador, "id">): Promise<TrabajadorDetails | null> => {
+export const updateTrabajador = async (id: number, trabajador: Omit<Trabajador, "id">): Promise<Trabajador | null> => {
     try{
         const payload = humps.decamelizeKeys(trabajador);
         const response = await axiosInstance.put(`${API_BASE_URL}${id}/`, payload);
-        return humps.camelizeKeys(response.data) as TrabajadorDetails;
+        return humps.camelizeKeys(response.data) as Trabajador;
     }catch(error){
         if(error instanceof AxiosError && error.response?.data?.detail){
             throw new Error(error.response.data.detail);
@@ -62,11 +60,11 @@ export const deleteTrabajador = async (id: number): Promise<boolean> => {
 }
 
 
-export const getTrabajadorById = async(id: number): Promise<TrabajadorDetails | null> => {
+export const getTrabajadorById = async(id: number): Promise<Trabajador | null> => {
     try{
         const response = await axiosInstance.get(`${API_BASE_URL}${id}/`);
         if (!response.data) return null;
-        return humps.camelizeKeys(response.data) as TrabajadorDetails;
+        return humps.camelizeKeys(response.data) as Trabajador;
 
     }catch(error){
         if(error instanceof AxiosError){
@@ -82,12 +80,12 @@ export const getTrabajadorById = async(id: number): Promise<TrabajadorDetails | 
 }
 
 
-export const findByString = async (searchString: string): Promise<TrabajadorDetails[]> => {
+export const findByString = async (searchString: string): Promise<Trabajador[]> => {
     try {
         const response = await axiosInstance.get(`${API_BASE_URL}search`, {
             params: humps.decamelizeKeys({searchString}),
         });
-        return humps.camelizeKeys(response.data) as TrabajadorDetails[];
+        return humps.camelizeKeys(response.data) as Trabajador[];
     }catch(error){
         if (error instanceof AxiosError){
             if (error.response?.status === 404) {
@@ -121,7 +119,7 @@ export const getTrabajadoresPaginated = async (
         const rawData = response.data;
 
         return {
-            data: humps.camelizeKeys(rawData.data) as TrabajadorDetails[],
+            data: humps.camelizeKeys(rawData.data) as Trabajador[],
             pagination: {
                 currentPage: rawData.pagination.current_page,
                 pageSize: rawData.pagination.page_size,

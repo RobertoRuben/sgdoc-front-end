@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import debounce from "lodash/debounce";
 import { CaserioPaginatedResponse } from "@/model/caserioPaginatedResponse";
-import { CaserioDetails } from "@/model/caserioDetails";
 import { Caserio } from "@/model/caserio";
 import { CaserioHeader } from "./CaserioHeader";
 import { CaserioSearch } from "./CaserioSearch";
@@ -37,7 +36,7 @@ export const CaserioContainer: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedCaserio, setSelectedCaserio] = useState<
-    CaserioDetails | undefined
+    Caserio | undefined
   >();
   const [dataVersion, setDataVersion] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");

@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
 import { ReactNode, useState } from 'react';
 import { Bell, LogOut, Menu, User, UserCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
-import { UsuarioProfileModal } from '../modal/usuario-modal/usuario-perfil-modal/UsuarioPerfilModal';
+import {UsuarioProfileModal} from "@/components/modal/usuario-modal/usuario-perfil-modal/UsuarioPerfilModal.tsx";
 import LogoutModal from '../modal/alerts/logout-modal/LogoutModal';
 import {
     DropdownMenu,
@@ -14,12 +14,20 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 
-const mockUser = {
-    id: 1,
-    nombreUsuario: "usuario.demo",
+import SuccessModal from '@/components/modal/alerts/success-modal/SuccessModal';
+import ErrorModal from '@/components/modal/alerts/error-modal/ErrorModal';
+
+import { getUsuarioById, updateUsuarioPassword } from '@/service/usuarioService';
+import { Usuario } from '@/model/usuario';
+import { UsuarioProfile } from '@/model/usuarioProfile';
+
+// Objeto _default_ que cumple con la interfaz completa
+const defaultUserProfile: UsuarioProfile = {
+    id: 0,
+    nombreUsuario: "",
+    rolNombre: "",
     contrasena: "",
-    rolNombre: "Administrador",
-    trabajadorNombre: "Juan Pérez"
+    trabajadorNombre: ""
 };
 
 type HeaderProps = {
@@ -31,25 +39,57 @@ type HeaderProps = {
 };
 
 export function Header({
-    onOpenSidebar,
-    title,
-    notificationCount,
-    onViewNotifications,
-    onModalStateChange,
-}: HeaderProps) {
+                           onOpenSidebar,
+                           title,
+                           notificationCount,
+                           onViewNotifications,
+                           onModalStateChange,
+                       }: HeaderProps) {
     const { logout } = useAuth();
+
+    // Estados para abrir/cerrar modales
     const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
-    const handlePasswordChange = (newPassword: string) => {
-        console.log('Cambio de contraseña:', newPassword);
-        setIsProfileModalOpen(false);
-        onModalStateChange(false);
-    };
+    // Estado para almacenar la data del usuario a mostrar en el modal
+    const [userProfile, setUserProfile] = useState<UsuarioProfile | null>(null);
 
-    const handleProfileModalOpen = () => {
-        setIsProfileModalOpen(true);
-        onModalStateChange(true);
+    // Estados para mostrar modales de Éxito y Error
+    const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+    const [successMessage, setSuccessMessage] = useState("¡Contraseña actualizada correctamente!");
+
+    const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
+
+    const handleProfileModalOpen = async () => {
+        try {
+            const userIdStr = sessionStorage.getItem("userId");
+            const rolName = sessionStorage.getItem("rolName");
+
+            if (!userIdStr) {
+                throw new Error("No se encontró userId en sessionStorage");
+            }
+
+            const userId = parseInt(userIdStr, 10);
+            const userFromApi: Usuario = await getUsuarioById(userId);
+
+            const userProfileData: UsuarioProfile = {
+                id: userFromApi.id ?? 0,
+                nombreUsuario: userFromApi.nombreUsuario,
+                rolNombre: rolName || userFromApi.rolNombre || "",
+                contrasena: userFromApi.contrasena || "",
+                trabajadorNombre: userFromApi.trabajadorNombre || ""
+            };
+
+            setUserProfile(userProfileData);
+            setIsProfileModalOpen(true);
+            onModalStateChange(true);
+        } catch (error: unknown) {
+            console.error("Error al obtener el usuario:", error);
+            const message = error instanceof Error ? error.message : "Ocurrió un error al obtener datos del usuario.";
+            setErrorMessage(message);
+            setIsErrorModalOpen(true);
+        }
     };
 
     const handleProfileModalClose = () => {
@@ -57,13 +97,32 @@ export function Header({
         onModalStateChange(false);
     };
 
-    const handleLogout = async () => {
+    // Función para cambiar la contraseña (se invoca desde el modal)
+    const handlePasswordChange = async (newPassword: string) => {
         try {
-            await logout();
-            handleLogoutModalClose();
-        } catch (error) {
-            console.error('Error al cerrar sesión:', error);
+            if (!userProfile?.id) {
+                throw new Error("No existe un ID de usuario válido para actualizar contraseña.");
+            }
+
+            await updateUsuarioPassword(userProfile.id, newPassword);
+
+            setSuccessMessage("¡Tu contraseña ha sido actualizada exitosamente!");
+            setIsSuccessModalOpen(true);
+
+            setIsProfileModalOpen(false);
+            onModalStateChange(false);
+        } catch (error: unknown) {
+            console.error("Error al actualizar contraseña:", error);
+            const message = error instanceof Error ? error.message : "Error al actualizar la contraseña.";
+            setErrorMessage(message);
+            setIsErrorModalOpen(true);
         }
+    };
+
+    // Funciones para el modal de Logout
+    const handleLogoutModalOpen = () => {
+        setIsLogoutModalOpen(true);
+        onModalStateChange(true);
     };
 
     const handleLogoutModalClose = () => {
@@ -71,9 +130,13 @@ export function Header({
         onModalStateChange(false);
     };
 
-    const handleLogoutModalOpen = () => {
-        setIsLogoutModalOpen(true);
-        onModalStateChange(true);
+    const handleLogout = async () => {
+        try {
+            await logout();
+            handleLogoutModalClose();
+        } catch (error: unknown) {
+            console.error("Error al cerrar sesión:", error);
+        }
     };
 
     return (
@@ -117,6 +180,7 @@ export function Header({
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
+
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button
@@ -149,17 +213,34 @@ export function Header({
                 </div>
             </header>
 
+            {/* Modal del Perfil */}
             <UsuarioProfileModal
                 isOpen={isProfileModalOpen}
                 onClose={handleProfileModalClose}
-                user={mockUser}
+                user={userProfile || defaultUserProfile}
                 onPasswordChange={handlePasswordChange}
             />
 
+            {/* Modal de Logout */}
             <LogoutModal
                 isOpen={isLogoutModalOpen}
                 onClose={handleLogoutModalClose}
                 onConfirm={handleLogout}
+            />
+
+            {/* Modal de Éxito */}
+            <SuccessModal
+                isOpen={isSuccessModalOpen}
+                onClose={() => setIsSuccessModalOpen(false)}
+                title="Operación Exitosa"
+                message={successMessage}
+            />
+
+            {/* Modal de Error */}
+            <ErrorModal
+                isOpen={isErrorModalOpen}
+                onClose={() => setIsErrorModalOpen(false)}
+                errorMessage={errorMessage}
             />
         </>
     );

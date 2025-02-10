@@ -9,10 +9,10 @@ import {
     TableHead,
     TableRow,
 } from "@/components/ui/table";
-import {UsuarioDetails} from "@/model/usuarioDetails";
+import {Usuario} from "@/model/usuario";
 
 interface UsuarioTableProps {
-    usuarios: UsuarioDetails[];
+    usuarios: Usuario[];
     dataVersion: number;
     currentPage: number;
     searchTerm: string;
@@ -57,7 +57,7 @@ export const UsuarioTable: React.FC<UsuarioTableProps> = ({
         <div className="overflow-x-auto">
             <AnimatePresence mode="wait">
                 <motion.div
-                    key={`${currentPage}-${dataVersion}-${searchTerm}`} // Added searchTerm to key
+                    key={`${currentPage}-${dataVersion}-${searchTerm}`}
                     variants={tableVariants}
                     initial="initial"
                     animate="animate"
@@ -118,7 +118,11 @@ export const UsuarioTable: React.FC<UsuarioTableProps> = ({
                                         {usuario.nombreUsuario}
                                     </TableCell>
                                     <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
-                                        {usuario.fechaCreacion}
+                                        {usuario.fechaCreacion
+                                            ? new Date(usuario.fechaCreacion).toLocaleString("en-US", {
+                                                timeZone: "America/Lima",
+                                            })
+                                            : ''}
                                     </TableCell>
                                     <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
                     <span
@@ -152,8 +156,7 @@ export const UsuarioTable: React.FC<UsuarioTableProps> = ({
                                                 <UserX className="w-5 h-5"/>
                                             </Button>
                                         )}
-
-                                        {/* Solo mostrar el botón de activar si statusFilter es "false" */}
+                                        
                                         {statusFilter === "false" && (
                                             <Button
                                                 onClick={() => onActivate(usuario.id)}

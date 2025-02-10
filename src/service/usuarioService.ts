@@ -1,17 +1,16 @@
 import {AxiosError} from "axios";
 import humps from "humps";
 import {Usuario} from "@/model/usuario";
-import {UsuarioDetails} from "@/model/usuarioDetails";
 import {UsuarioPaginatedResponse} from "@/model/usuarioPaginatedResponse";
 import axiosInstance from "@/service/axiosConfig";
 
 const API_BASE_URL = `/usuarios/`;
 
-export const createUsuario = async (usuario: Usuario): Promise<UsuarioDetails> => {
+export const createUsuario = async (usuario: Usuario): Promise<Usuario> => {
     try {
         const payload = humps.decamelizeKeys(usuario);
         const response = await axiosInstance.post(API_BASE_URL, payload);
-        return humps.camelizeKeys(response.data) as UsuarioDetails;
+        return humps.camelizeKeys(response.data) as Usuario;
     } catch (error) {
         if (error instanceof AxiosError && error.response?.data?.detail) {
             throw new Error(error.response.data.detail);
@@ -24,11 +23,11 @@ export const createUsuario = async (usuario: Usuario): Promise<UsuarioDetails> =
 export const updateUsuario = async (
     id: number,
     caserio: Omit<Usuario, "id">
-): Promise<UsuarioDetails | null> => {
+): Promise<Usuario | null> => {
     try {
         const payload = humps.decamelizeKeys(caserio);
         const response = await axiosInstance.put(`${API_BASE_URL}${id}/`, payload);
-        return humps.camelizeKeys(response.data) as UsuarioDetails;
+        return humps.camelizeKeys(response.data) as Usuario;
     } catch (error) {
         if (error instanceof AxiosError && error.response?.data?.detail) {
             throw new Error(error.response.data.detail);
@@ -62,10 +61,10 @@ export const updateUsuarioStatus = async (
 };
 
 
-export const getUsuarioById = async (id: number): Promise<UsuarioDetails> => {
+export const getUsuarioById = async (id: number): Promise<Usuario> => {
     try {
         const response = await axiosInstance.get(`${API_BASE_URL}${id}`);
-        return humps.camelizeKeys(response.data) as UsuarioDetails;
+        return humps.camelizeKeys(response.data) as Usuario;
     } catch (error) {
         if (error instanceof AxiosError && error.response?.data?.detail) {
             throw new Error(error.response.data.detail);
@@ -81,7 +80,7 @@ export const updateUsuarioPassword = async (
 ): Promise<{ message: string }> => {
     try {
         const response = await axiosInstance.patch(
-            `${API_BASE_URL}${id}/password`,
+            `${API_BASE_URL}${id}/update-password`,
             null,
             {
                 params: {
@@ -101,12 +100,12 @@ export const updateUsuarioPassword = async (
 
 export const findByString = async (
     searchString: string
-): Promise<UsuarioDetails[]> => {
+): Promise<Usuario[]> => {
     try {
         const response = await axiosInstance.get(`${API_BASE_URL}search`, {
             params: humps.decamelizeKeys({ searchString }),
         });
-        return humps.camelizeKeys(response.data) as UsuarioDetails[];
+        return humps.camelizeKeys(response.data) as Usuario[];
     } catch (error) {
         if (error instanceof AxiosError) {
             if (error.response?.status === 404) {
@@ -140,8 +139,9 @@ export const getUsuariosPaginated = async (
         });
 
         const rawData = response.data;
+        console.log(rawData);
         return {
-            data: humps.camelizeKeys(rawData.data) as UsuarioDetails[],
+            data: humps.camelizeKeys(rawData.data) as Usuario[],
             pagination: {
                 currentPage: rawData.pagination.current_page,
                 pageSize: rawData.pagination.page_size,

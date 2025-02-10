@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/form";
 import { DerivacionModalFooter } from "./DerivacionModalFooter";
 import { getAreasDestinoByAreaOrigenId } from "@/service/comunicacionAreaService";
-import { ComunicacionAreaDestinoDetails } from "@/model/comunicacionAreaDestinoDetails";
+import {ComunicacionArea} from "@/model/comunicacionArea.ts";
 
 const formSchema = z.object({
   areaId: z.number({
@@ -33,7 +33,7 @@ export const DerivacionModalForm: React.FC<DerivacionModalFormProps> = ({
   isLoading = false,
 }) => {
   const [areasDestino, setAreasDestino] = useState<
-    ComunicacionAreaDestinoDetails[]
+    ComunicacionArea[]
   >([]);
   const [loadingAreas, setLoadingAreas] = useState(false);
 
@@ -58,10 +58,12 @@ export const DerivacionModalForm: React.FC<DerivacionModalFormProps> = ({
     loadAreasDestino();
   }, []);
 
-  const areasOptions = areasDestino.map((area) => ({
-    value: area.areaDestinoId,
-    label: area.nombreAreaDestino,
-  }));
+  const areasOptions = areasDestino
+      .filter((area) => area.areaDestinoId !== undefined && area.nombreAreaDestino !== undefined)
+      .map((area) => ({
+        value: area.areaDestinoId!,
+        label: area.nombreAreaDestino!,
+      }));
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     await onSubmit(values.areaId);

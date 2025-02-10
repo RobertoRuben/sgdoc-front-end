@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { UsuarioProfile } from "@/model/usuarioProfile";
+import {Usuario} from "@/model/usuario";
 import { UsuarioPerfilModalHeader } from "./components/UsuarioPerfilModalHeader";
 import { UsuarioPerfilModalForm } from "./components/UsuarioPerfilModalForm";
 import { UsuarioPerfilModalFooter } from "./components/UsuarioPerfilModalFooter";
@@ -9,16 +9,16 @@ import { UsuarioPerfilModalFooter } from "./components/UsuarioPerfilModalFooter"
 interface UserProfileModalProps {
     isOpen: boolean;
     onClose: () => void;
-    user: UsuarioProfile;
+    user: Usuario;
     onPasswordChange: (newPassword: string) => void;
 }
 
 export function UsuarioProfileModal({
-    isOpen,
-    onClose,
-    user,
-    onPasswordChange,
-}: UserProfileModalProps) {
+                                        isOpen,
+                                        onClose,
+                                        user,
+                                        onPasswordChange,
+                                    }: UserProfileModalProps) {
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [error, setError] = useState("");
@@ -32,12 +32,16 @@ export function UsuarioProfileModal({
             setError("Las contraseñas no coinciden");
             return;
         }
+
         onPasswordChange(newPassword);
+
         handleClose();
     };
 
     const handleClose = () => {
-        document.activeElement && (document.activeElement as HTMLElement).blur();
+        if (document.activeElement) {
+            (document.activeElement as HTMLElement).blur();
+        }
         setNewPassword("");
         setConfirmPassword("");
         setError("");

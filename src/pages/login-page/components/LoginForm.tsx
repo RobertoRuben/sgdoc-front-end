@@ -11,7 +11,7 @@ import { useNavigate } from "react-router-dom";
 
 export const LoginFormContent = () => {
   const [credentials, setCredentials] = useState<AuthCredentials>({
-    nombreUsuario: "",
+    username: "",
     password: "",
   });
 
@@ -23,7 +23,7 @@ export const LoginFormContent = () => {
   useEffect(() => {
     setIsLoading(false);
     setCredentials({
-      nombreUsuario: "",
+      username: "",
       password: "",
     });
     setIsLoading(false);
@@ -39,7 +39,7 @@ export const LoginFormContent = () => {
     setIsLoading(true);
 
     try {
-      await login(credentials.nombreUsuario, credentials.password);
+      await login(credentials.username, credentials.password);
 
       toast({
         title: "¡Bienvenido!",
@@ -87,15 +87,15 @@ export const LoginFormContent = () => {
       className="space-y-6"
     >
       <motion.div variants={itemVariants} className="space-y-2">
-        <Label htmlFor="nombreUsuario" className="text-gray-800 flex items-center gap-2">
+        <Label htmlFor="username" className="text-gray-800 flex items-center gap-2">
           <User className="w-4 h-4" />
           Nombre de Usuario
         </Label>
         <Input
-          id="nombreUsuario"
-          name="nombreUsuario"
+          id="username"
+          name="username"
           type="text"
-          value={credentials.nombreUsuario}
+          value={credentials.username}
           onChange={handleChange}
           required
           disabled={isLoading}

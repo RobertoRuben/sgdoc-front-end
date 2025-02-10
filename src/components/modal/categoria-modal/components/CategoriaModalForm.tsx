@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { CategoriaModalFooter } from "./CategoriaModalFooter";
-import { Categoria } from "@/model/categoria";
+import { CategoriaDocumento } from "@/model/categoriaDocumento.ts";
 
 const formSchema = z.object({
   nombreCategoria: z
@@ -26,10 +26,10 @@ const formSchema = z.object({
 });
 
 interface CategoriaModalFormProps {
-  categoria?: Categoria;
+  categoria?: CategoriaDocumento;
   isEditing: boolean;
   onClose: () => void;
-  onSubmit: (data: Categoria) => Promise<void>;
+  onSubmit: (data: CategoriaDocumento) => Promise<void>;
   isLoading?: boolean;
 }
 
@@ -56,7 +56,7 @@ export const CategoriaModalForm: React.FC<CategoriaModalFormProps> = ({
   }, [categoria, form]);
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
-    const categoriaData: Categoria = {
+    const categoriaData: CategoriaDocumento = {
       id: categoria?.id || 0,
       nombreCategoria: values.nombreCategoria,
     };

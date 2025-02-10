@@ -1,10 +1,10 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { User, KeyRound, UserCircle, Building2 } from "lucide-react";
-import { UsuarioProfile } from "@/model/usuarioProfile";
+import { User, KeyRound, Building2 } from "lucide-react";
+import {Usuario} from "@/model/usuario";
 
 interface UsuarioPerfilModalFormProps {
-    user: UsuarioProfile;
+    user: Usuario;
     newPassword: string;
     confirmPassword: string;
     error: string;
@@ -51,22 +51,6 @@ export const UsuarioPerfilModalForm: React.FC<UsuarioPerfilModalFormProps> = ({
                             className="pl-10"
                             disabled
                             autoComplete="organization-title"
-                        />
-                    </div>
-                </div>
-
-                <div className="space-y-2">
-                    <Label htmlFor="worker" className="text-sm text-muted-foreground">
-                        Trabajador
-                    </Label>
-                    <div className="relative">
-                        <UserCircle className="absolute left-3 top-2.5 h-5 w-5 text-[#028a3b]" />
-                        <Input
-                            id="worker"
-                            value={user.trabajadorNombre}
-                            className="pl-10"
-                            disabled
-                            autoComplete="name"
                         />
                     </div>
                 </div>

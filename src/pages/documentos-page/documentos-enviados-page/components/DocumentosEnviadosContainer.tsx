@@ -40,7 +40,7 @@ import {
   createDetalleDerivacion,
 } from "@/service/detalleDerivacionService";
 import { DetalleDerivacionModal } from "@/components/modal/detalle-derivacion-modal/DetalleDerivacionModal";
-import { DetalleDerivacionDetails } from "@/model/detalleDerivacionDetails";
+import {DetalleDerivacion} from "@/model/detalleDerivacion";
 
 /** Importamos el modal de Rechazo */
 import { RechazoDocumentoModal } from "@/components/modal/rechazo-documento-modal/RechazoDocumentoModal";
@@ -76,7 +76,7 @@ export const ListaDocumentosEnviadosContainer: React.FC = () => {
   // Modal de detalle de derivación
   const [isDetalleModalOpen, setIsDetalleModalOpen] = useState(false);
   const [detallesDerivacion, setDetallesDerivacion] = useState<
-    DetalleDerivacionDetails[]
+    DetalleDerivacion[]
   >([]);
 
   // Modal de Rechazo

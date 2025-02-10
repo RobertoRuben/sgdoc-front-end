@@ -6,11 +6,11 @@ import { UserInfoResponse } from "@/model/userInforResponse"
 import humps from "humps"
 
 export const loginForAccessToken = async (
-  { nombreUsuario, password }: AuthCredentials
+  { username, password }: AuthCredentials
 ): Promise<AuthResponse> => {
   try {
     const payload = new URLSearchParams()
-    payload.append("username", nombreUsuario)
+    payload.append("username", username)
     payload.append("password", password)
 
     const response = await axiosInstance.post("/auth/login", payload, {

@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import debounce from "lodash/debounce";
 import { TrabajadorPaginatedResponse } from "@/model/trabajadorPaginatedResponse";
-import { TrabajadorDetails } from "@/model/trabajadorDetails";
 import { Trabajador } from "@/model/trabajador";
 import { TrabajadorHeader } from "./TrabajadorHeader";
 import { TrabajadorSearch } from "./TrabajadorSearch";
@@ -38,7 +37,7 @@ export const TrabajadorContainer: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
     const [selectedTrabajador, setSelectedTrabajador] = useState<
-        TrabajadorDetails | undefined
+        Trabajador | undefined
     >();
 
     const [dataVersion, setDataVersion] = useState<number>(0);

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import debounce from "lodash/debounce";
-import { Categoria } from "@/model/categoria";
-import { CategoriaPaginatedResponse } from "@/model/categoriaPaginatedResponse";
+import { CategoriaDocumento } from "@/model/categoriaDocumento.ts";
+import { CategoriaDocumentoPaginatedResponse } from "@/model/categoriaDocumentoPaginatedResponse.ts";
 import { CategoriaHeader } from "./CategoriaHeader";
 import { CategoriaSearch } from "./CategoriaSearch";
 import { CategoriaTable } from "./CategoriaTable";
@@ -19,12 +19,12 @@ import {
   findByString,
   deleteCategoria,
   getCategoriaById,
-} from "@/service/categoriaService";
+} from "@/service/categoriaDocumentoService.ts";
 import LoadingSpinner from "@/components/layout/LoadingSpinner";
 
 export const CategoriaContainer: React.FC = () => {
   const [categoriasState, setCategoriasState] =
-    useState<CategoriaPaginatedResponse>({
+    useState<CategoriaDocumentoPaginatedResponse>({
       data: [],
       pagination: {
         currentPage: 1,
@@ -36,7 +36,7 @@ export const CategoriaContainer: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedCategoria, setSelectedCategoria] = useState<
-    Categoria | undefined
+    CategoriaDocumento | undefined
   >();
   const [dataVersion, setDataVersion] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
@@ -87,9 +87,9 @@ export const CategoriaContainer: React.FC = () => {
         categoriasState.pagination.pageSize
       );
       setCategoriasState(response);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       showError("Error al cargar las categorías");
+      console.log(error);
     } finally {
       setIsLoading(false);
     }
@@ -145,6 +145,7 @@ export const CategoriaContainer: React.FC = () => {
     }, 500),
     []
   );
+
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchTerm(value);
@@ -182,6 +183,7 @@ export const CategoriaContainer: React.FC = () => {
 
     } catch (error) {
       showError("Error al cargar los datos de la categoría");
+      console.log(error);
     } finally {
       setIsLoading(false);
     }
@@ -230,7 +232,7 @@ export const CategoriaContainer: React.FC = () => {
     }
   };
 
-  const handleModalSubmit = async (data: Categoria) => {
+  const handleModalSubmit = async (data: CategoriaDocumento) => {
     try {
       setIsLoading(true);
 
