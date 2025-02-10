@@ -141,7 +141,7 @@ export const searchDocumentos = async (params: {
   p_fecha_ingreso?: string;
 }): Promise<DocumentoPaginatedResponse> => {
   try {
-    const response = await axiosInstance.get(`${API_BASE_URL}buscar`, {
+    const response = await axiosInstance.get(`${API_BASE_URL}search`, {
       params: humps.decamelizeKeys(params),
     });
     const rawData = response.data;
@@ -164,7 +164,7 @@ export const searchDocumentos = async (params: {
 
 export const downloadDocumento = async (id: number): Promise<Blob> => {
   try {
-    const response = await axiosInstance.get(`${API_BASE_URL}${id}/descargar`, {
+    const response = await axiosInstance.get(`${API_BASE_URL}${id}/download`, {
       responseType: "blob",
     });
     return response.data;
@@ -181,7 +181,7 @@ export const getDocumentosByCurrentDate = async (
   pageSize: number
 ): Promise<DocumentoPaginatedResponse> => {
   try {
-    const response = await axiosInstance.get(`${API_BASE_URL}fecha_actual`, {
+    const response = await axiosInstance.get(`${API_BASE_URL}entered-current-date`, {
       params: {
         page,
         page_size: pageSize,
@@ -217,7 +217,7 @@ export const getSentDocumentsByAreaId = async (params: {
   p_page_size: number;
 }): Promise<DocumentoSentPaginatedResponse> => {
   try {
-    const response = await axiosInstance.get(`${API_BASE_URL}enviados`, {
+    const response = await axiosInstance.get(`${API_BASE_URL}sends`, {
       params: humps.decamelizeKeys(params),
     });
     const rawData = response.data;
@@ -251,7 +251,7 @@ export const getReceivedDocumentsByAreaId = async (params: {
   p_page_size: number;
 }): Promise<DocumentoReceivedPaginatedResponse> => {
   try {
-    const response = await axiosInstance.get(`${API_BASE_URL}recibidos`, {
+    const response = await axiosInstance.get(`${API_BASE_URL}received`, {
       params: humps.decamelizeKeys(params),
     });
 
@@ -287,7 +287,7 @@ export const getRejectedDocumentsByAreaId = async (params: {
   p_page_size: number;
 }): Promise<DocumentoRechazadoPaginatedResponse> => {
   try {
-    const response = await axiosInstance.get(`${API_BASE_URL}rechazados`, {
+    const response = await axiosInstance.get(`${API_BASE_URL}rejected`, {
       params: humps.decamelizeKeys(params),
     });
 
@@ -315,7 +315,7 @@ export const getDocumentosNoConfirmados = async (
   p_area_destino_id: number
 ): Promise<DocumentosNoConfirmadosResponse> => {
   try {
-    const response = await axiosInstance.get(`${API_BASE_URL}no-confirmados`, {
+    const response = await axiosInstance.get(`${API_BASE_URL}unconfirmed`, {
       params: { p_area_destino_id },
     });
     return humps.camelizeKeys(response.data) as DocumentosNoConfirmadosResponse;

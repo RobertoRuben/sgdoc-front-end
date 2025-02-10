@@ -127,9 +127,14 @@ export const ListaDocumentosTable: React.FC<ListaDocumentosTableProps> = ({
                   <TableCell className="hidden sm:table-cell px-4 py-4 text-sm text-gray-700">
                     {documento.dniRemitente}
                   </TableCell>
-                  <TableCell className="hidden md:table-cell px-4 py-4 text-sm text-gray-700">
-                    {documento.fechaIngreso ? new Date(documento.fechaIngreso).toLocaleDateString() : ''}
+                  <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 hidden md:table-cell">
+                    {documento.fechaIngreso
+                        ? new Date(documento.fechaIngreso).toLocaleString("en-US", {
+                          timeZone: "America/Lima",
+                        })
+                        : ''}
                   </TableCell>
+
                   <TableCell className="hidden lg:table-cell px-4 py-4 text-sm text-gray-700">
                     {documento.nombreAmbito}
                   </TableCell>

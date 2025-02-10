@@ -88,6 +88,7 @@ export const AmbitoContainer: React.FC = () => {
       setAmbitosState(response);
     } catch (error) {
       showError("Error al cargar los ámbitos");
+      console.log(error);
     } finally {
       setIsLoading(false);
     }
@@ -171,6 +172,7 @@ export const AmbitoContainer: React.FC = () => {
       }
     } catch (error) {
       showError("Error al cargar los datos del ámbito");
+      console.log(error);
     } finally {
       setIsLoading(false);
     }

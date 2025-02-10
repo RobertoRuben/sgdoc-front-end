@@ -9,10 +9,10 @@ import {
     TableHead,
     TableRow,
 } from "@/components/ui/table";
-import { TrabajadorDetails } from "@/model/trabajadorDetails";
+import {Trabajador} from "@/model/trabajador";
 
 interface TrabajadorTableProps {
-    trabajadores: TrabajadorDetails[];
+    trabajadores: Trabajador[];
     dataVersion: number;
     currentPage: number;
     searchTerm: string;

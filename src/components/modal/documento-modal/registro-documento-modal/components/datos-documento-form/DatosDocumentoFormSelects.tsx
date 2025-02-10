@@ -2,12 +2,12 @@ import type React from "react";
 import { useState, useEffect } from "react";
 import { Controller, Control, FieldErrorsImpl } from "react-hook-form";
 import { Documento } from "@/model/documento";
-import { CaserioSimpleResponse } from "@/model/caserioSimpleResponse";
+import {Caserio} from "@/model/caserio.ts";
 import { Ambito } from "@/model/ambito";
-import { Categoria } from "@/model/categoria";
+import { CategoriaDocumento } from "@/model/categoriaDocumento.ts";
 import { CentroPoblado } from "@/model/centroPoblado";
 import { getAmbitos } from "@/service/ambitoService";
-import { getCategorias } from "@/service/categoriaService";
+import { getCategorias } from "@/service/categoriaDocumentoService.ts";
 import { getCentrosPoblados } from "@/service/centroPobladoService";
 import {
   getCaseriosByCentroPobladoId, getAllCaserios
@@ -26,9 +26,9 @@ const DatosDocumentoFormSelects: React.FC<DatosDocumentoFormSelectsProps> = ({
 }) => {
   const [ambitos, setAmbitos] = useState<Ambito[]>([]);
   const [centrosPoblados, setCentrosPoblados] = useState<CentroPoblado[]>([]);
-  const [allCaserios, setAllCaserios] = useState<CaserioSimpleResponse[]>([]);
-  const [caserios, setCaserios] = useState<CaserioSimpleResponse[]>([]);
-  const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [allCaserios, setAllCaserios] = useState<Caserio[]>([]);
+  const [caserios, setCaserios] = useState<Caserio[]>([]);
+  const [categorias, setCategorias] = useState<CategoriaDocumento[]>([]);
 
   useEffect(() => {
     const loadInitialData = async () => {

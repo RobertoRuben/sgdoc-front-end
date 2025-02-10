@@ -6,7 +6,7 @@ import { Usuario } from "@/model/usuario";
 import { getRoles } from "@/service/rolService";
 import { getTrabajadoresNames } from "@/service/trabajadorService";
 import { Rol } from "@/model/rol";
-import { TrabajadorNombresDetails } from "@/model/trabajadorNombresDetails";
+import {Trabajador} from "@/model/trabajador";
 import LoadingSpinner from "@/components/layout/LoadingSpinner";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -37,7 +37,7 @@ export function RegistroUsuarioModal({
 }: RegistroUsuarioModalProps) {
   const isEditing = !!(usuario?.id && usuario.id > 0);
   const [roles, setRoles] = useState<Rol[]>([]);
-  const [trabajadores, setTrabajadores] = useState<TrabajadorNombresDetails[]>(
+  const [trabajadores, setTrabajadores] = useState<Trabajador[]>(
     []
   );
   const [loading, setLoading] = useState(false);

@@ -27,7 +27,6 @@ const tableVariants = {
 };
 
 export const IngresoDocumentosContainer: React.FC = () => {
-  // Estado para la paginación y datos de documentos
   const [documentosState, setDocumentosState] =
     useState<DocumentoPaginatedResponse>({
       data: [],

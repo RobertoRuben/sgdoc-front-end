@@ -1,4 +1,4 @@
 import { PaginatedResponse } from "./pagination";
-import { CaserioDetails } from "./caserioDetails";
+import {Caserio} from "@/model/caserio.ts";
 
-export type CaserioPaginatedResponse = PaginatedResponse<CaserioDetails>;
+export type CaserioPaginatedResponse = PaginatedResponse<Caserio>;

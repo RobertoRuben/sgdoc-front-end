@@ -1,4 +1,4 @@
-export interface Ambito{
+export interface Ambito {
     id?: number;
     nombreAmbito: string;
 }

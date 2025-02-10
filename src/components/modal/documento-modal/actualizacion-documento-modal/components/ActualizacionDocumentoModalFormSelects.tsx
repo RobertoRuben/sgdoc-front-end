@@ -11,11 +11,11 @@ import {
 import type { Ambito } from "@/model/ambito";
 import type { CentroPoblado } from "@/model/centroPoblado";
 import type { Caserio } from "@/model/caserio";
-import type { Categoria } from "@/model/categoria";
+import type { CategoriaDocumento } from "@/model/categoriaDocumento.ts";
 
 interface DocumentoModalFormSelectsProps {
   ambitos: Ambito[];
-  categorias: Categoria[];
+  categorias: CategoriaDocumento[];
   centrosPoblados: CentroPoblado[];
   caserios: Caserio[];
   handleWheel: (event: React.WheelEvent<HTMLDivElement>) => void;

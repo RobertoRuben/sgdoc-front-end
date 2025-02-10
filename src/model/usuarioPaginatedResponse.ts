@@ -1,4 +1,4 @@
-import {PaginatedResponse} from "@/model/pagination.ts";
-import {UsuarioDetails} from "@/model/usuarioDetails.ts";
+import {PaginatedResponse} from "@/model/pagination";
+import {Usuario} from "@/model/usuario";
 
-export type UsuarioPaginatedResponse = PaginatedResponse<UsuarioDetails>;
+export type UsuarioPaginatedResponse = PaginatedResponse<Usuario>;

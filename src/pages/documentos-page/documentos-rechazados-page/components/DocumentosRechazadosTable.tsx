@@ -150,10 +150,18 @@ export const ListaDocumentosRechazadosTable: React.FC<
                     {documento.derivadoPor}
                   </TableCell>
                   <TableCell className="hidden md:table-cell px-4 py-4 text-sm text-gray-700">
-                    {new Date(documento.fechaEnvio).toLocaleString()}
+                    {documento.fechaEnvio
+                        ? new Date(documento.fechaEnvio).toLocaleString("en-US", {
+                          timeZone: "America/Lima",
+                        })
+                        : ''}
                   </TableCell>
                   <TableCell className="hidden md:table-cell px-4 py-4 text-sm text-gray-700">
-                    {new Date(documento.fechaRechazo).toLocaleString()}
+                    {documento.fechaRechazo
+                        ? new Date(documento.fechaRechazo).toLocaleString("en-US", {
+                          timeZone: "America/Lima",
+                        })
+                        : ''}
                   </TableCell>
                   <TableCell className="hidden lg:table-cell px-4 py-4 text-sm text-gray-700">
                     {documento.nombreAmbito}

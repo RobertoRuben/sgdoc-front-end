@@ -121,8 +121,13 @@ export const IngresoDocumentosTable: React.FC<IngresoDocumentosTableProps> = ({
                 {documento.dniRemitente}
               </TableCell>
               <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 hidden md:table-cell">
-                {documento.fechaIngreso ? new Date(documento.fechaIngreso).toLocaleString() : ''}
+                {documento.fechaIngreso
+                    ? new Date(documento.fechaIngreso).toLocaleString("en-US", {
+                      timeZone: "America/Lima",
+                    })
+                    : ''}
               </TableCell>
+
               <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 hidden lg:table-cell">
                 {documento.nombreAmbito}
               </TableCell>

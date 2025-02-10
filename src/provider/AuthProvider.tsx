@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (username: string, password: string) => {
     try {
       const authResponse: AuthResponse = await loginForAccessToken({
-        nombreUsuario: username,
+        username: username,
         password: password,
       });
 

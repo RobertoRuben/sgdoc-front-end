@@ -1,4 +1,4 @@
 import {PaginatedResponse} from "@/model/pagination";
-import {TrabajadorDetails} from "@/model/trabajadorDetails";
+import {Trabajador} from "@/model/trabajador";
 
-export type TrabajadorPaginatedResponse = PaginatedResponse<TrabajadorDetails>;
+export type TrabajadorPaginatedResponse = PaginatedResponse<Trabajador>;

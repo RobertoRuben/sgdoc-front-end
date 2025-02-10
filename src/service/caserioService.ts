@@ -1,8 +1,6 @@
 import { AxiosError } from "axios";
 import humps from "humps";
 import { Caserio } from "@/model/caserio";
-import { CaserioSimpleResponse } from "@/model/caserioSimpleResponse";
-import { CaserioDetails } from "@/model/caserioDetails";
 import { CaserioPaginatedResponse } from "@/model/caserioPaginatedResponse";
 import axiosInstance from "./axiosConfig";
 
@@ -31,10 +29,10 @@ export const getCaseriosByCentroPobladoId = async (
   }
 };
 
-export const getAllCaserios = async (): Promise<CaserioSimpleResponse[]> => {
+export const getAllCaserios = async (): Promise<Caserio[]> => {
   try {
     const response = await axiosInstance.get(`${API_BASE_URL}names`);
-    return humps.camelizeKeys(response.data) as CaserioSimpleResponse[];
+    return humps.camelizeKeys(response.data) as Caserio[];
   } catch (error) {
     if (error instanceof AxiosError) {
       if (error.response?.status === 404) {
@@ -51,11 +49,11 @@ export const getAllCaserios = async (): Promise<CaserioSimpleResponse[]> => {
 
 export const createCaserio = async (
   caserio: Caserio
-): Promise<CaserioDetails> => {
+): Promise<Caserio> => {
   try {
     const payload = humps.decamelizeKeys(caserio);
     const response = await axiosInstance.post(API_BASE_URL, payload);
-    return humps.camelizeKeys(response.data) as CaserioDetails;
+    return humps.camelizeKeys(response.data) as Caserio;
   } catch (error) {
     if (error instanceof AxiosError && error.response?.data?.detail) {
       throw new Error(error.response.data.detail);
@@ -68,11 +66,11 @@ export const createCaserio = async (
 export const updateCaserio = async (
   id: number,
   caserio: Omit<Caserio, "id">
-): Promise<CaserioDetails | null> => {
+): Promise<Caserio | null> => {
   try {
     const payload = humps.decamelizeKeys(caserio);
     const response = await axiosInstance.put(`${API_BASE_URL}${id}/`, payload);
-    return humps.camelizeKeys(response.data) as CaserioDetails;
+    return humps.camelizeKeys(response.data) as Caserio;
   } catch (error) {
     if (error instanceof AxiosError && error.response?.data?.detail) {
       throw new Error(error.response.data.detail);
@@ -96,11 +94,11 @@ export const deleteCaserio = async (id: number): Promise<boolean> => {
 
 export const getCaserioById = async (
   id: number
-): Promise<CaserioDetails | null> => {
+): Promise<Caserio | null> => {
   try {
     const response = await axiosInstance.get(`${API_BASE_URL}${id}/`);
     if (!response.data) return null;
-    return humps.camelizeKeys(response.data) as CaserioDetails;
+    return humps.camelizeKeys(response.data) as Caserio;
   } catch (error) {
     if (error instanceof AxiosError) {
       if (error.response?.status === 404) {
@@ -116,12 +114,12 @@ export const getCaserioById = async (
 
 export const findByString = async (
   searchString: string
-): Promise<CaserioDetails[]> => {
+): Promise<Caserio[]> => {
   try {
     const response = await axiosInstance.get(`${API_BASE_URL}search`, {
       params: humps.decamelizeKeys({ searchString }),
     });
-    return humps.camelizeKeys(response.data) as CaserioDetails[];
+    return humps.camelizeKeys(response.data) as Caserio[];
   } catch (error) {
     if (error instanceof AxiosError) {
       if (error.response?.status === 404) {
@@ -153,7 +151,7 @@ export const getCaseriosPaginated = async (
 
     const rawData = response.data;
     return {
-      data: humps.camelizeKeys(rawData.data) as CaserioDetails[],
+      data: humps.camelizeKeys(rawData.data) as Caserio[],
       pagination: {
         currentPage: rawData.pagination.current_page,
         pageSize: rawData.pagination.page_size,

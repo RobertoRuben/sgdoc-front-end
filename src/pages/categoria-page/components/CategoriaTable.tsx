@@ -9,10 +9,10 @@ import {
   TableHead,
   TableRow,
 } from "@/components/ui/table";
-import { Categoria } from "@/model/categoria";
+import { CategoriaDocumento } from "@/model/categoriaDocumento.ts";
 
 interface CategoriaTableProps {
-  categorias: Categoria[];
+  categorias: CategoriaDocumento[];
   dataVersion: number;
   currentPage: number;
   searchTerm: string;

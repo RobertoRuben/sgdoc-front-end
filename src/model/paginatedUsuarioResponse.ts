@@ -1,5 +1,5 @@
 import { PaginatedResponse } from "@/model/pagination";
-import { UsuarioDetails } from './usuarioDetails';
+import {Usuario} from "@/model/usuario";
 
 
-export type PaginatedUsuarioResponse = PaginatedResponse<UsuarioDetails>;
+export type UsuarioPaginatedResponse = PaginatedResponse<Usuario>;

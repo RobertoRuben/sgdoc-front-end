@@ -2,14 +2,14 @@ import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { CategoriaModalHeader } from "./components/CategoriaModalHeader";
 import { CategoriaModalForm } from "./components/CategoriaModalForm";
-import { Categoria } from "@/model/categoria";
+import { CategoriaDocumento } from "@/model/categoriaDocumento.ts";
 import { AnimatePresence, motion } from "framer-motion";
 
 interface CategoriaModalProps {
   isOpen: boolean;
-  categoria?: Categoria;
+  categoria?: CategoriaDocumento;
   onClose: () => void;
-  onSubmit: (data: Categoria) => Promise<void>;
+  onSubmit: (data: CategoriaDocumento) => Promise<void>;
 }
 
 const fadeInVariants = {

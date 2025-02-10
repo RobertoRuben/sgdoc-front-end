@@ -1,12 +1,11 @@
-import {useState, useEffect, useCallback} from "react";
+import { useState, useEffect, useCallback } from "react";
 import debounce from "lodash/debounce";
-import {PaginatedUsuarioResponse} from "@/model/paginatedUsuarioResponse";
-import {UsuarioDetails} from "@/model/usuarioDetails";
-import {Usuario} from "@/model/usuario";
-import {UsuarioHeader} from "@/pages/usuarios-page/components/UsuarioHeader";
-import {UsuarioSearch} from "@/pages/usuarios-page/components/UsuarioSearch";
-import {UsuarioTable} from "@/pages/usuarios-page/components/UsuarioTable";
-import {RegistroUsuarioModal} from "@/components/modal/usuario-modal/usuario-form-modal/UsuarioModal";
+import { UsuarioPaginatedResponse } from "@/model/paginatedUsuarioResponse";
+import { Usuario } from "@/model/usuario";
+import { UsuarioHeader } from "@/pages/usuarios-page/components/UsuarioHeader";
+import { UsuarioSearch } from "@/pages/usuarios-page/components/UsuarioSearch";
+import { UsuarioTable } from "@/pages/usuarios-page/components/UsuarioTable";
+import { RegistroUsuarioModal } from "@/components/modal/usuario-modal/usuario-form-modal/UsuarioModal";
 import ActivateModal from "@/components/modal/alerts/activate-modal/ActivateModal";
 import DeactivateModal from "@/components/modal/alerts/deactivate-modal/DeactivateModal";
 import NoResultsModal from "@/components/modal/alerts/no-results-modal/NoResultsModal";
@@ -14,7 +13,7 @@ import ErrorModal from "@/components/modal/alerts/error-modal/ErrorModal";
 import SuccessModal from "@/components/modal/alerts/success-modal/SuccessModal";
 import UpdateSuccessModal from "@/components/modal/alerts/update-modal/UpdateSuccessModal";
 import LoadingSpinner from "@/components/layout/LoadingSpinner";
-import {Pagination} from "@/components/ui/pagination";
+import { Pagination } from "@/components/ui/pagination";
 
 import {
     getUsuariosPaginated,
@@ -27,7 +26,7 @@ import {
 
 export const UsuarioContainer: React.FC = () => {
     // Estado principal para la paginación y los datos del usuario
-    const [usuariosState, setUsuariosState] = useState<PaginatedUsuarioResponse>({
+    const [usuariosState, setUsuariosState] = useState<UsuarioPaginatedResponse>({
         data: [],
         pagination: {
             currentPage: 1,
@@ -44,9 +43,9 @@ export const UsuarioContainer: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [isDeactivateModalOpen, setIsDeactivateModalOpen] =
         useState<boolean>(false);
-    const [selectedUsuario, setSelectedUsuario] = useState<
-        UsuarioDetails | undefined
-    >(undefined);
+    const [selectedUsuario, setSelectedUsuario] = useState<Usuario | undefined>(
+        undefined
+    );
 
     const [dataVersion, setDataVersion] = useState<number>(0);
     const [searchTerm, setSearchTerm] = useState<string>("");
@@ -78,11 +77,11 @@ export const UsuarioContainer: React.FC = () => {
     });
 
     const showError = (message: string) => {
-        setErrorModalConfig({isOpen: true, message});
+        setErrorModalConfig({ isOpen: true, message });
     };
 
     const showSuccess = (message: string) => {
-        setSuccessModalConfig({isOpen: true, message});
+        setSuccessModalConfig({ isOpen: true, message });
     };
 
     const handleStatusFilterChange = (value: string) => {
@@ -101,18 +100,17 @@ export const UsuarioContainer: React.FC = () => {
 
             const formattedData = response.data.map((usuario) => ({
                 ...usuario,
-                fechaCreacion: new Date(usuario.fechaCreacion).toLocaleDateString(),
-                fechaActualizacion: usuario.fechaActualizacion
-                    ? new Date(usuario.fechaActualizacion).toLocaleDateString()
-                    : undefined,
+                fechaCreacion: usuario.fechaCreacion,
+                fechaActualizacion: usuario.fechaActualizacion,
             }));
 
             setUsuariosState({
                 ...response,
                 data: formattedData,
             });
-        } catch {
+        } catch (error) {
             showError("Error al cargar la lista de usuarios");
+            console.error(error);
         } finally {
             setIsLoading(false);
         }
@@ -127,16 +125,12 @@ export const UsuarioContainer: React.FC = () => {
 
                     const formattedResults = searchResults.map((usuario) => ({
                         ...usuario,
-                        fechaCreacion: new Date(usuario.fechaCreacion).toLocaleDateString(),
-                        fechaActualizacion: usuario.fechaActualizacion
-                            ? new Date(usuario.fechaActualizacion).toLocaleDateString()
-                            : undefined,
+                        fechaCreacion: usuario.fechaCreacion,
+                        fechaActualizacion: usuario.fechaActualizacion,
                     }));
 
                     if (formattedResults.length === 0) {
-                        setNoResultsMessage(
-                            "No se encontraron resultados para la búsqueda"
-                        );
+                        setNoResultsMessage("No se encontraron resultados para la búsqueda");
                         setShowNoResults(true);
                         setUsuariosState((prev) => ({
                             ...prev,
@@ -321,7 +315,7 @@ export const UsuarioContainer: React.FC = () => {
 
     return (
         <div className="pt-0.5 pr-0.5 pb-1 pl-0.5 sm:pt-2 sm:pr-2 sm:pb-4 sm:pl-2 bg-transparent">
-            <UsuarioHeader onAddClick={() => setIsModalOpen(true)}/>
+            <UsuarioHeader onAddClick={() => setIsModalOpen(true)} />
 
             <div className="w-full overflow-hidden bg-white rounded-lg shadow-lg">
                 <UsuarioSearch
@@ -392,7 +386,7 @@ export const UsuarioContainer: React.FC = () => {
             <SuccessModal
                 isOpen={successModalConfig.isOpen}
                 onClose={() =>
-                    setSuccessModalConfig((prev) => ({...prev, isOpen: false}))
+                    setSuccessModalConfig((prev) => ({ ...prev, isOpen: false }))
                 }
                 title="Operación Exitosa"
                 message={successModalConfig.message}
@@ -401,7 +395,7 @@ export const UsuarioContainer: React.FC = () => {
             <ErrorModal
                 isOpen={errorModalConfig.isOpen}
                 onClose={() =>
-                    setErrorModalConfig((prev) => ({...prev, isOpen: false}))
+                    setErrorModalConfig((prev) => ({ ...prev, isOpen: false }))
                 }
                 title="Error"
                 errorMessage={errorModalConfig.message}
@@ -410,7 +404,7 @@ export const UsuarioContainer: React.FC = () => {
             <UpdateSuccessModal
                 isOpen={updateSuccessConfig.isOpen}
                 onClose={() =>
-                    setUpdateSuccessConfig((prev) => ({...prev, isOpen: false}))
+                    setUpdateSuccessConfig((prev) => ({ ...prev, isOpen: false }))
                 }
                 title="Actualización Exitosa"
                 message={updateSuccessConfig.message}

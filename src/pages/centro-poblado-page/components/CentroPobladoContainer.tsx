@@ -92,6 +92,7 @@ export const CentroPobladoContainer: React.FC = () => {
       setCentrosPobladosState(response);
     } catch (error) {
       showError("Error al cargar los centros poblados");
+      console.log(error);
     } finally {
       setIsLoading(false);
     }
@@ -184,6 +185,7 @@ export const CentroPobladoContainer: React.FC = () => {
       }
     } catch (error) {
       showError("Error al cargar los datos del centro poblado");
+      console.log(error);
     } finally {
       setIsLoading(false);
     }

@@ -2,11 +2,11 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { DetalleDerivacionModalHeader } from "./components/DetalleDerivacionModalHeader";
 import { DetalleDerivacionModalContent } from "./components/DetalleDerivacionModalContent";
 import { AnimatePresence, motion } from "framer-motion";
-import { DetalleDerivacionDetails } from "@/model/detalleDerivacionDetails";
+import {DetalleDerivacion} from "@/model/detalleDerivacion.ts";
 
 interface DetalleDerivacionModalProps {
   isOpen: boolean;
-  detalles: DetalleDerivacionDetails[];
+  detalles: DetalleDerivacion[];
   onClose: () => void;
 }
 
