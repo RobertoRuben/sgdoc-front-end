@@ -1,16 +1,16 @@
-export interface DocumentosByCurrentDateResponse{
-  totalDocuments: number;
+export interface TotalDocumentosIngresados {
+  totalDocumentos: number;
 }
 
-export interface TotalDerivedDocumentsToday{
-  totalPendingDocumentsToday: number
+export interface TotalDocumentosDerivados {
+  totalDocumentosDerivados: number
 }
 
-export interface TotalPendingDerivedDocumentsToday{
-  totalPendingDerivedDocumentsToday: number
+export interface TotalDocumentosNoDerivados {
+  totalDocumentosNoDerivados: number
 }
 
-export interface TotalDocumentsByCaserioToday{
+export interface TotalDocumentosPorCaserio {
   nombreCaserio: string;
-  totalDocuments: number;
+  totalDocumentosIngresados: number;
 }

@@ -32,12 +32,12 @@ export const useDashboardData = () => {
       ]);
 
       setDashboardData({
-        totalDocuments: documentsToday.totalDocuments,
-        totalDerivedDocuments: derivedDocuments.totalPendingDocumentsToday,
-        totalPendingDerivedDocuments: pendingDerivedDocuments.totalPendingDerivedDocumentsToday,
+        totalDocuments: documentsToday.totalDocumentos,
+        totalDerivedDocuments: derivedDocuments.totalDocumentosDerivados,
+        totalPendingDerivedDocuments: pendingDerivedDocuments.totalDocumentosNoDerivados,
         documentsByCaserio: documentsByCaserio.map(item => ({
           name: item.nombreCaserio,
-          documentos: item.totalDocuments
+          documentos: item.totalDocumentosIngresados
         }))
       });
     } catch (err) {

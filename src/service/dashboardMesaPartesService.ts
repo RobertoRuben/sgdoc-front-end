@@ -1,19 +1,19 @@
 import { AxiosError } from "axios";
 import humps from "humps";
 import { 
-  DocumentosByCurrentDateResponse,
-  TotalDerivedDocumentsToday,
-  TotalPendingDerivedDocumentsToday,
-  TotalDocumentsByCaserioToday 
+  TotalDocumentosIngresados,
+  TotalDocumentosDerivados,
+  TotalDocumentosNoDerivados,
+  TotalDocumentosPorCaserio
 } from "@/model/dashboardMesaPartes";
 import axiosInstance from "./axiosConfig";
 
-const API_BASE_URL = `/documentos-by-current-date`;
+const API_BASE_URL = `/dashboard-mesa-partes/documents`;
 
-export const getTotalDocumentsToday = async (): Promise<DocumentosByCurrentDateResponse> => {
+export const getTotalDocumentsToday = async (): Promise<TotalDocumentosIngresados> => {
   try {
-    const response = await axiosInstance.get(API_BASE_URL);
-    return humps.camelizeKeys(response.data) as DocumentosByCurrentDateResponse;
+    const response = await axiosInstance.get(`${API_BASE_URL}/received-today`);
+    return humps.camelizeKeys(response.data) as TotalDocumentosIngresados;
   } catch (error) {
     if (error instanceof AxiosError) {
       throw new Error(`Error al obtener total de documentos: ${error.message}`);
@@ -23,10 +23,10 @@ export const getTotalDocumentsToday = async (): Promise<DocumentosByCurrentDateR
 };
 
 
-export const getTotalDerivedDocumentsToday = async (): Promise<TotalDerivedDocumentsToday> => {
+export const getTotalDerivedDocumentsToday = async (): Promise<TotalDocumentosDerivados> => {
   try {
-    const response = await axiosInstance.get(`${API_BASE_URL}/derived`);
-    return humps.camelizeKeys(response.data) as TotalDerivedDocumentsToday;
+    const response = await axiosInstance.get(`${API_BASE_URL}/derived-today`);
+    return humps.camelizeKeys(response.data) as TotalDocumentosDerivados;
   } catch (error) {
     if (error instanceof AxiosError) {
       throw new Error(`Error al obtener documentos derivados: ${error.message}`);
@@ -36,10 +36,10 @@ export const getTotalDerivedDocumentsToday = async (): Promise<TotalDerivedDocum
 };
 
 
-export const getTotalPendingDerivedDocumentsToday = async (): Promise<TotalPendingDerivedDocumentsToday> => {
+export const getTotalPendingDerivedDocumentsToday = async (): Promise<TotalDocumentosNoDerivados> => {
   try {
-    const response = await axiosInstance.get(`${API_BASE_URL}/pending-derived`);
-    return humps.camelizeKeys(response.data) as TotalPendingDerivedDocumentsToday;
+    const response = await axiosInstance.get(`${API_BASE_URL}/pending-derivation-today`);
+    return humps.camelizeKeys(response.data) as TotalDocumentosNoDerivados;
   } catch (error) {
     if (error instanceof AxiosError) {
       throw new Error(`Error al obtener documentos pendientes de derivar: ${error.message}`);
@@ -49,10 +49,10 @@ export const getTotalPendingDerivedDocumentsToday = async (): Promise<TotalPendi
 };
 
 
-export const getTotalDocumentsByCaserioToday = async (): Promise<TotalDocumentsByCaserioToday[]> => {
+export const getTotalDocumentsByCaserioToday = async (): Promise<TotalDocumentosPorCaserio[]> => {
   try {
-    const response = await axiosInstance.get(`${API_BASE_URL}/caserios`);
-    return humps.camelizeKeys(response.data) as TotalDocumentsByCaserioToday[];
+    const response = await axiosInstance.get(`${API_BASE_URL}/received-today/by-village`);
+    return humps.camelizeKeys(response.data) as TotalDocumentosPorCaserio[];
   } catch (error) {
     if (error instanceof AxiosError) {
       throw new Error(`Error al obtener documentos por caserío: ${error.message}`);
