@@ -80,7 +80,7 @@ export const updateUsuarioPassword = async (
 ): Promise<{ message: string }> => {
     try {
         const response = await axiosInstance.patch(
-            `${API_BASE_URL}${id}/password`,
+            `${API_BASE_URL}${id}/update-password`,
             null,
             {
                 params: {
