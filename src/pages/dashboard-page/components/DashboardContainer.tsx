@@ -131,7 +131,7 @@ export function DashboardContainer() {
 ];
 
   return (
-      <div className="min-h-screen bg-gradient-to-b from-background to-secondary p-4 sm:p-6">
+      <div className="pt-0.5 pr-0.5 pb-1 pl-0.5 sm:pt-2 sm:pr-2 sm:pb-3 sm:pl-2 bg-transparent">
         <div className="mx-auto max-w-[1600px] space-y-6 animate-fadeIn">
           <DashboardDateFilter
               dateRange={dateRange}
