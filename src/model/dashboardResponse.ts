@@ -21,8 +21,10 @@ export interface TopIngresosResponse{
     totalDocumentos?: number;
 }
 
-export interface IngresosCentroPobladoResponse{
+export interface IngresosCentroPobladoResponse {
     mes: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    centros?: any;
-}
+    centros?: Array<{
+      centroPoblado: string;     // Ajusta según el camelCase que uses
+      totalDocumentos: number;
+    }>;
+  }

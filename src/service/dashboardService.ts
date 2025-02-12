@@ -73,6 +73,8 @@ export const getTotalDocumentsByCentroPoblado = async (
     return humps.camelizeKeys(response.data) as IngresosCentroPobladoResponse[];
   } catch (error) {
     if (error instanceof AxiosError) {
+        console.log("Error status code:", error.response?.status);
+        console.log("Error response data:", error.response?.data);
       if (error.response?.status === 404) {
         return [];
       }
