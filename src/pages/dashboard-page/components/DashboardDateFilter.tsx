@@ -32,27 +32,52 @@ export function DashboardDateFilter({
   selectedStartMonth,
   selectedEndMonth,
 }: DashboardDateFilterProps) {
-  const years = ["2023", "2024", "2025"];
+  const allYears = Array.from({ length: 10 }, (_, index) => String(2025 + index));
+  const years = ["all", ...allYears];
+
   const months = [
-    "Enero",
-    "Febrero",
-    "Marzo",
-    "Abril",
-    "Mayo",
-    "Junio",
-    "Julio",
-    "Agosto",
-    "Septiembre",
-    "Octubre",
-    "Noviembre",
-    "Diciembre",
+    { value: "all", label: "Todos" },
+    { value: "1", label: "Enero" },
+    { value: "2", label: "Febrero" },
+    { value: "3", label: "Marzo" },
+    { value: "4", label: "Abril" },
+    { value: "5", label: "Mayo" },
+    { value: "6", label: "Junio" },
+    { value: "7", label: "Julio" },
+    { value: "8", label: "Agosto" },
+    { value: "9", label: "Septiembre" },
+    { value: "10", label: "Octubre" },
+    { value: "11", label: "Noviembre" },
+    { value: "12", label: "Diciembre" },
   ];
 
   const handleReset = () => {
-    onStartYearChange("2023");
-    onEndYearChange("");
-    onStartMonthChange("1");
-    onEndMonthChange("");
+    onStartYearChange("all");
+    onEndYearChange("all");
+    onStartMonthChange("all");
+    onEndMonthChange("all");
+  };
+
+  const handleStartYearChange = (value: string) => {
+    onStartYearChange(value);
+    onEndYearChange(value === "all" ? "all" : "");
+  };
+
+  const handleStartMonthChange = (value: string) => {
+    onStartMonthChange(value);
+    onEndMonthChange(value === "all" ? "all" : "");
+  };
+
+  const getEndYears = () => {
+    if (selectedStartYear === "all") return allYears;
+    return allYears.filter(year => Number(year) > Number(selectedStartYear));
+  };
+
+  const getEndMonths = () => {
+    if (selectedStartMonth === "all") return months;
+    return months.filter(month => 
+      month.value === "all" ? false : Number(month.value) > Number(selectedStartMonth)
+    );
   };
 
   return (
@@ -73,7 +98,6 @@ export function DashboardDateFilter({
       </CardHeader>
       <CardContent className="p-4">
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          {/* Fecha Inicial */}
           <div className="space-y-4">
             <h3 className="font-medium text-sm text-gray-700 flex items-center gap-2">
               <Filter className="h-4 w-4" />
@@ -84,14 +108,14 @@ export function DashboardDateFilter({
                 <label className="text-sm font-medium mb-2 block text-gray-700">
                   Año
                 </label>
-                <Select value={selectedStartYear} onValueChange={onStartYearChange}>
+                <Select value={selectedStartYear} onValueChange={handleStartYearChange}>
                   <SelectTrigger className="w-full bg-white">
                     <SelectValue placeholder="Seleccionar año" />
                   </SelectTrigger>
                   <SelectContent>
                     {years.map((year) => (
                       <SelectItem key={`start-${year}`} value={year}>
-                        {year}
+                        {year === "all" ? "Todos los años" : year}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -101,14 +125,14 @@ export function DashboardDateFilter({
                 <label className="text-sm font-medium mb-2 block text-gray-700">
                   Mes
                 </label>
-                <Select value={selectedStartMonth} onValueChange={onStartMonthChange}>
+                <Select value={selectedStartMonth} onValueChange={handleStartMonthChange}>
                   <SelectTrigger className="w-full bg-white">
                     <SelectValue placeholder="Seleccionar mes" />
                   </SelectTrigger>
                   <SelectContent>
-                    {months.map((month, index) => (
-                      <SelectItem key={`start-${month}`} value={String(index + 1)}>
-                        {month}
+                    {months.map((month) => (
+                      <SelectItem key={`start-${month.value}`} value={month.value}>
+                        {month.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -117,7 +141,6 @@ export function DashboardDateFilter({
             </div>
           </div>
 
-          {/* Fecha Final */}
           <div className="space-y-4">
             <h3 className="font-medium text-sm text-gray-700 flex items-center gap-2">
               <Filter className="h-4 w-4" />
@@ -128,12 +151,22 @@ export function DashboardDateFilter({
                 <label className="text-sm font-medium mb-2 block text-gray-700">
                   Año
                 </label>
-                <Select value={selectedEndYear} onValueChange={onEndYearChange}>
+                <Select 
+                  value={selectedEndYear} 
+                  onValueChange={onEndYearChange}
+                  disabled={selectedStartYear === "all"}
+                >
                   <SelectTrigger className="w-full bg-white">
-                    <SelectValue placeholder="Seleccionar año" />
+                    <SelectValue 
+                      placeholder={
+                        selectedStartYear === "all" 
+                          ? "Seleccionar año" 
+                          : `Seleccione después de ${selectedStartYear}`
+                      } 
+                    />
                   </SelectTrigger>
                   <SelectContent>
-                    {years.map((year) => (
+                    {getEndYears().map((year) => (
                       <SelectItem key={`end-${year}`} value={year}>
                         {year}
                       </SelectItem>
@@ -145,14 +178,26 @@ export function DashboardDateFilter({
                 <label className="text-sm font-medium mb-2 block text-gray-700">
                   Mes
                 </label>
-                <Select value={selectedEndMonth} onValueChange={onEndMonthChange}>
+                <Select 
+                  value={selectedEndMonth} 
+                  onValueChange={onEndMonthChange}
+                  disabled={selectedStartMonth === "all"}
+                >
                   <SelectTrigger className="w-full bg-white">
-                    <SelectValue placeholder="Seleccionar mes" />
+                    <SelectValue 
+                      placeholder={
+                        selectedStartMonth === "all" 
+                          ? "Seleccionar mes" 
+                          : `Seleccione después de ${
+                              months.find(m => m.value === selectedStartMonth)?.label
+                            }`
+                      } 
+                    />
                   </SelectTrigger>
                   <SelectContent>
-                    {months.map((month, index) => (
-                      <SelectItem key={`end-${month}`} value={String(index + 1)}>
-                        {month}
+                    {getEndMonths().map((month) => (
+                      <SelectItem key={`end-${month.value}`} value={month.value}>
+                        {month.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
