@@ -12,7 +12,7 @@ import {
   getTotalDocumentsByDocumentaryScope,
   getTotalDocumentsByVillage,
   getTopVillagesWithMostDocuments,
-  getTopVillagesWithLeastDocuments // <-- IMPORTANTE
+  getTopVillagesWithLeastDocuments
 } from "@/service/dashboardService";
 
 import { DashboardRequest } from "@/model/dashboardRequest";
@@ -41,7 +41,7 @@ export function DashboardContainer() {
   >({});
 
   // ---------------------------
-  // ESTADOS PARA TUS BARRAS VERTICALES
+  // ESTADOS PARA LAS BARRAS VERTICALES
   // ---------------------------
   const [documentaryScopeBarData, setDocumentaryScopeBarData] = useState<
     { ambito: string; total: number }[]
@@ -51,14 +51,14 @@ export function DashboardContainer() {
   >([]);
 
   // ---------------------------
-  // ESTADOS PARA LOS BARRAS HORIZONTALES
+  // ESTADOS PARA LAS BARRAS HORIZONTALES
   // ---------------------------
-  // 1) Top con más documentos
+  // 1) Top Caseríos con más documentos
   const [topMostVillagesBarData, setTopVillagesBarData] = useState<
     { caserio: string; totalDocumentos: number }[]
   >([]);
 
-  // 2) Top con menos documentos
+  // 2) Top Caseríos con menos documentos
   const [topLeastVillagesBarData, setTopLeastVillagesBarData] = useState<
     { caserio: string; totalDocumentos: number }[]
   >([]);
@@ -116,7 +116,7 @@ export function DashboardContainer() {
   ];
 
   // ---------------------------
-  // FUNCIÓN PARA TRANSFORMAR EL ÁREA CHART (centro poblado)
+  // FUNCIÓN PARA TRANSFORMAR EL ÁREA CHART (Centro Poblado)
   // ---------------------------
   function transformDataCP(data: IngresosCentroPobladoResponse[]): unknown[] {
     const centrosSet = new Set<string>();
@@ -270,7 +270,7 @@ export function DashboardContainer() {
 
         {/* Sección de gráficos */}
         <ChartsSection
-          // Área chart
+          // Área Chart
           areaChartData={areaChartData}
           areaChartSeries={areaChartSeries}
           areaChartConfig={areaChartConfig}
@@ -279,11 +279,11 @@ export function DashboardContainer() {
           documentaryScopeBarData={documentaryScopeBarData}
           villageBarData={villageBarData}
 
-          // BARRAS HORIZONTALES
+          // Barras horizontales
           topMostVillagesBarData={topMostVillagesBarData}
           topLeastVillagesBarData={topLeastVillagesBarData}
 
-          // Data ejemplo
+          // Data de ejemplo
           horizontalBarChartData={horizontalBarChartData}
         />
       </div>

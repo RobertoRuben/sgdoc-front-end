@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { AreaChartLegend } from "@/components/chart/AreaChartLegend";
 import { BarChart } from "@/components/chart/BarChart";
 import { BarCharHorizontal } from "@/components/chart/BarChartHorizontal";
@@ -26,8 +27,21 @@ export function ChartsSection({
   villageBarData,
   topMostVillagesBarData,
   topLeastVillagesBarData,
-
 }: ChartsSectionProps) {
+  // Genera un color base verde aleatorio en formato hsl para la paleta,
+  // tomando como referencia "hsl(142, 76%, 36%)"
+  const randomGreen = useMemo(() => {
+    const baseHue = 142;
+    const baseSaturation = 76;
+    const baseLightness = 36;
+    const variation = 5; // Variación de ±5 puntos para el color base
+    const randomSaturation =
+      baseSaturation + (Math.floor(Math.random() * (2 * variation + 1)) - variation);
+    const randomLightness =
+      baseLightness + (Math.floor(Math.random() * (2 * variation + 1)) - variation);
+    return `hsl(${baseHue}, ${randomSaturation}%, ${randomLightness}%)`;
+  }, []);
+
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
       <div className="lg:col-span-2">
@@ -53,34 +67,31 @@ export function ChartsSection({
           xAxisDataKey="ambito"
           bar={{
             dataKey: "total",
-            fill: "hsl(200, 60%, 50%)",
+            fill: randomGreen, // Color base para este gráfico (no verde)
             radius: [4, 4, 0, 0],
           }}
         />
       </div>
 
-      {/* BARRA VERTICAL 2: Documentos por Caserío */}
+      {/* BARRA VERTICAL 2: Documentos por Caserío, con paleta de verdes */}
       <div className="lg:col-span-2">
         <BarChart
           data={villageBarData}
           config={{
-            totalDocumentos: {
-              label: "Documentos",
-              color: "hsl(142, 76%, 36%)",
-            },
+            totalDocumentos: { label: "Documentos", color: randomGreen },
           }}
           title="Documentos por Caserío"
           description="Cantidad total de documentos por cada caserío"
           xAxisDataKey="caserio"
           bar={{
             dataKey: "totalDocumentos",
-            fill: "hsl(142, 76%, 36%)",
+            fill: randomGreen, // Color base para generar la paleta de verdes
             radius: [4, 4, 0, 0],
           }}
         />
       </div>
 
-      {/* PRIMER BAR HORIZONTAL -> Top con más documentos */}
+      {/* PRIMER BAR HORIZONTAL -> Top Caseríos con más documentos */}
       <BarCharHorizontal
         data={topMostVillagesBarData}
         config={{
@@ -96,7 +107,7 @@ export function ChartsSection({
         }}
       />
 
-      {/* SEGUNDO BAR HORIZONTAL -> Top con menos documentos */}
+      {/* SEGUNDO BAR HORIZONTAL -> Top Caseríos con menos documentos */}
       <BarCharHorizontal
         data={topLeastVillagesBarData}
         config={{

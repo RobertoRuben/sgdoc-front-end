@@ -1,7 +1,6 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { TrendingUp } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export interface CardData {
@@ -51,23 +50,6 @@ export function StatCards({ cards }: StatCardsProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold mt-2">{card.value}</div>
-            <div className="mt-1 flex items-center">
-              <TrendingUp
-                className={cn(
-                  "mr-1 h-4 w-4",
-                  card.trend === "up" ? "text-emerald-500" : "text-rose-500",
-                  card.trend === "down" && "rotate-180"
-                )}
-              />
-              <span
-                className={cn(
-                  "text-sm",
-                  card.trend === "up" ? "text-emerald-500" : "text-rose-500"
-                )}
-              >
-                {card.change}
-              </span>
-            </div>
           </CardContent>
         </Card>
       ))}

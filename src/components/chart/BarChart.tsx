@@ -1,12 +1,16 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card.tsx"
+"use client";
+
+import { useMemo } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card.tsx";
 import {
   Bar,
   BarChart as RechartsBarChart,
   ResponsiveContainer,
   XAxis,
   YAxis,
-  Tooltip
-} from "recharts"
+  Tooltip,
+  Cell,
+} from "recharts";
 
 interface BarChartProps {
   data: unknown[];
@@ -16,8 +20,8 @@ interface BarChartProps {
   xAxisDataKey: string;
   bar: {
     dataKey: string;
-    fill: string;
-    radius: number[];
+    fill: string; 
+    radius: [number, number, number, number] | number;
   };
 }
 
@@ -28,6 +32,29 @@ export function BarChart({
   xAxisDataKey,
   bar,
 }: BarChartProps) {
+
+  const hslRegex = /hsl\(\s*(\d+),\s*(\d+)%\s*,\s*(\d+)%\s*\)/;
+  const matches = bar.fill.match(hslRegex);
+  let baseHue = 142;
+  let baseSaturation = 76;
+  let baseLightness = 36;
+  if (matches) {
+    baseHue = Number(matches[1]);
+    baseSaturation = Number(matches[2]);
+    baseLightness = Number(matches[3]);
+  }
+  const variation = 10; 
+
+  const paletteColors = useMemo(() => {
+    return data.map(() => {
+      const randomSaturation =
+        baseSaturation + (Math.floor(Math.random() * (2 * variation + 1)) - variation);
+      const randomLightness =
+        baseLightness + (Math.floor(Math.random() * (2 * variation + 1)) - variation);
+      return `hsl(${baseHue}, ${randomSaturation}%, ${randomLightness}%)`;
+    });
+  }, [data, baseHue, baseSaturation, baseLightness, variation]);
+
   return (
     <Card>
       <CardHeader>
@@ -39,7 +66,7 @@ export function BarChart({
         <div className="h-[400px]">
           <ResponsiveContainer width="100%" height="100%">
             <RechartsBarChart data={data}>
-              {/* Eje X */}
+
               <XAxis
                 dataKey={xAxisDataKey}
                 interval={0}
@@ -49,7 +76,7 @@ export function BarChart({
                 tick={{ fontSize: 12 }}
               />
 
-              {/* Eje Y con ajustes para solo enteros + margen */}
+
               <YAxis
                 allowDecimals={false}
                 domain={[0, (dataMax: number) => dataMax + 5]}
@@ -58,14 +85,15 @@ export function BarChart({
 
               <Tooltip />
 
-              <Bar
-                dataKey={bar.dataKey}
-                fill={bar.fill}
-              />
+              <Bar dataKey={bar.dataKey} radius={bar.radius}>
+                {data.map((_, index) => (
+                  <Cell key={`cell-${index}`} fill={paletteColors[index]} />
+                ))}
+              </Bar>
             </RechartsBarChart>
           </ResponsiveContainer>
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
