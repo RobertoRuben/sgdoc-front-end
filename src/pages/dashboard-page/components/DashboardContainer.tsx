@@ -5,20 +5,34 @@ import { FileText, Clock, XCircle, CheckCircle } from "lucide-react";
 import { DashboardDateFilter } from "./DashboardDateFilter";
 import { StatCards, CardData } from "./StatCards";
 import { ChartsSection } from "./ChartsSection";
-import { getTotalDocumentsByCentroPoblado } from "@/service/dashboardService";
+
+// Importación de tus servicios
+import {
+  getTotalDocumentsByCentroPoblado,
+  getTotalDocumentsByDocumentaryScope,
+  getTotalDocumentsByVillage,
+  getTopVillagesWithMostDocuments,
+  getTopVillagesWithLeastDocuments // <-- IMPORTANTE
+} from "@/service/dashboardService";
+
 import { DashboardRequest } from "@/model/dashboardRequest";
-import { IngresosCentroPobladoResponse } from "@/model/dashboardResponse";
+import {
+  IngresosCentroPobladoResponse,
+  IngresosPorAmbitoResponse,
+  IngresosPorCaserioResponse,
+  TopIngresosResponse,
+} from "@/model/dashboardResponse";
 
 export function DashboardContainer() {
-
   const [selectedStartYear, setSelectedStartYear] = useState("2025");
   const [selectedEndYear, setSelectedEndYear] = useState("");
   const [selectedStartMonth, setSelectedStartMonth] = useState("");
   const [selectedEndMonth, setSelectedEndMonth] = useState("");
 
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [areaChartData, setAreaChartData] = useState<any[]>([]);
+  // ---------------------------
+  // ESTADOS PARA EL ÁREA CHART
+  // ---------------------------
+  const [areaChartData, setAreaChartData] = useState<unknown[]>([]);
   const [areaChartSeries, setAreaChartSeries] = useState<
     Array<{ dataKey: string; fill: string; stroke: string }>
   >([]);
@@ -26,7 +40,42 @@ export function DashboardContainer() {
     Record<string, { label: string; color: string }>
   >({});
 
+  // ---------------------------
+  // ESTADOS PARA TUS BARRAS VERTICALES
+  // ---------------------------
+  const [documentaryScopeBarData, setDocumentaryScopeBarData] = useState<
+    { ambito: string; total: number }[]
+  >([]);
+  const [villageBarData, setVillageBarData] = useState<
+    { caserio: string; totalDocumentos: number }[]
+  >([]);
 
+  // ---------------------------
+  // ESTADOS PARA LOS BARRAS HORIZONTALES
+  // ---------------------------
+  // 1) Top con más documentos
+  const [topMostVillagesBarData, setTopVillagesBarData] = useState<
+    { caserio: string; totalDocumentos: number }[]
+  >([]);
+
+  // 2) Top con menos documentos
+  const [topLeastVillagesBarData, setTopLeastVillagesBarData] = useState<
+    { caserio: string; totalDocumentos: number }[]
+  >([]);
+
+  // EJEMPLO: data estática para un hipotético bar horizontal
+  const [horizontalBarChartData] = useState<
+    { departamento: string; ingresos: number }[]
+  >([
+    { departamento: "Ventas", ingresos: 4500 },
+    { departamento: "Marketing", ingresos: 3200 },
+    { departamento: "Desarrollo", ingresos: 5100 },
+    { departamento: "Soporte", ingresos: 2800 },
+  ]);
+
+  // ---------------------------
+  // TARJETAS DE EJEMPLO
+  // ---------------------------
   const cardData: CardData[] = [
     {
       title: "Total Documentos",
@@ -66,9 +115,10 @@ export function DashboardContainer() {
     },
   ];
 
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function transformData(data: IngresosCentroPobladoResponse[]): any[] {
+  // ---------------------------
+  // FUNCIÓN PARA TRANSFORMAR EL ÁREA CHART (centro poblado)
+  // ---------------------------
+  function transformDataCP(data: IngresosCentroPobladoResponse[]): unknown[] {
     const centrosSet = new Set<string>();
 
     data.forEach((item) => {
@@ -78,8 +128,7 @@ export function DashboardContainer() {
     });
 
     return data.map((item) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const row: Record<string, any> = {};
+      const row: Record<string, unknown> = {};
       row.mes = item.mes;
 
       centrosSet.forEach((cp) => {
@@ -133,6 +182,9 @@ export function DashboardContainer() {
     return { series, config };
   }
 
+  // ---------------------------
+  // useEffect PARA CARGAR DATA
+  // ---------------------------
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -143,59 +195,65 @@ export function DashboardContainer() {
           endMonth: selectedEndMonth ? parseInt(selectedEndMonth, 10) : undefined,
         };
 
-        const response = await getTotalDocumentsByCentroPoblado(requestPayload);
-
-        const transformed = transformData(response);
-        const { series, config } = generateSeriesAndConfig(transformed);
-
-        setAreaChartData(transformed);
+        // 1) Documentos por Centro Poblado -> Área Chart
+        const responseCP = await getTotalDocumentsByCentroPoblado(requestPayload);
+        const transformedCP = transformDataCP(responseCP);
+        const { series, config } = generateSeriesAndConfig(transformedCP);
+        setAreaChartData(transformedCP);
         setAreaChartSeries(series);
         setAreaChartConfig(config);
+
+        // 2) Documentos por Ámbito
+        const responseDS: IngresosPorAmbitoResponse[] =
+          await getTotalDocumentsByDocumentaryScope(requestPayload);
+        setDocumentaryScopeBarData(
+          responseDS.map((item) => ({
+            ambito: item.ambito,
+            total: item.total ?? 0,
+          }))
+        );
+
+        // 3) Documentos por Caserío
+        const responseVG: IngresosPorCaserioResponse[] =
+          await getTotalDocumentsByVillage(requestPayload);
+        setVillageBarData(
+          responseVG.map((item) => ({
+            caserio: item.caserio,
+            totalDocumentos: item.totalDocumentos ?? 0,
+          }))
+        );
+
+        // 4) Top Caseríos con Más Documentos
+        const responseTopMost: TopIngresosResponse[] =
+          await getTopVillagesWithMostDocuments(requestPayload);
+        setTopVillagesBarData(
+          responseTopMost.map((item) => ({
+            caserio: item.caserio,
+            totalDocumentos: item.totalDocumentos ?? 0,
+          }))
+        );
+
+        // 5) Top Caseríos con Menos Documentos
+        const responseTopLeast: TopIngresosResponse[] =
+          await getTopVillagesWithLeastDocuments(requestPayload);
+        setTopLeastVillagesBarData(
+          responseTopLeast.map((item) => ({
+            caserio: item.caserio,
+            totalDocumentos: item.totalDocumentos ?? 0,
+          }))
+        );
       } catch (error) {
-        console.error("Error al cargar data de centro poblado:", error);
+        console.error("Error al cargar data:", error);
       }
     };
 
     fetchData();
   }, [selectedStartYear, selectedEndYear, selectedStartMonth, selectedEndMonth]);
 
-  const barChartData = [
-    { categoria: "A", valor: 120 },
-    { categoria: "B", valor: 80 },
-    { categoria: "C", valor: 100 },
-    { categoria: "D", valor: 60 },
-  ];
-
-  const horizontalBarChartData = [
-    { departamento: "Ventas", ingresos: 4500 },
-    { departamento: "Marketing", ingresos: 3200 },
-    { departamento: "Desarrollo", ingresos: 5100 },
-    { departamento: "Soporte", ingresos: 2800 },
-  ];
-
-  const pieChartData = [
-    { name: "Completados", value: 60 },
-    { name: "En Proceso", value: 25 },
-    { name: "Pendientes", value: 15 },
-  ];
-
-  const lineChartData = [
-    { year: "2019", documentos: 850 },
-    { year: "2020", documentos: 940 },
-    { year: "2021", documentos: 1250 },
-    { year: "2022", documentos: 1420 },
-    { year: "2023", documentos: 1680 },
-  ];
-
-  const dailyBarChartData = [
-    { ciudad: "Nueva Aurora", documentos: 45 },
-    { ciudad: "Puerto Cristal", documentos: 52 },
-    // ...
-  ];
-
   return (
     <div className="pt-0.5 pr-0.5 pb-1 pl-0.5 sm:pt-2 sm:pr-2 sm:pb-3 sm:pl-2 bg-transparent">
       <div className="mx-auto max-w-[1600px] space-y-6 animate-fadeIn">
+        {/* Filtro de Fechas */}
         <DashboardDateFilter
           selectedStartYear={selectedStartYear}
           selectedEndYear={selectedEndYear}
@@ -207,17 +265,26 @@ export function DashboardContainer() {
           onEndMonthChange={setSelectedEndMonth}
         />
 
+        {/* Tarjetas */}
         <StatCards cards={cardData} />
 
+        {/* Sección de gráficos */}
         <ChartsSection
+          // Área chart
           areaChartData={areaChartData}
           areaChartSeries={areaChartSeries}
           areaChartConfig={areaChartConfig}
-          barChartData={barChartData}
+
+          // Barras verticales
+          documentaryScopeBarData={documentaryScopeBarData}
+          villageBarData={villageBarData}
+
+          // BARRAS HORIZONTALES
+          topMostVillagesBarData={topMostVillagesBarData}
+          topLeastVillagesBarData={topLeastVillagesBarData}
+
+          // Data ejemplo
           horizontalBarChartData={horizontalBarChartData}
-          pieChartData={pieChartData}
-          lineChartData={lineChartData}
-          dailyBarChartData={dailyBarChartData}
         />
       </div>
     </div>

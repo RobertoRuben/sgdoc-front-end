@@ -24,7 +24,7 @@ export interface TopIngresosResponse{
 export interface IngresosCentroPobladoResponse {
     mes: string;
     centros?: Array<{
-      centroPoblado: string;     // Ajusta según el camelCase que uses
+      centroPoblado: string;     
       totalDocumentos: number;
     }>;
   }
