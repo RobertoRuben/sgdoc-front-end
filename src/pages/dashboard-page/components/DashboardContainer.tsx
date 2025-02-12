@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { DateRange } from "react-day-picker"
 import { FileText, Clock, XCircle, CheckCircle } from "lucide-react"
 
 import { DashboardDateFilter } from "./DashboardDateFilter"
@@ -10,10 +9,11 @@ import { ChartsSection } from "./ChartsSection"
 
 export function DashboardContainer() {
   // Estado para el rango de fechas
-  const [dateRange, setDateRange] = useState<DateRange | undefined>({
-    from: new Date(2023, 0, 1),
-    to: new Date(),
-  })
+  const [selectedStartYear, setSelectedStartYear] = useState("2023")
+  const [selectedEndYear, setSelectedEndYear] = useState("")
+  const [selectedStartMonth, setSelectedStartMonth] = useState("1")
+  const [selectedEndMonth, setSelectedEndMonth] = useState("")
+
 
   // Data para las tarjetas de estadística
   const cardData: CardData[] = [
@@ -133,10 +133,16 @@ export function DashboardContainer() {
   return (
       <div className="pt-0.5 pr-0.5 pb-1 pl-0.5 sm:pt-2 sm:pr-2 sm:pb-3 sm:pl-2 bg-transparent">
         <div className="mx-auto max-w-[1600px] space-y-6 animate-fadeIn">
-          <DashboardDateFilter
-              dateRange={dateRange}
-              onChange={(range) => setDateRange(range)}
-          />
+        <DashboardDateFilter
+          selectedStartYear={selectedStartYear}
+          selectedEndYear={selectedEndYear}
+          selectedStartMonth={selectedStartMonth}
+          selectedEndMonth={selectedEndMonth}
+          onStartYearChange={setSelectedStartYear}
+          onEndYearChange={setSelectedEndYear}
+          onStartMonthChange={setSelectedStartMonth}
+          onEndMonthChange={setSelectedEndMonth}
+        />
 
           <StatCards cards={cardData} />
 

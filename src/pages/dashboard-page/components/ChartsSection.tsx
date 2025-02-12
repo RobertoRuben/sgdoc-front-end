@@ -17,7 +17,6 @@ interface ChartsSectionProps {
 
 export function ChartsSection({
   areaChartData,
-  barChartData,
   horizontalBarChartData,
   pieChartData,
   lineChartData,
@@ -50,22 +49,38 @@ export function ChartsSection({
           ]}
         />
       </div>
-
-      {/* Barra vertical */}
-      <BarChart
-        data={barChartData}
-        config={{
-          valor: { label: "Valor", color: "hsl(142, 76%, 36%)" },
-        }}
-        title="Distribución por Categoría"
-        description="Valores por categoría de documento"
-        xAxisDataKey="categoria"
-        bar={{
-          dataKey: "valor",
-          fill: "hsl(142, 76%, 36%)",
-          radius: [4, 4, 0, 0],
-        }}
-      />
+      <div className="lg:col-span-2">
+        <BarChart
+          data={dailyBarChartData}
+          config={{
+            documentos: { label: "Documentos", color: "hsl(142, 76%, 36%)" },
+          }}
+          title="Documentos Diarios"
+          description="Distribución diaria de documentos del último mes"
+          xAxisDataKey="ciudad"
+          bar={{
+            dataKey: "documentos",
+            fill: "hsl(142, 76%, 36%)",
+            radius: [4, 4, 0, 0],
+          }}
+        />
+      </div>
+      <div className="lg:col-span-2">
+        <BarChart
+          data={dailyBarChartData}
+          config={{
+            documentos: { label: "Documentos", color: "hsl(142, 76%, 36%)" },
+          }}
+          title="Documentos Diarios"
+          description="Distribución diaria de documentos del último mes"
+          xAxisDataKey="ciudad"
+          bar={{
+            dataKey: "documentos",
+            fill: "hsl(142, 76%, 36%)",
+            radius: [4, 4, 0, 0],
+          }}
+        />
+      </div>
 
       {/* Barra horizontal */}
       <BarCharHorizontal
@@ -81,6 +96,32 @@ export function ChartsSection({
           fill: "hsl(142, 71%, 45%)",
           radius: [0, 4, 4, 0],
         }}
+      />
+
+      <BarCharHorizontal
+        data={horizontalBarChartData}
+        config={{
+          ingresos: { label: "Ingresos", color: "hsl(142, 71%, 45%)" },
+        }}
+        title="Ingresos por Departamento"
+        description="Ingresos generados por cada departamento"
+        yAxisDataKey="departamento"
+        bar={{
+          dataKey: "ingresos",
+          fill: "hsl(142, 71%, 45%)",
+          radius: [0, 4, 4, 0],
+        }}
+      />
+
+      {/* Línea temporal */}
+      <LineChart
+        data={lineChartData}
+        config={{
+          documentos: { label: "Documentos", color: "hsl(142, 76%, 36%)" },
+        }}
+        title="Documentos por Año"
+        description="Evolución anual de documentos ingresados"
+        xAxisDataKey="year"
       />
 
       {/* Gráfico de pastel */}
@@ -99,33 +140,6 @@ export function ChartsSection({
         dataKey="value"
         nameKey="name"
       />
-
-      {/* Línea temporal */}
-      <LineChart
-        data={lineChartData}
-        config={{
-          documentos: { label: "Documentos", color: "hsl(142, 76%, 36%)" },
-        }}
-        title="Documentos por Año"
-        description="Evolución anual de documentos ingresados"
-        xAxisDataKey="year"
-      />
-            <div className="lg:col-span-2">
-        <BarChart
-          data={dailyBarChartData}
-          config={{
-            documentos: { label: "Documentos", color: "hsl(142, 76%, 36%)" },
-          }}
-          title="Documentos Diarios"
-          description="Distribución diaria de documentos del último mes"
-          xAxisDataKey="ciudad"
-          bar={{
-            dataKey: "documentos",
-            fill: "hsl(142, 76%, 36%)",
-            radius: [4, 4, 0, 0],
-          }}
-        />
-      </div>
     </div>
   );
 }
