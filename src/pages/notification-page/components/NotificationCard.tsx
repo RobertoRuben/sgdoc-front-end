@@ -22,18 +22,18 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
       className={`
         ${notification.leido 
           ? "bg-gray-50/60 backdrop-blur-sm" 
-          : "bg-white border-l-4 border-[#145A32]"
+          : "bg-white border-l-4 sm:border-l-4 border-t-4 sm:border-t-0 border-[#145A32]"
         }
-        rounded-xl shadow-sm hover:shadow-lg p-6 mb-4 
+        rounded-xl shadow-sm hover:shadow-lg p-4 sm:p-6 mb-4 
         transition-all duration-300 transform hover:-translate-y-1
-        relative overflow-hidden
+        relative overflow-hidden w-full
       `}
     >
       {!notification.leido && (
-        <div className="absolute top-0 right-0 w-24 h-24 -mr-12 -mt-12 bg-[#145A32]/5 rounded-full" />
+        <div className="absolute top-0 right-0 w-24 h-24 -mr-12 -mt-12 bg-[#145A32]/5 rounded-full hidden sm:block" />
       )}
       
-      <div className="flex items-start gap-4 relative">
+      <div className="flex flex-col sm:flex-row sm:items-start gap-4 relative">
         <motion.div
           whileHover={{ rotate: 15 }}
           className={`
@@ -42,7 +42,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
               : "bg-amber-100"
             }
             rounded-xl p-3 transition-colors duration-300
-            shadow-sm
+            shadow-sm self-start
           `}
         >
           <Bell className={`
@@ -54,11 +54,11 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
           `} />
         </motion.div>
         
-        <div className="flex-1 space-y-2">
-          <div className="flex justify-between items-start gap-4">
-            <div className="space-y-2 flex-1">
+        <div className="flex-1 space-y-2 w-full">
+          <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+            <div className="space-y-2 flex-1 w-full">
               <p className={`
-                text-gray-800 leading-relaxed
+                text-gray-800 leading-relaxed text-sm sm:text-base
                 ${notification.leido 
                   ? "text-gray-500" 
                   : "font-medium"
@@ -74,7 +74,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
                     : "bg-[#145A32] animate-pulse"
                   }
                 `} />
-                <p className="text-sm text-gray-400 font-medium">
+                <p className="text-xs sm:text-sm text-gray-400 font-medium">
                   {notification.fechaCreacion && formatDateToLocal(notification.fechaCreacion)}
                 </p>
               </div>
@@ -85,13 +85,14 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.2 }}
+                className="w-full sm:w-auto mt-3 sm:mt-0"
               >
                 <Button
                   onClick={() => onMarkAsRead(notification.id!)}
-                  className="bg-[#145A32] text-white hover:bg-[#0E3D22] 
+                  className="w-full sm:w-auto bg-[#145A32] text-white hover:bg-[#0E3D22] 
                     transition-all duration-300
-                    shadow-sm hover:shadow-md flex items-center gap-2 
-                    px-4 py-2 rounded-full hover:scale-105"
+                    shadow-sm hover:shadow-md flex items-center justify-center gap-2 
+                    px-4 py-2 rounded-full hover:scale-105 text-sm sm:text-base"
                 >
                   <Check className="w-4 h-4" />
                   <span>Marcar como leída</span>

@@ -5,44 +5,7 @@ import { NotificationCard } from "./NotificationCard";
 import LoadingSpinner from "@/components/layout/LoadingSpinner";
 import ErrorModal from "@/components/modal/alerts/error-modal/ErrorModal";
 import SuccessModal from "@/components/modal/alerts/success-modal/SuccessModal";
-
-const mockNotifications: Notificacion[] = [
-  {
-    id: 1,
-    comentario: "Se ha creado un nuevo documento en el área de Administración",
-    areaDestinoId: 1,
-    leido: false,
-    fechaCreacion: new Date(2024, 1, 13, 10, 30)
-  },
-  {
-    id: 2,
-    comentario: "El documento #123 ha sido actualizado por Juan Pérez",
-    areaDestinoId: 2,
-    leido: false,
-    fechaCreacion: new Date(2024, 1, 13, 9, 15)
-  },
-  {
-    id: 3,
-    comentario: "Se requiere su revisión en el documento #456",
-    areaDestinoId: 1,
-    leido: true,
-    fechaCreacion: new Date(2024, 1, 12, 15, 45)
-  },
-  {
-    id: 4,
-    comentario: "María González ha compartido un documento con su departamento",
-    areaDestinoId: 3,
-    leido: false,
-    fechaCreacion: new Date(2024, 1, 12, 14, 20)
-  },
-  {
-    id: 5,
-    comentario: "El documento #789 está pendiente de aprobación",
-    areaDestinoId: 2,
-    leido: false,
-    fechaCreacion: new Date(2024, 1, 11, 16, 0)
-  }
-];
+import { getNotificationsByAreaId, markNotificationAsRead } from "@/service/notificactionService";
 
 export const NotificationContainer: React.FC = () => {
   const [notifications, setNotifications] = useState<Notificacion[]>([]);
@@ -59,15 +22,28 @@ export const NotificationContainer: React.FC = () => {
   const loadNotifications = async () => {
     setIsLoading(true);
     try {
-      // Simulamos una llamada a API con un delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setNotifications(mockNotifications);
+      const areaId = sessionStorage.getItem("areaId");
+      
+      if (!areaId) {
+        throw new Error("ID de área no encontrado en sesión");
+      }
+      
+      const areaIdNumber = parseInt(areaId, 10);
+      if (isNaN(areaIdNumber)) {
+        throw new Error("ID de área no válido");
+      }
+
+      const data = await getNotificationsByAreaId(areaIdNumber);
+      setNotifications(data);
     } catch (err) {
+      let errorMessage = "Error al cargar las notificaciones";
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      }
       setError({
         isOpen: true,
-        message: "Error al cargar las notificaciones",
+        message: errorMessage,
       });
-      console.error(err);
     } finally {
       setIsLoading(false);
     }
@@ -75,8 +51,7 @@ export const NotificationContainer: React.FC = () => {
 
   const handleMarkAsRead = async (id: number) => {
     try {
-      // Aquí iría la llamada al servicio para marcar como leída
-      // await markNotificationAsRead(id);
+      await markNotificationAsRead(id);
       setNotifications(prevNotifications =>
         prevNotifications.map(notif =>
           notif.id === id ? { ...notif, leido: true } : notif
@@ -87,31 +62,42 @@ export const NotificationContainer: React.FC = () => {
         message: "Notificación marcada como leída",
       });
     } catch (err) {
+      let errorMessage = "Error al marcar la notificación como leída";
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      }
       setError({
         isOpen: true,
-        message: "Error al marcar la notificación como leída",
+        message: errorMessage,
       });
-      console.error(err);
     }
   };
 
   const handleMarkAllAsRead = async () => {
     try {
-      // Aquí iría la llamada al servicio para marcar todas como leídas
-      // await markAllNotificationsAsRead();
+      const unreadNotifications = notifications.filter(notif => !notif.leido);
+      const unreadIds = unreadNotifications.map(notif => notif.id).filter((id): id is number => id !== undefined);
+      
+      await Promise.all(unreadIds.map(id => markNotificationAsRead(id)));
+      
+      // Actualizar estado local después de éxito
       setNotifications(prevNotifications =>
         prevNotifications.map(notif => ({ ...notif, leido: true }))
       );
+      
       setSuccess({
         isOpen: true,
-        message: "Todas las notificaciones han sido marcadas como leídas",
+        message: "Todas las notificaciones marcadas como leídas",
       });
     } catch (err) {
+      let errorMessage = "Error al marcar las notificaciones como leídas";
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      }
       setError({
         isOpen: true,
-        message: "Error al marcar las notificaciones como leídas",
+        message: errorMessage,
       });
-      console.error(err);
     }
   };
 
@@ -153,14 +139,14 @@ export const NotificationContainer: React.FC = () => {
 
       <ErrorModal
         isOpen={error.isOpen}
-        onClose={() => setError({ ...error, isOpen: false })}
+        onClose={() => setError(prev => ({ ...prev, isOpen: false }))}
         title="Error"
         errorMessage={error.message}
       />
 
       <SuccessModal
         isOpen={success.isOpen}
-        onClose={() => setSuccess({ ...success, isOpen: false })}
+        onClose={() => setSuccess(prev => ({ ...prev, isOpen: false }))}
         title="Éxito"
         message={success.message}
       />

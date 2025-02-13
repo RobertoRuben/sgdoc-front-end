@@ -6,7 +6,7 @@ import { Header } from "./Header";
 import { MainContent } from "./MainContent";
 import { Footer } from "./Footer";
 import ContentHeader from "./ContentHeader";
-import { useLocation, Outlet } from "react-router-dom";
+import { useLocation, useNavigate, Outlet } from "react-router-dom"; // <-- Importa useNavigate
 import { navItems } from "./SidebarConfig";
 import { getBreadcrumb } from "@/utils/getBreadcrumb";
 import { useLoading } from "@/context/LoadingContext";
@@ -22,6 +22,7 @@ export function Layout() {
   const [unconfirmedCount, setUnconfirmedCount] = useState(0);
 
   const location = useLocation();
+  const navigate = useNavigate(); // <-- Define navigate
   const { isLoading, setLoading } = useLoading();
 
   const handleNewNotification = () => {
@@ -35,8 +36,9 @@ export function Layout() {
     [location.pathname]
   );
 
+  // Función para navegar a la página de notificaciones
   const handleViewNotifications = () => {
-    console.log("Depuración: Se hizo clic en 'Ver notificaciones'.");
+    navigate("/notificaciones");
   };
 
   const excludedRoutes = ["/inicio", "/dashboard"];
@@ -87,7 +89,7 @@ export function Layout() {
           onOpenSidebar={() => setSidebarOpen(true)}
           title={headerTitle}
           notificationCount={notificationCount}
-          onViewNotifications={handleViewNotifications}
+          onViewNotifications={handleViewNotifications} // Pasa la función
           onModalStateChange={setModalOpen}
         />
 
