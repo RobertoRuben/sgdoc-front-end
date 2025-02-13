@@ -21,7 +21,6 @@ import { getUsuarioById, updateUsuarioPassword } from '@/service/usuarioService'
 import { Usuario } from '@/model/usuario';
 import { UsuarioProfile } from '@/model/usuarioProfile';
 
-// Objeto _default_ que cumple con la interfaz completa
 const defaultUserProfile: UsuarioProfile = {
     id: 0,
     nombreUsuario: "",
@@ -97,7 +96,6 @@ export function Header({
         onModalStateChange(false);
     };
 
-    // Función para cambiar la contraseña (se invoca desde el modal)
     const handlePasswordChange = async (newPassword: string) => {
         try {
             if (!userProfile?.id) {
@@ -119,7 +117,6 @@ export function Header({
         }
     };
 
-    // Funciones para el modal de Logout
     const handleLogoutModalOpen = () => {
         setIsLogoutModalOpen(true);
         onModalStateChange(true);
