@@ -27,6 +27,11 @@ export function setupRefreshTokenInterceptor(
     async (error) => {
       const originalRequest = error.config
 
+      // Si la URL corresponde al endpoint de login, se rechaza el error sin refrescar
+      if (originalRequest.url && originalRequest.url.includes("/login")) {
+        return Promise.reject(error)
+      }
+
       if (
         error.response &&
         error.response.status === 401 &&
