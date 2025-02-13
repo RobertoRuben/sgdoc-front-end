@@ -29,6 +29,7 @@ import ListaDocumentosRecibidosPage from "./pages/received-documents-page/Receiv
 import ListaDocumentosEnviadosPage from "./pages/documentos-page/documentos-enviados-page/DocumentosEnviadosPage";
 import ListaDocumentosRechazadosPage from "./pages/documentos-page/documentos-rechazados-page/DocumentosRechazadosPage";
 import DashbaordPage from "@/pages/dashboard-page/DashbaordPage.tsx";
+import NotificationPage from "@/pages/notification-page/NotificationPage";
 
 import { Toaster } from "@/components/ui/toaster";
 
@@ -75,6 +76,7 @@ function App() {
                 <Route path="inbox/enviados" element={<ListaDocumentosEnviadosPage />}/>
                 <Route path="inbox/rechazados" element={<ListaDocumentosRechazadosPage />}/>
                 <Route path="dashboard" element={<DashbaordPage />}/>
+                <Route path="notificaciones" element={<NotificationPage />} />
 
                 {/* Redirecciones */}
                 <Route path="areas" element={<Navigate to="/areas/lista" replace />}/>
