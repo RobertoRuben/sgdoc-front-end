@@ -28,6 +28,8 @@ import DashboardMesaPartesPage from "@/pages/inicio-page/DashboardMesaPartesPage
 import ListaDocumentosRecibidosPage from "./pages/received-documents-page/ReceivedDocumentsPage";
 import ListaDocumentosEnviadosPage from "./pages/documentos-page/documentos-enviados-page/DocumentosEnviadosPage";
 import ListaDocumentosRechazadosPage from "./pages/documentos-page/documentos-rechazados-page/DocumentosRechazadosPage";
+import DashbaordPage from "@/pages/dashboard-page/DashbaordPage.tsx";
+
 import { Toaster } from "@/components/ui/toaster";
 
 function App() {
@@ -72,6 +74,7 @@ function App() {
                 <Route path="inbox/recibidos" element={<ListaDocumentosRecibidosPage />}/>
                 <Route path="inbox/enviados" element={<ListaDocumentosEnviadosPage />}/>
                 <Route path="inbox/rechazados" element={<ListaDocumentosRechazadosPage />}/>
+                <Route path="dashboard" element={<DashbaordPage />}/>
 
                 {/* Redirecciones */}
                 <Route path="areas" element={<Navigate to="/areas/lista" replace />}/>
