@@ -91,7 +91,6 @@ export const ListaDocumentosSearch: React.FC<ListaDocumentosSearchProps> = ({
 
   return (
     <div className="mb-4 p-4 border-b border-gray-200 flex flex-wrap gap-4 items-center justify-between">
-      {/* Campo de búsqueda */}
       <div className="relative flex-1 min-w-[200px]">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
         <Input
@@ -117,7 +116,6 @@ export const ListaDocumentosSearch: React.FC<ListaDocumentosSearchProps> = ({
         )}
       </div>
 
-      {/* Select de Centro Poblado */}
       <Select
         onValueChange={(val) => {
           console.log("Centro Poblado seleccionado:", val);
@@ -139,7 +137,6 @@ export const ListaDocumentosSearch: React.FC<ListaDocumentosSearchProps> = ({
         </SelectContent>
       </Select>
 
-      {/* Select de Caserío */}
       <Select
         onValueChange={(val) => {
           console.log("Caserío seleccionado:", val);
