@@ -28,7 +28,7 @@ export const CentroPobladoContainer: React.FC = () => {
       data: [],
       pagination: {
         currentPage: 1,
-        pageSize: 10,
+        pageSize: 5,
         totalItems: 0,
         totalPages: 0,
       },
