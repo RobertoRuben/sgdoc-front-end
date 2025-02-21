@@ -112,7 +112,7 @@ export const UsuarioTable: React.FC<UsuarioTableProps> = ({
                                 >
                                     <TableCell
                                         className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                        {usuario.id}
+                                        {String(usuario.id).padStart(5, "0")}
                                     </TableCell>
                                     <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
                                         {usuario.nombreUsuario}
