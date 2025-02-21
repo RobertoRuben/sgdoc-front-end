@@ -81,7 +81,7 @@ export const RolTable: React.FC<RolTableProps> = ({roles, dataVersion, currentPa
                                     } hover:bg-gray-100`}
                                 >
                                     <TableCell className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                        {rol.id}
+                                        {String(rol.id).padStart(5, "0")}
                                     </TableCell>
                                     <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
                                         {rol.nombreRol}
