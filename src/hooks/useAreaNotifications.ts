@@ -10,7 +10,6 @@ export function useAreaNotifications({ onNewNotification }: UseAreaNotifications
   const areaId = sessionStorage.getItem("areaId");
   const wsRef = useRef<WebSocket | null>(null);
 
-  // Instanciamos el sonido solo una vez
   const notificationSound = useMemo(() => {
     return new Howl({
       src: ["/sounds/notification.wav"],
@@ -19,12 +18,10 @@ export function useAreaNotifications({ onNewNotification }: UseAreaNotifications
   }, []);
 
   useEffect(() => {
-    // Verifica si no hay areaId o ya hay un socket activo
     if (!areaId || wsRef.current) return;
-
     console.log("useAreaNotifications se monta / abre la conexión WebSocket.");
-
-    const wsUrl = `ws://127.0.0.1:8000/api/v1/ws/notificaciones/${areaId}`;
+    const wsBaseUrl = import.meta.env.VITE_WS_BASE_URL;
+    const wsUrl = `${wsBaseUrl}/notifications/${areaId}`;
     const socket = new WebSocket(wsUrl);
     wsRef.current = socket;
 
@@ -63,7 +60,6 @@ export function useAreaNotifications({ onNewNotification }: UseAreaNotifications
       wsRef.current = null;
     };
 
-    // Cleanup para cuando el componente se desmonte
     return () => {
       console.log("Cleanup: cerrando WebSocket de Notificaciones...");
       if (wsRef.current) {
