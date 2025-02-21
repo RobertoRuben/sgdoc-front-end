@@ -99,8 +99,8 @@ export const findByString = async (searchString: string): Promise<Ambito[]> => {
 };
 
 export const getPaginatedAmbitos = async (
-    page: number = 1,
-    pageSize: number = 5
+    page: number,
+    pageSize: number
 ): Promise<AmbitoPaginatedResponse> => {
     try {
         const response = await axiosInstance.get(`${API_BASE_URL}paginated`, {
