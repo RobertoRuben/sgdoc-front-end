@@ -88,7 +88,7 @@ export const AreaTable: React.FC<AreaTableProps> = ({
                   } hover:bg-gray-100 transition-colors duration-150 ease-in-out`}
                 >
                   <TableCell className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {area.id}
+                    {String(area.id).padStart(5, "0")}
                   </TableCell>
                   <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
                     {area.nombreArea}
