@@ -45,7 +45,7 @@ export const ListaDocumentosContainer: React.FC = () => {
   const [documentosState, setDocumentosState] =
     useState<DocumentoPaginatedResponse>({
       data: [],
-      pagination: { currentPage: 1, pageSize: 4, totalItems: 0, totalPages: 0 },
+      pagination: { currentPage: 1, pageSize: 5, totalItems: 0, totalPages: 0 },
     });
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -125,8 +125,6 @@ export const ListaDocumentosContainer: React.FC = () => {
       ]);
       setAmbitos(ambitosData);
       setCentrosPoblados(centrosPobladosData);
-
-      // Cargar todos los caseríos inicialmente
       loadAllCaserios();
     } catch (error) {
       console.error(error);
@@ -158,7 +156,6 @@ export const ListaDocumentosContainer: React.FC = () => {
     }
   };
 
-  // Hook para cargar catálogos al iniciar
   useEffect(() => {
     loadFilters();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -166,10 +163,8 @@ export const ListaDocumentosContainer: React.FC = () => {
 
   useEffect(() => {
     if (selectedCentroPoblado) {
-      // Si hay un centro poblado seleccionado
       loadCaseriosByCentroPoblado(selectedCentroPoblado);
     } else {
-      // Mostrar todos
       loadAllCaserios();
     }
   }, [selectedCentroPoblado]);
@@ -199,10 +194,9 @@ export const ListaDocumentosContainer: React.FC = () => {
         ? date.toISOString().split("T")[0]
         : undefined;
 
-      // Convertir explícitamente los IDs a números
       const params = {
         p_page: page,
-        p_page_size: 4,
+        p_page_size: 5,
         p_dni,
         p_id_caserio:
           caserio && caserio !== "all" ? parseInt(caserio, 10) : undefined,
@@ -214,11 +208,7 @@ export const ListaDocumentosContainer: React.FC = () => {
           ambito && ambito !== "all" ? parseInt(ambito, 10) : undefined,
         p_fecha_ingreso,
       };
-
-      console.log("Params enviados al servicio:", params);
-
       const response = await searchDocumentos(params);
-
       const anyFilterApplied =
         searchValue.trim() !== "" ||
         !!ambito ||
@@ -297,11 +287,8 @@ export const ListaDocumentosContainer: React.FC = () => {
     if (!selectedDocumentoId) return;
 
     try {
-      // Obtenemos el área de origen y el usuario desde sessionStorage
       const areaOrigenIdString = sessionStorage.getItem("areaId");
       const userIdString = sessionStorage.getItem("userId");
-
-      // Validaciones mínimas
       if (!areaOrigenIdString || !userIdString) {
         showError(
           "No se encontró areaId o userId en sessionStorage. No se puede derivar."

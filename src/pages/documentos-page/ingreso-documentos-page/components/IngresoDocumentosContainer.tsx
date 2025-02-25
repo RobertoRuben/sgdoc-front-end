@@ -32,29 +32,22 @@ export const IngresoDocumentosContainer: React.FC = () => {
       data: [],
       pagination: {
         currentPage: 1,
-        pageSize: 5, // Tamaño de página deseado
+        pageSize: 5,
         totalItems: 0,
         totalPages: 0,
       },
     });
 
-  // Estado para la página actual y el término de búsqueda
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
-  // Nuevos estados para el modal de derivación
   const [isDerivacionModalOpen, setIsDerivacionModalOpen] = useState(false);
   const [selectedDocumentoId, setSelectedDocumentoId] = useState<
     number | undefined
   >();
 
-  // Estado para mostrar spinner de carga
   const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  // Control del modal de registro de documento
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-
-  // Control del modal de descarga
   const [isDownloadModalOpen, setIsDownloadModalOpen] =
     useState<boolean>(false);
   const [selectedDocument, setSelectedDocument] = useState<{
@@ -64,7 +57,6 @@ export const IngresoDocumentosContainer: React.FC = () => {
     fileType: string;
   } | null>(null);
 
-  // Manejo de errores
   const [errorModalConfig, setErrorModalConfig] = useState<{
     isOpen: boolean;
     message: string;
@@ -73,7 +65,6 @@ export const IngresoDocumentosContainer: React.FC = () => {
     message: "",
   });
 
-  // Manejo de mensajes de éxito
   const [successModalConfig, setSuccessModalConfig] = useState<{
     isOpen: boolean;
     message: string;
@@ -82,13 +73,7 @@ export const IngresoDocumentosContainer: React.FC = () => {
     message: "",
   });
 
-  // dataVersion, si necesitas forzar algún refresco adicional (en este ejemplo se mantiene fijo)
   const [dataVersion] = useState<number>(0);
-
-  /**
-   * Para determinar la dirección al cambiar de página, usamos un ref para almacenar la
-   * página anterior y calculamos si el usuario avanzó o retrocedió.
-   */
   const prevPageRef = useRef<number>(currentPage);
   const pageDirection = currentPage >= prevPageRef.current ? 1 : -1;
 
@@ -96,20 +81,13 @@ export const IngresoDocumentosContainer: React.FC = () => {
     prevPageRef.current = currentPage;
   }, [currentPage]);
 
-  /**
-   * Muestra un modal de error con el mensaje proporcionado.
-   */
   const showError = (message: string) => {
     setErrorModalConfig({ isOpen: true, message });
   };
 
-  /**
-   * Carga la lista paginada de documentos según la página.
-   */
   const loadDocumentos = async (page: number) => {
     try {
       setIsLoading(true);
-      // Llamada al servicio que obtiene documentos paginados
       const response = await getDocumentosByCurrentDate(
         page,
         documentosState.pagination.pageSize
@@ -124,41 +102,25 @@ export const IngresoDocumentosContainer: React.FC = () => {
     }
   };
 
-  /**
-   * Se ejecuta cada vez que cambie la página actual.
-   */
   useEffect(() => {
     loadDocumentos(currentPage);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage]);
 
-  /**
-   * Filtra la lista de documentos en memoria según el término de búsqueda.
-   * Si deseas búsqueda desde back-end, puedes implementar la llamada aquí.
-   */
   const filteredDocumentos = documentosState.data.filter((doc) =>
     doc.nombreDocumento.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  /**
-   * Maneja la paginación. Asegura que no se navegue a páginas inválidas.
-   */
   const handlePageChange = (page: number) => {
     if (page < 1 || page > documentosState.pagination.totalPages) return;
     setCurrentPage(page);
     loadDocumentos(page);
   };
 
-  /**
-   * Abre el modal de registro de documento.
-   */
   const handleOpenModal = () => {
     setIsModalOpen(true);
   };
 
-  /**
-   * Lógica para descargar un documento. Abre un modal de confirmación.
-   */
   const handleDownload = (id?: number) => {
     if (id !== undefined) {
       const document = documentosState.data.find((doc) => doc.id === id);
@@ -174,23 +136,16 @@ export const IngresoDocumentosContainer: React.FC = () => {
     }
   };
 
-  /**
-   * Llamado cuando se confirma la descarga en el DownloadModal.
-   */
   const handleConfirmDownload = async () => {
     try {
       if (selectedDocument?.id) {
         const fileData = await downloadDocumento(selectedDocument.id);
-
-        // Crea un Blob y fuerza la descarga
         const blob = new Blob([fileData], { type: "application/pdf" });
         const url = window.URL.createObjectURL(blob);
-
         const link = document.createElement("a");
         link.href = url;
         link.download = `${selectedDocument.nombreDocumento}.pdf`;
         link.click();
-
         window.URL.revokeObjectURL(url);
         setIsDownloadModalOpen(false);
       }
@@ -200,16 +155,10 @@ export const IngresoDocumentosContainer: React.FC = () => {
     }
   };
 
-  /**
-   * Cierra el modal de descarga.
-   */
   const handleCloseDownloadModal = () => {
     setIsDownloadModalOpen(false);
   };
 
-  /**
-   * Ejemplo de manejo de envío. Puedes adaptar según tu caso de uso.
-   */
   const handleSend = (id?: number) => {
     if (id !== undefined) {
       setSelectedDocumentoId(id);
@@ -219,13 +168,9 @@ export const IngresoDocumentosContainer: React.FC = () => {
 
   const handleDerivar = async (areaDestinoId: number) => {
     if (!selectedDocumentoId) return;
-
     try {
-      // Obtenemos el área de origen y el usuario desde sessionStorage
       const areaOrigenIdString = sessionStorage.getItem("areaId");
       const userIdString = sessionStorage.getItem("userId");
-
-      // Validaciones mínimas
       if (!areaOrigenIdString || !userIdString) {
         showError(
           "No se encontró areaId o userId en sessionStorage. No se puede derivar."
@@ -236,16 +181,13 @@ export const IngresoDocumentosContainer: React.FC = () => {
       const areaOrigenId = parseInt(areaOrigenIdString, 10);
       const userId = parseInt(userIdString, 10);
 
-      // Construimos el objeto Derivacion según tu modelo
       const nuevaDerivacion: Derivacion = {
         documentoId: selectedDocumentoId,
         areaOrigenId,
         areaDestinoId,
         usuarioId: userId,
-        // Si tu back-end necesita más campos, agrégalos aquí
       };
 
-      // Llamamos al servicio
       await createDerivacion(nuevaDerivacion);
 
       const nuevaNotificacion: Notificacion = {
@@ -253,8 +195,6 @@ export const IngresoDocumentosContainer: React.FC = () => {
         areaDestinoId: areaDestinoId
       };
       await createNotificacion(nuevaNotificacion);
-
-      // Si no hay error, cerramos el modal y mostramos el éxito
       setIsDerivacionModalOpen(false);
       setSuccessModalConfig({
         isOpen: true,
@@ -267,14 +207,6 @@ export const IngresoDocumentosContainer: React.FC = () => {
     }
   };
 
-  /**
-   * Callback que el modal hijo (RegistroDocumentoModal) llamará cuando se haya
-   * guardado (creado o editado) exitosamente un documento.
-   *
-   * - Si es un documento nuevo: se calcula la nueva última página
-   *   en base a la cantidad total de ítems y se recarga esa página.
-   * - Si es solo una edición: se recarga la misma página.
-   */
   const handleDocumentoSaved = (isNewDocument: boolean = true) => {
     if (isNewDocument) {
       const totalItems = documentosState.pagination.totalItems + 1;
@@ -294,20 +226,16 @@ export const IngresoDocumentosContainer: React.FC = () => {
 
   return (
     <div className="pt-0.5 pr-0.5 pb-1 pl-0.5 sm:pt-2 sm:pr-2 sm:pb-4 sm:pl-2 bg-transparent">
-      {/* Header con botón para abrir el modal de registro */}
       <IngresoDocumentosHeader onAddClick={handleOpenModal} />
-
       <div className="w-full overflow-hidden bg-white rounded-lg shadow-lg">
-        {/* Componente de búsqueda */}
         <IngresoDocumentosSearch
           searchTerm={searchTerm}
           onSearch={(term) => {
             setSearchTerm(term);
-            setCurrentPage(1); // Reinicia a la primera página en cada nueva búsqueda
+            setCurrentPage(1);
           }}
         />
 
-        {/* Si estamos cargando, se muestra un spinner */}
         {isLoading ? (
           <div className="w-full h-[300px] flex items-center justify-center">
             <LoadingSpinner size="lg" message="Cargando documentos..." />
@@ -337,7 +265,6 @@ export const IngresoDocumentosContainer: React.FC = () => {
           </div>
         )}
 
-        {/* Componente de paginación (solo si hay más de 1 página) */}
         <div className="py-4 px-4 sm:px-6 border-t border-gray-200">
           <Pagination
             currentPage={documentosState.pagination.currentPage}
@@ -347,7 +274,6 @@ export const IngresoDocumentosContainer: React.FC = () => {
         </div>
       </div>
 
-      {/* Modal de Registro de Documento */}
       {isModalOpen && (
         <RegistroDocumentoModal
           isOpen={isModalOpen}

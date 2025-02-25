@@ -25,7 +25,6 @@ import {
 } from "@/service/usuarioService";
 
 export const UsuarioContainer: React.FC = () => {
-    // Estado principal para la paginación y los datos del usuario
     const [usuariosState, setUsuariosState] = useState<UsuarioPaginatedResponse>({
         data: [],
         pagination: {

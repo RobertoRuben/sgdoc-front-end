@@ -29,7 +29,7 @@ export const RemitenteContainer: React.FC = () => {
       data: [],
       pagination: {
         currentPage: 1,
-        pageSize: 4,
+        pageSize: 5,
         totalItems: 0,
         totalPages: 0,
       },

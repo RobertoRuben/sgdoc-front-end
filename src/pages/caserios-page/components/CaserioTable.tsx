@@ -91,13 +91,13 @@ export const CaserioTable: React.FC<CaserioTableProps> = ({
                   } hover:bg-gray-100 transition-colors duration-150 ease-in-out`}
                 >
                   <TableCell className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {caserio.id}
+                    {String(caserio.id).padStart(5, "0")}
                   </TableCell>
                   <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
                     {caserio.nombreCaserio}
                   </TableCell>
                   <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
-                    {caserio.nombreCentroPoblado}
+                    {caserio.nombreCentroPoblado ?? "No pertenece a un centro poblado"}
                   </TableCell>
                   <TableCell className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <Button

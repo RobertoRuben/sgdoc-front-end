@@ -99,14 +99,14 @@ export const findByString = async (searchString: string): Promise<Ambito[]> => {
 };
 
 export const getPaginatedAmbitos = async (
-    page: number = 1,
-    perPage: number = 10
+    page: number,
+    pageSize: number
 ): Promise<AmbitoPaginatedResponse> => {
     try {
         const response = await axiosInstance.get(`${API_BASE_URL}paginated`, {
             params: {
                 page,
-                per_page: perPage,
+                page_size: pageSize,
             },
         });
 

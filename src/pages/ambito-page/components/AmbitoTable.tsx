@@ -88,7 +88,7 @@ export const AmbitoTable: React.FC<AmbitoTableProps> = ({
                   } hover:bg-gray-100 transition-colors duration-150 ease-in-out`}
                 >
                   <TableCell className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {ambito.id}
+                    {String (ambito.id).padStart(5, "0")}
                   </TableCell>
                   <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
                     {ambito.nombreAmbito}

@@ -27,7 +27,7 @@ export const RolContainer: React.FC = () => {
         data: [],
         pagination: {
             currentPage: 1,
-            pageSize: 10,
+            pageSize: 5,
             totalItems: 0,
             totalPages: 0,
         },
@@ -168,7 +168,6 @@ export const RolContainer: React.FC = () => {
         loadPaginatedData(1);
     }, []);
 
-    // Cambio de página
     const handlePageChange = (page: number) => {
         if (isSearchMode) return;
         if (page < 1 || page > rolState.pagination.totalPages) return;
