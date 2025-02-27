@@ -105,7 +105,7 @@ export const navItems: NavItem[] = [
     allowedRoles: ["Admin"],
     subItems: [
       { name: "Lista de Áreas", path: "/areas/lista" },
-      { name: "Comunicaciones", path: "/areas/comunicaciones/lista" },
+      { name: "Comunicaciones", path: "/areas/comunicacion-areas/lista" },
     ],
   },
   {

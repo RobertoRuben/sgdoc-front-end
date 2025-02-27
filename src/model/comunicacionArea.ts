@@ -3,5 +3,5 @@ export interface ComunicacionArea{
     areaOrigenId?: number;
     areaDestinoId?: number;
     nombreAreaDestino?: string;
-    areaOrigenNombre?: string;
+    nombreAreaOrigen?: string;
 }

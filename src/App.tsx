@@ -30,6 +30,7 @@ import ListaDocumentosEnviadosPage from "./pages/documentos-page/documentos-envi
 import ListaDocumentosRechazadosPage from "./pages/documentos-page/documentos-rechazados-page/DocumentosRechazadosPage";
 import DashbaordPage from "@/pages/dashboard-page/DashbaordPage.tsx";
 import NotificationPage from "@/pages/notification-page/NotificationPage";
+import ComunicacionAreaPage from "@/pages/comunicacion-area-page/ComunicacionAreaPage";
 
 import { Toaster } from "@/components/ui/toaster";
 
@@ -59,6 +60,7 @@ function App() {
                   <Route path="usuarios/lista" element={<UsuariosPage />} />
                   <Route path="usuarios/roles/lista" element={<RolesPage />} />
                   <Route path="areas/lista" element={<AreasPage />} />
+                  <Route path="areas/comunicacion-areas/lista" element={<ComunicacionAreaPage />} />
                 </Route>
 
                 {/* Ruta compartida para ambos roles */}
@@ -90,6 +92,7 @@ function App() {
                 <Route path="documentos/categorias" element={<Navigate to="/documentos/categorias/lista" replace />}/>
                 <Route path="distrito/centros-poblados" element={<Navigate to="/distrito/centros-poblados/lista" replace />}/>
                 <Route path="distrito/caserios" element={<Navigate to="/distrito/caserios/lista" replace />}/>
+                <Route path="areas/comunicacion-areas" element={<Navigate to="/areas/comunicacion-areas/lista" replace />}/>
               </Route>
             </Route>
 
