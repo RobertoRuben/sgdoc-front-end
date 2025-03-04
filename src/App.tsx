@@ -8,11 +8,9 @@ import { Layout } from "@/components/layout/Layout";
 import { LoadingProvider } from "@/context/LoadingContext";
 import { AuthProvider } from "./provider/AuthProvider";
 import { ProtectedRoute } from "@/auth/ProtectedRoute";
-
 import LoginPage from "@/pages/login-page/LoginPage";
 import NotAuthorizedPage from "@/pages/not-authorized-page/NotAuthorizedPage";
-import NotFoundPage from "@/pages/not-found-page/NotFoundPage"; // <-- Importa tu NotFoundPage
-
+import NotFoundPage from "@/pages/not-found-page/NotFoundPage";
 import RemitentesPage from "@/pages/remitentes-page/RemitentesPage";
 import TrabajadoresPage from "@/pages/trabajadores-page/TrabajadoresPage";
 import UsuariosPage from "@/pages/usuarios-page/UsuariosPage";
@@ -93,6 +91,7 @@ function App() {
                 <Route path="distrito/centros-poblados" element={<Navigate to="/distrito/centros-poblados/lista" replace />}/>
                 <Route path="distrito/caserios" element={<Navigate to="/distrito/caserios/lista" replace />}/>
                 <Route path="areas/comunicacion-areas" element={<Navigate to="/areas/comunicacion-areas/lista" replace />}/>
+                <Route path="inbox" element={<Navigate to="/inbox/recibidos" replace />}/>
               </Route>
             </Route>
 
