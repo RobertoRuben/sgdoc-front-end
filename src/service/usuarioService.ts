@@ -12,8 +12,25 @@ export const createUsuario = async (usuario: Usuario): Promise<Usuario> => {
         const response = await axiosInstance.post(API_BASE_URL, payload);
         return humps.camelizeKeys(response.data) as Usuario;
     } catch (error) {
-        if (error instanceof AxiosError && error.response?.data?.detail) {
-            throw new Error(error.response.data.detail);
+        if (error instanceof AxiosError) {
+            if (error.response?.status === 409) {
+                const conflictMsg = error.response.data?.error || 
+                                   error.response.data?.detail || 
+                                   "El usuario ya existe";
+                throw new Error(conflictMsg);
+            }
+            
+            if (error.response?.data) {
+                const rawMsg = error.response.data.error || 
+                              error.response.data.detail || 
+                              error.response.data.details;
+                let message = rawMsg;
+                const match = rawMsg && typeof rawMsg === 'string' ? rawMsg.match(/'error':\s*'([^']+)'/) : null;
+                if (match) {
+                    message = match[1];
+                }
+                throw new Error(message);
+            }
         }
         throw new Error("Error al crear el usuario");
     }
@@ -22,17 +39,34 @@ export const createUsuario = async (usuario: Usuario): Promise<Usuario> => {
 
 export const updateUsuario = async (
     id: number,
-    caserio: Omit<Usuario, "id">
+    usuario: Omit<Usuario, "id">
 ): Promise<Usuario | null> => {
     try {
-        const payload = humps.decamelizeKeys(caserio);
+        const payload = humps.decamelizeKeys(usuario);
         const response = await axiosInstance.put(`${API_BASE_URL}${id}/`, payload);
         return humps.camelizeKeys(response.data) as Usuario;
     } catch (error) {
-        if (error instanceof AxiosError && error.response?.data?.detail) {
-            throw new Error(error.response.data.detail);
+        if (error instanceof AxiosError) {
+            if (error.response?.status === 409) {
+                const conflictMsg = error.response.data?.error || 
+                                   error.response.data?.detail || 
+                                   "El usuario ya existe";
+                throw new Error(conflictMsg);
+            }
+            
+            if (error.response?.data) {
+                const rawMsg = error.response.data.error || 
+                              error.response.data.detail || 
+                              error.response.data.details;
+                let message = rawMsg;
+                const match = rawMsg && typeof rawMsg === 'string' ? rawMsg.match(/'error':\s*'([^']+)'/) : null;
+                if (match) {
+                    message = match[1];
+                }
+                throw new Error(message);
+            }
         }
-        throw new Error("Error al actualizar el caserio con id: " + id);
+        throw new Error("Error al actualizar el usuario con id: " + id);
     }
 };
 
@@ -53,21 +87,40 @@ export const updateUsuarioStatus = async (
         );
         return response.data;
     } catch (error) {
-        if (error instanceof AxiosError && error.response?.data?.detail) {
-            throw new Error(error.response.data.detail);
+        if (error instanceof AxiosError && error.response?.data) {
+            const rawMsg = error.response.data.error || 
+                          error.response.data.detail || 
+                          error.response.data.details;
+            let message = rawMsg;
+            const match = rawMsg && typeof rawMsg === 'string' ? rawMsg.match(/'error':\s*'([^']+)'/) : null;
+            if (match) {
+                message = match[1];
+            }
+            throw new Error(message);
         }
         throw new Error(`Error al ${isActive ? 'activar' : 'desactivar'} el usuario con id: ${id}`);
     }
 };
 
 
-export const getUsuarioById = async (id: number): Promise<Usuario> => {
+export const getUsuarioById = async (id: number): Promise<Usuario | null> => {
     try {
         const response = await axiosInstance.get(`${API_BASE_URL}${id}`);
         return humps.camelizeKeys(response.data) as Usuario;
     } catch (error) {
-        if (error instanceof AxiosError && error.response?.data?.detail) {
-            throw new Error(error.response.data.detail);
+        if (error instanceof AxiosError) {
+            if (error.response?.status === 404) return null;
+            if (error.response?.data) {
+                const rawMsg = error.response.data.error || 
+                              error.response.data.detail || 
+                              error.response.data.details;
+                let message = rawMsg;
+                const match = rawMsg && typeof rawMsg === 'string' ? rawMsg.match(/'error':\s*'([^']+)'/) : null;
+                if (match) {
+                    message = match[1];
+                }
+                throw new Error(message);
+            }
         }
         throw new Error(`Error al obtener el usuario con id: ${id}`);
     }
@@ -90,8 +143,16 @@ export const updateUsuarioPassword = async (
         );
         return response.data;
     } catch (error) {
-        if (error instanceof AxiosError && error.response?.data?.detail) {
-            throw new Error(error.response.data.detail);
+        if (error instanceof AxiosError && error.response?.data) {
+            const rawMsg = error.response.data.error || 
+                          error.response.data.detail || 
+                          error.response.data.details;
+            let message = rawMsg;
+            const match = rawMsg && typeof rawMsg === 'string' ? rawMsg.match(/'error':\s*'([^']+)'/) : null;
+            if (match) {
+                message = match[1];
+            }
+            throw new Error(message);
         }
         throw new Error("Error al actualizar la contraseña del usuario");
     }
@@ -110,13 +171,23 @@ export const findByString = async (
         if (error instanceof AxiosError) {
             if (error.response?.status === 404) {
                 const notFoundError = new Error(
-                    error.response?.data?.detail || "No se encontraron resultados"
+                    error.response.data?.error || 
+                    error.response.data?.detail || 
+                    "No se encontraron resultados"
                 );
                 notFoundError.name = "NotFoundError";
                 throw notFoundError;
             }
-            if (error.response?.data?.detail) {
-                throw new Error(error.response.data.detail);
+            if (error.response?.data) {
+                const rawMsg = error.response.data.error || 
+                              error.response.data.detail || 
+                              error.response.data.details;
+                let message = rawMsg;
+                const match = rawMsg && typeof rawMsg === 'string' ? rawMsg.match(/'error':\s*'([^']+)'/) : null;
+                if (match) {
+                    message = match[1];
+                }
+                throw new Error(message);
             }
         }
         throw new Error("Ocurrio un error al buscar al usuario :(");
@@ -139,7 +210,6 @@ export const getUsuariosPaginated = async (
         });
 
         const rawData = response.data;
-        console.log(rawData);
         return {
             data: humps.camelizeKeys(rawData.data) as Usuario[],
             pagination: {
@@ -150,8 +220,16 @@ export const getUsuariosPaginated = async (
             },
         };
     } catch (error) {
-        if (error instanceof AxiosError && error.response?.data?.detail) {
-            throw new Error(error.response.data.detail);
+        if (error instanceof AxiosError && error.response?.data) {
+            const rawMsg = error.response.data.error || 
+                          error.response.data.detail || 
+                          error.response.data.details;
+            let message = rawMsg;
+            const match = rawMsg && typeof rawMsg === 'string' ? rawMsg.match(/'error':\s*'([^']+)'/) : null;
+            if (match) {
+                message = match[1];
+            }
+            throw new Error(message);
         }
         throw new Error("Ocurrió un error al obtener la lista de usuarios");
     }
