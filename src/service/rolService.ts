@@ -142,7 +142,7 @@ export const getRolById = async (id: number): Promise<Rol | null> => {
     }
 }
 
-export const findRolByString = async (searchString: string): Promise<Rol[]> => {
+export const findByString = async (searchString: string): Promise<Rol[]> => {
     try {
         const response = await axiosInstance.get(`${API_BASE_URL_ROLES}search`, {
             params: humps.decamelizeKeys({searchString}),
