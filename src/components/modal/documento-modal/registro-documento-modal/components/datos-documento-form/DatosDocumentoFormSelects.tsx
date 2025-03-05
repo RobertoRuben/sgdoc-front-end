@@ -158,14 +158,11 @@ const DatosDocumentoFormSelects: React.FC<DatosDocumentoFormSelectsProps> = ({
 
       {/* Centro Poblado */}
       <div>
-        <Label htmlFor="centroPobladoId">Centro Poblado</Label>
+        <Label htmlFor="centroPobladoId">Centro Poblado (Opcional)</Label>
         <Controller
           name="centroPobladoId"
           control={control}
-          rules={{
-            required: "Centro Poblado es requerido",
-            min: { value: 1, message: "Debe seleccionar un centro poblado" }
-          }}
+          // Se eliminaron las reglas de validación aquí para hacerlo opcional
           render={({ field }) => (
             <>
               <SearchSelect<number>
@@ -184,7 +181,8 @@ const DatosDocumentoFormSelects: React.FC<DatosDocumentoFormSelectsProps> = ({
                   }))
                   .find(option => option.value === field.value)}
                 onChange={option => {
-                  field.onChange(option?.value);
+                  // Si no se selecciona ninguno, establecemos a null o 0
+                  field.onChange(option?.value || null);
                   // Cada vez que cambia el centro poblado, cargamos
                   // los caseríos correspondientes
                   if (option?.value) {
@@ -195,7 +193,8 @@ const DatosDocumentoFormSelects: React.FC<DatosDocumentoFormSelectsProps> = ({
                   }
                 }}
                 isDisabled={false}
-                placeholder="Seleccione un centro poblado"
+                placeholder="Seleccione un centro poblado (opcional)"
+                isClearable={true}
               />
               {errors.centroPobladoId && (
                 <p className="text-red-600 text-sm mt-1">
