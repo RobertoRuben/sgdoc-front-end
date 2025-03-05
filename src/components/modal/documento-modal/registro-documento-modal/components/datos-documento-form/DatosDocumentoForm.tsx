@@ -41,15 +41,6 @@ const DatosDocumentoForm: React.FC<DatosDocumentoFormProps> = ({
     },
   });
 
-  const watchedFields = watch([
-    "nombre",
-    "folios",
-    "asunto",
-    "ambitoId",
-    "categoriaId",
-    "caserioId",
-    "centroPobladoId",
-  ]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -68,16 +59,27 @@ const DatosDocumentoForm: React.FC<DatosDocumentoFormProps> = ({
   };
 
   const isFormValid = () => {
-    const areFieldsFilled = watchedFields.every((field) => {
+    const requiredFields = [
+      "nombre", 
+      "folios", 
+      "asunto", 
+      "ambitoId", 
+      "categoriaId", 
+      "caserioId"
+    ]; 
+
+    const areRequiredFieldsFilled = requiredFields.every((fieldName) => {
+      const field = watch(fieldName as keyof Documento);
       if (typeof field === "number") {
         return field > 0;
       }
       return field !== undefined && field !== null && field !== "";
     });
-    return areFieldsFilled && file !== null;
-  };
+    
+    return areRequiredFieldsFilled && file !== null;
+};
 
-  const onFormSubmit = (data: Documento) => {
+const onFormSubmit = (data: Documento) => {
     if (isFormValid()) {
       const documentoRequest: Documento = {
         ...data,
@@ -88,11 +90,11 @@ const DatosDocumentoForm: React.FC<DatosDocumentoFormProps> = ({
         ambitoId: Number(data.ambitoId),
         categoriaId: Number(data.categoriaId),
         caserioId: Number(data.caserioId),
-        centroPobladoId: Number(data.centroPobladoId),
+        centroPobladoId: data.centroPobladoId ? Number(data.centroPobladoId) : 0, // Manejamos el caso nulo
       };
       onSubmit({ documento: documentoRequest });
     }
-  };
+};
 
   return (
     <form
