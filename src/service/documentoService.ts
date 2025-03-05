@@ -20,48 +20,72 @@ export const getDocumentos = async (): Promise<Documento[]> => {
     const response = await axiosInstance.get(API_BASE_URL);
     return humps.camelizeKeys(response.data) as Documento[];
   } catch (error) {
-    if (error instanceof AxiosError && error.response?.data?.detail) {
-      throw new Error(error.response.data.detail);
+    if (error instanceof AxiosError && error.response?.data) {
+      const rawMsg = error.response.data.error || 
+                     error.response.data.detail || 
+                     error.response.data.details;
+      let message = rawMsg;
+      const match = rawMsg && typeof rawMsg === 'string' ? rawMsg.match(/'error':\s*'([^']+)'/) : null;
+      if (match) {
+        message = match[1];
+      }
+      throw new Error(message);
     }
     throw new Error("Error al obtener los documentos");
   }
 };
 
+
 export const createDocumento = async (documento: DocumentoPayload): Promise<Documento> => {
-    try {
-      const snakeCaseData = humps.decamelizeKeys(documento);
-  
-      const formData = new FormData();
-  
-      if (documento.documentoBytes instanceof Blob) {
-        formData.append("documento_file", documento.documentoBytes);
-      } else {
-        throw new Error("El archivo del documento no es válido.");
-      }
-  
-      Object.entries(snakeCaseData).forEach(([key, value]) => {
-        if (key !== "documento_bytes") {
-          formData.append(key, value.toString());
-        }
-      });
-  
-      const response = await axiosInstance.post(API_BASE_URL, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-  
-      return humps.camelizeKeys(response.data) as Documento;
-    } catch (error) {
-      if (error instanceof AxiosError) {
-        if (error.response?.data?.detail) {
-          throw new Error(`Error del servidor: ${error.response.data.detail}`);
-        }
-      }
-      throw new Error("Error desconocido al crear el documento");
+  try {
+    const snakeCaseData = humps.decamelizeKeys(documento);
+
+    const formData = new FormData();
+
+    if (documento.documentoBytes instanceof Blob) {
+      formData.append("documento_file", documento.documentoBytes);
+    } else {
+      throw new Error("El archivo del documento no es válido.");
     }
-  };
-  
+
+    Object.entries(snakeCaseData).forEach(([key, value]) => {
+      if (key !== "documento_bytes") {
+        formData.append(key, value.toString());
+      }
+    });
+
+    const response = await axiosInstance.post(API_BASE_URL, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    return humps.camelizeKeys(response.data) as Documento;
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      if (error.response?.status === 409) {
+        const conflictMsg = error.response?.data?.error || 
+                           error.response?.data?.detail || 
+                           "El documento ya existe";
+        throw new Error(conflictMsg);
+      }
+      
+      if (error.response?.data) {
+        const rawMsg = error.response.data.error || 
+                       error.response.data.detail || 
+                       error.response.data.details;
+        let message = rawMsg;
+        const match = rawMsg && typeof rawMsg === 'string' ? rawMsg.match(/'error':\s*'([^']+)'/) : null;
+        if (match) {
+          message = match[1];
+        }
+        throw new Error(message);
+      }
+    }
+    throw new Error("Error desconocido al crear el documento");
+  }
+};
+
 
 export const updateDocumento = async (
   id: number,
@@ -91,24 +115,60 @@ export const updateDocumento = async (
     );
     return humps.camelizeKeys(response.data) as Documento;
   } catch (error) {
-    if (error instanceof AxiosError && error.response?.data?.detail) {
-      throw new Error(error.response.data.detail);
+    if (error instanceof AxiosError) {
+      if (error.response?.status === 409) {
+        const conflictMsg = error.response?.data?.error || 
+                           error.response?.data?.detail || 
+                           "El documento ya existe";
+        throw new Error(conflictMsg);
+      }
+      
+      if (error.response?.data) {
+        const rawMsg = error.response.data.error || 
+                       error.response.data.detail || 
+                       error.response.data.details;
+        let message = rawMsg;
+        const match = rawMsg && typeof rawMsg === 'string' ? rawMsg.match(/'error':\s*'([^']+)'/) : null;
+        if (match) {
+          message = match[1];
+        }
+        throw new Error(message);
+      }
     }
     throw new Error("Error al actualizar el documento con id: " + id);
   }
 };
+
 
 export const deleteDocumento = async (id: number): Promise<boolean> => {
   try {
     await axiosInstance.delete(`${API_BASE_URL}${id}/`);
     return true;
   } catch (error) {
-    if (error instanceof AxiosError && error.response?.data?.detail) {
-      throw new Error(error.response.data.detail);
+    if (error instanceof AxiosError) {
+      if (error.response?.status === 409) {
+        const conflictMsg = error.response?.data?.error || 
+                           error.response?.data?.detail || 
+                           "No se puede eliminar el documento";
+        throw new Error(conflictMsg);
+      }
+      
+      if (error.response?.data) {
+        const rawMsg = error.response.data.error || 
+                       error.response.data.detail || 
+                       error.response.data.details;
+        let message = rawMsg;
+        const match = rawMsg && typeof rawMsg === 'string' ? rawMsg.match(/'error':\s*'([^']+)'/) : null;
+        if (match) {
+          message = match[1];
+        }
+        throw new Error(message);
+      }
     }
     throw new Error("Error al eliminar el documento con id: " + id);
   }
 };
+
 
 export const getDocumentoById = async (
   id: number
@@ -119,16 +179,23 @@ export const getDocumentoById = async (
     return humps.camelizeKeys(response.data) as Documento;
   } catch (error) {
     if (error instanceof AxiosError) {
-      if (error.response?.status === 404) {
-        return null;
-      }
-      if (error.response?.data?.detail) {
-        throw new Error(error.response.data.detail);
+      if (error.response?.status === 404) return null;
+      if (error.response?.data) {
+        const rawMsg = error.response.data.error || 
+                       error.response.data.detail || 
+                       error.response.data.details;
+        let message = rawMsg;
+        const match = rawMsg && typeof rawMsg === 'string' ? rawMsg.match(/'error':\s*'([^']+)'/) : null;
+        if (match) {
+          message = match[1];
+        }
+        throw new Error(message);
       }
     }
     throw new Error("Error al obtener el documento con id: " + id);
   }
 };
+
 
 export const searchDocumentos = async (params: {
   p_page: number;
@@ -155,12 +222,32 @@ export const searchDocumentos = async (params: {
       },
     };
   } catch (error) {
-    if (error instanceof AxiosError && error.response?.data?.detail) {
-      throw new Error(error.response.data.detail);
+    if (error instanceof AxiosError) {
+      if (error.response?.status === 404) {
+        const notFoundError = new Error(
+          error.response?.data?.error || 
+          error.response?.data?.detail || 
+          "No se encontraron resultados"
+        );
+        notFoundError.name = "NotFoundError";
+        throw notFoundError;
+      }
+      if (error.response?.data) {
+        const rawMsg = error.response.data.error || 
+                       error.response.data.detail || 
+                       error.response.data.details;
+        let message = rawMsg;
+        const match = rawMsg && typeof rawMsg === 'string' ? rawMsg.match(/'error':\s*'([^']+)'/) : null;
+        if (match) {
+          message = match[1];
+        }
+        throw new Error(message);
+      }
     }
     throw new Error("Error al buscar los documentos");
   }
 };
+
 
 export const downloadDocumento = async (id: number): Promise<Blob> => {
   try {
@@ -169,12 +256,21 @@ export const downloadDocumento = async (id: number): Promise<Blob> => {
     });
     return response.data;
   } catch (error) {
-    if (error instanceof AxiosError && error.response?.data?.detail) {
-      throw new Error(error.response.data.detail);
+    if (error instanceof AxiosError && error.response?.data) {
+      const rawMsg = error.response.data.error || 
+                     error.response.data.detail || 
+                     error.response.data.details;
+      let message = rawMsg;
+      const match = rawMsg && typeof rawMsg === 'string' ? rawMsg.match(/'error':\s*'([^']+)'/) : null;
+      if (match) {
+        message = match[1];
+      }
+      throw new Error(message);
     }
     throw new Error("Error al descargar el documento con id: " + id);
   }
 };
+
 
 export const getDocumentosByCurrentDate = async (
   page: number,
@@ -198,12 +294,21 @@ export const getDocumentosByCurrentDate = async (
       },
     };
   } catch (error) {
-    if (error instanceof AxiosError && error.response?.data?.detail) {
-      throw new Error(error.response.data.detail);
+    if (error instanceof AxiosError && error.response?.data) {
+      const rawMsg = error.response.data.error || 
+                     error.response.data.detail || 
+                     error.response.data.details;
+      let message = rawMsg;
+      const match = rawMsg && typeof rawMsg === 'string' ? rawMsg.match(/'error':\s*'([^']+)'/) : null;
+      if (match) {
+        message = match[1];
+      }
+      throw new Error(message);
     }
     throw new Error("Error al obtener los documentos con fecha actual");
   }
 };
+
 
 export const getSentDocumentsByAreaId = async (params: {
   p_area_origen_id: number;
@@ -231,12 +336,21 @@ export const getSentDocumentsByAreaId = async (params: {
       },
     };
   } catch (error) {
-    if (error instanceof AxiosError && error.response?.data?.detail) {
-      throw new Error(error.response.data.detail);
+    if (error instanceof AxiosError && error.response?.data) {
+      const rawMsg = error.response.data.error || 
+                     error.response.data.detail || 
+                     error.response.data.details;
+      let message = rawMsg;
+      const match = rawMsg && typeof rawMsg === 'string' ? rawMsg.match(/'error':\s*'([^']+)'/) : null;
+      if (match) {
+        message = match[1];
+      }
+      throw new Error(message);
     }
     throw new Error("Error al obtener los documentos enviados por área de origen");
   }
 };
+
 
 export const getReceivedDocumentsByAreaId = async (params: {
   p_area_destino_id: number;
@@ -267,8 +381,16 @@ export const getReceivedDocumentsByAreaId = async (params: {
       },
     };
   } catch (error) {
-    if (error instanceof AxiosError && error.response?.data?.detail) {
-      throw new Error(error.response.data.detail);
+    if (error instanceof AxiosError && error.response?.data) {
+      const rawMsg = error.response.data.error || 
+                     error.response.data.detail || 
+                     error.response.data.details;
+      let message = rawMsg;
+      const match = rawMsg && typeof rawMsg === 'string' ? rawMsg.match(/'error':\s*'([^']+)'/) : null;
+      if (match) {
+        message = match[1];
+      }
+      throw new Error(message);
     }
     throw new Error("Error al obtener los documentos recibidos por área de destino");
   }
@@ -303,10 +425,18 @@ export const getRejectedDocumentsByAreaId = async (params: {
       },
     };
   } catch (error) {
-    if (error instanceof AxiosError && error.response?.data?.detail) {
-      throw new Error(error.response.data.detail);
+    if (error instanceof AxiosError && error.response?.data) {
+      const rawMsg = error.response.data.error || 
+                     error.response.data.detail || 
+                     error.response.data.details;
+      let message = rawMsg;
+      const match = rawMsg && typeof rawMsg === 'string' ? rawMsg.match(/'error':\s*'([^']+)'/) : null;
+      if (match) {
+        message = match[1];
+      }
+      throw new Error(message);
     }
-    throw new Error("Error al obtener los documentos recibidos por área de destino");
+    throw new Error("Error al obtener los documentos rechazados por área de destino");
   }
 };
 
@@ -320,8 +450,16 @@ export const getDocumentosNoConfirmados = async (
     });
     return humps.camelizeKeys(response.data) as DocumentosNoConfirmadosResponse;
   } catch (error) {
-    if (error instanceof AxiosError && error.response?.data?.detail) {
-      throw new Error(error.response.data.detail);
+    if (error instanceof AxiosError && error.response?.data) {
+      const rawMsg = error.response.data.error || 
+                     error.response.data.detail || 
+                     error.response.data.details;
+      let message = rawMsg;
+      const match = rawMsg && typeof rawMsg === 'string' ? rawMsg.match(/'error':\s*'([^']+)'/) : null;
+      if (match) {
+        message = match[1];
+      }
+      throw new Error(message);
     }
     throw new Error("Error al obtener la cantidad de documentos no confirmados");
   }
