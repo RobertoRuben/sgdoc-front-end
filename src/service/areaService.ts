@@ -32,14 +32,11 @@ export const createArea = async (area: Area): Promise<Area> => {
         const payload = humps.decamelizeKeys(area);
         const response = await axiosInstance.post(API_BASE_URL, payload);
         return humps.camelizeKeys(response.data) as Area;
-    } catch (error) {
-        console.log("Error completo:", error);
-        
+    } catch (error) {     
         if (error instanceof AxiosError) {       
             if (error.response?.status === 409) {
                 if (error.response.data && typeof error.response.data === 'object' && 'error' in error.response.data) {
                     const errorMsg = String(error.response.data.error);
-                    console.log("Lanzando error con mensaje:", errorMsg);
                     throw new Error(errorMsg);
                 }
             }
