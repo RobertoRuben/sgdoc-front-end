@@ -11,12 +11,19 @@ export const getAmbitos = async (): Promise<Ambito[]> => {
         const response = await axiosInstance.get(API_BASE_URL);
         return humps.camelizeKeys(response.data) as Ambito[];
     } catch (error) {
-        if (error instanceof AxiosError && error.response?.data?.detail) {
-            throw new Error(error.response.data.detail);
+        if (error instanceof AxiosError && error.response?.data) {
+            const rawMsg = error.response.data.details || error.response.data.error || error.response.data.detail;
+            let message = rawMsg;
+            const match = rawMsg && typeof rawMsg === 'string' ? rawMsg.match(/'error':\s*'([^']+)'/) : null;
+            if (match) {
+                message = match[1];
+            }
+            throw new Error(message);
         }
         throw new Error("Error al obtener los ambitos");
     }
 };
+
 
 export const createAmbito = async (ambito: Ambito): Promise<Ambito> => {
     try {
@@ -24,12 +31,19 @@ export const createAmbito = async (ambito: Ambito): Promise<Ambito> => {
         const response = await axiosInstance.post(API_BASE_URL, payload);
         return humps.camelizeKeys(response.data) as Ambito;
     } catch (error) {
-        if (error instanceof AxiosError && error.response?.data?.detail) {
-            throw new Error(error.response.data.detail);
+        if (error instanceof AxiosError && error.response?.data) {
+            const rawMsg = error.response.data.details || error.response.data.error || error.response.data.detail;
+            let message = rawMsg;
+            const match = rawMsg && typeof rawMsg === 'string' ? rawMsg.match(/'error':\s*'([^']+)'/) : null;
+            if (match) {
+                message = match[1];
+            }
+            throw new Error(message);
         }
         throw new Error("Error al crear el ambito");
     }
 };
+
 
 export const updateAmbito = async (
     id: number,
@@ -40,24 +54,38 @@ export const updateAmbito = async (
         const response = await axiosInstance.put(`${API_BASE_URL}${id}/`, payload);
         return humps.camelizeKeys(response.data) as Ambito;
     } catch (error) {
-        if (error instanceof AxiosError && error.response?.data?.detail) {
-            throw new Error(error.response.data.detail);
+        if (error instanceof AxiosError && error.response?.data) {
+            const rawMsg = error.response.data.details || error.response.data.error || error.response.data.detail;
+            let message = rawMsg;
+            const match = rawMsg && typeof rawMsg === 'string' ? rawMsg.match(/'error':\s*'([^']+)'/) : null;
+            if (match) {
+                message = match[1];
+            }
+            throw new Error(message);
         }
         throw new Error("Error al actualizar el ambito con id: " + id);
     }
 };
+
 
 export const deleteAmbito = async (id: number): Promise<boolean> => {
     try {
         await axiosInstance.delete(`${API_BASE_URL}${id}/`);
         return true;
     } catch (error) {
-        if (error instanceof AxiosError && error.response?.data?.detail) {
-            throw new Error(error.response.data.detail);
+        if (error instanceof AxiosError && error.response?.data) {
+            const rawMsg = error.response.data.details || error.response.data.error || error.response.data.detail;
+            let message = rawMsg;
+            const match = rawMsg && typeof rawMsg === 'string' ? rawMsg.match(/'error':\s*'([^']+)'/) : null;
+            if (match) {
+                message = match[1];
+            }
+            throw new Error(message);
         }
         throw new Error("Error al eliminar el ambito con id: " + id);
     }
 };
+
 
 export const getAmbitoById = async (id: number): Promise<Ambito | null> => {
     try {
@@ -67,13 +95,20 @@ export const getAmbitoById = async (id: number): Promise<Ambito | null> => {
     } catch (error) {
         if (error instanceof AxiosError) {
             if (error.response?.status === 404) return null;
-            if (error.response?.data?.detail) {
-                throw new Error(error.response.data.detail);
+            if (error.response?.data) {
+                const rawMsg = error.response.data.details || error.response.data.error || error.response.data.detail;
+                let message = rawMsg;
+                const match = rawMsg && typeof rawMsg === 'string' ? rawMsg.match(/'error':\s*'([^']+)'/) : null;
+                if (match) {
+                    message = match[1];
+                }
+                throw new Error(message);
             }
         }
         throw new Error(`Error al obtener el ambito con id: ${id}`);
     }
 };
+
 
 export const findByString = async (searchString: string): Promise<Ambito[]> => {
     try {
@@ -90,13 +125,20 @@ export const findByString = async (searchString: string): Promise<Ambito[]> => {
                 notFoundError.name = "NotFoundError";
                 throw notFoundError;
             }
-            if (error.response?.data?.detail) {
-                throw new Error(error.response.data.detail);
+            if (error.response?.data) {
+                const rawMsg = error.response.data.details || error.response.data.error || error.response.data.detail;
+                let message = rawMsg;
+                const match = rawMsg && typeof rawMsg === 'string' ? rawMsg.match(/'error':\s*'([^']+)'/) : null;
+                if (match) {
+                    message = match[1];
+                }
+                throw new Error(message);
             }
         }
         throw new Error("Ocurrio un error al buscar el ambito del documento :(");
     }
 };
+
 
 export const getPaginatedAmbitos = async (
     page: number,
@@ -122,8 +164,14 @@ export const getPaginatedAmbitos = async (
             },
         };
     } catch (error) {
-        if (error instanceof AxiosError && error.response?.data?.detail) {
-            throw new Error(error.response.data.detail);
+        if (error instanceof AxiosError && error.response?.data) {
+            const rawMsg = error.response.data.details || error.response.data.error || error.response.data.detail;
+            let message = rawMsg;
+            const match = rawMsg && typeof rawMsg === 'string' ? rawMsg.match(/'error':\s*'([^']+)'/) : null;
+            if (match) {
+                message = match[1];
+            }
+            throw new Error(message);
         }
         throw new Error("Error al obtener los ambitos paginados");
     }

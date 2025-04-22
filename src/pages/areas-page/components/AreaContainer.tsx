@@ -214,7 +214,7 @@ export const AreaContainer: React.FC = () => {
   const handleModalSubmit = async (data: Area) => {
     try {
       setIsLoading(true);
-
+  
       if (data.id) {
         await updateArea(data.id, {
           nombreArea: data.nombreArea,
@@ -234,13 +234,16 @@ export const AreaContainer: React.FC = () => {
       setIsModalOpen(false);
       setSelectedArea(undefined);
       setDataVersion((prev) => prev + 1);
-    } catch {
-      showError(`Error al ${data.id ? "actualizar" : "crear"} el área`);
+    } catch (error) { 
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : `Error al ${data.id ? "actualizar" : "crear"} el área`;
+      
+      showError(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
-
   return (
       <div className="pt-0.5 pr-0.5 pb-1 pl-0.5 sm:pt-2 sm:pr-2 sm:pb-4 sm:pl-2 bg-transparent">
         <AreaHeader onAddClick={() => setIsModalOpen(true)} />

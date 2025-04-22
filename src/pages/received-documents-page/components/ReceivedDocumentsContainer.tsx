@@ -362,42 +362,51 @@ export const ListaDocumentosRecibidosContainer: React.FC = () => {
 
   const handleDerivar = async (areaDestinoId: number) => {
     if (!selectedDocumentoId) return;
-
+  
     try {
       const areaOrigenIdString = sessionStorage.getItem("areaId");
       const userIdString = sessionStorage.getItem("userId");
-
+  
       if (!areaOrigenIdString || !userIdString) {
         showError(
           "No se encontró areaId o userId en sessionStorage. No se puede derivar."
         );
         return;
       }
-
+  
       const areaOrigenId = parseInt(areaOrigenIdString, 10);
       const userId = parseInt(userIdString, 10);
-
+  
       const nuevaDerivacion: Derivacion = {
         documentoId: selectedDocumentoId,
         areaOrigenId,
         areaDestinoId,
         usuarioId: userId,
       };
-
-      await createDerivacion(nuevaDerivacion);
+  
+      const derivacionCreada = await createDerivacion(nuevaDerivacion);
+      
+      if (derivacionCreada && derivacionCreada.id) {
+        await createDetalleDerivacion({
+          derivacionId: derivacionCreada.id,
+          comentario: "El documento fue derivado al área correspondiente",
+          usuarioId: userId,
+          estado: "Enviada"
+        });
+      }
+  
       setIsDerivacionModalOpen(false);
       setSuccessModalConfig({
         isOpen: true,
         message: "Documento derivado exitosamente.",
       });
-
+  
       const nuevaNotificacion: Notificacion = {
         comentario: 'Se te ha enviado un nuevo documento. Revisa en tu bandeja los documentos recibos.',
         areaDestinoId: areaDestinoId
       };
       await createNotificacion(nuevaNotificacion);
-
-      // Refresca la data
+  
       await loadDocumentos({
         page: currentPage,
         searchValue: searchTerm,
@@ -408,12 +417,12 @@ export const ListaDocumentosRecibidosContainer: React.FC = () => {
         confirmacion: selectedConfirmacion,
       });
     } catch (error: any) {
-      showError(error.message || "Error al derivar el documento.");
-      console.error(error);
+      const errorMessage = error.response?.data?.message || error.message || "Error desconocido al derivar el documento";
+      console.error("Error completo:", error);
+      showError(errorMessage);
     }
   };
 
-  // Paginación
   const handlePageChange = (page: number) => {
     if (page < 1 || page > documentosState.pagination.totalPages) return;
     setCurrentPage(page);
@@ -454,7 +463,7 @@ export const ListaDocumentosRecibidosContainer: React.FC = () => {
     }
   };
 
-  // Ver detalle de derivación
+
   const handleVerDetalle = async (derivacionId?: number) => {
     if (!derivacionId) return;
     try {
@@ -467,7 +476,7 @@ export const ListaDocumentosRecibidosContainer: React.FC = () => {
     }
   };
 
-  // Manejo del rechazo
+
   const handleRejectClick = (id?: number) => {
     if (!id) return;
     setSelectedDocumentoRechazoId(id);
@@ -496,7 +505,6 @@ export const ListaDocumentosRecibidosContainer: React.FC = () => {
       setIsRechazoModalOpen(false);
       showSuccess("Documento rechazado exitosamente.");
 
-      // Refrescar datos al rechazar
       await loadDocumentos({
         page: currentPage,
         searchValue: searchTerm,
@@ -512,11 +520,7 @@ export const ListaDocumentosRecibidosContainer: React.FC = () => {
     }
   };
 
-  /**
-   * -----------
-   * CONFIRMAR RECEPCIÓN
-   * -----------
-   */
+
   const handleConfirmClick = (id?: number) => {
     if (!id) return;
     setSelectedDocumentoRecepcionId(id);
@@ -546,7 +550,6 @@ export const ListaDocumentosRecibidosContainer: React.FC = () => {
       setIsRecepcionModalOpen(false);
       showSuccess("Documento recepcionado exitosamente.");
 
-      // Refrescar la tabla
       await loadDocumentos({
         page: currentPage,
         searchValue: searchTerm,
@@ -567,7 +570,6 @@ export const ListaDocumentosRecibidosContainer: React.FC = () => {
       <ListaDocumentosRecibidosHeader title="Documentos Recibidos" />
 
       <div className="w-full overflow-hidden bg-white rounded-lg shadow-lg">
-        {/* Barra de búsqueda y filtros */}
         <ListaDocumentosRecibidosSearch
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
